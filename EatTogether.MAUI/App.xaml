@@ -5,6 +5,7 @@
              x:Class="EatTogether.MAUI.App">
     <Application.Resources>
         <ResourceDictionary>
+            <Color x:Key="StatusBarColor">#1F744D</Color>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
