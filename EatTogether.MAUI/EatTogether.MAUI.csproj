@@ -44,16 +44,29 @@
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiImage Include="Resources\Images\back_icon.png" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\google_icon.png" BaseSize="20,20" />
 		<MauiImage Include="Resources\Images\apple_icon.png" BaseSize="20,20" />
+		<MauiImage Include="Resources\Images\hide_pass.png" />
+		<MauiImage Include="Resources\Images\russia_flag.png" BaseSize="20,20" />
+		<MauiImage Include="Resources\Images\show_pass.png" />
+		<MauiImage Include="Resources\Images\usa_flag.png" BaseSize="20,20" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Resources\Images\back_icon.png" />
+	  <None Remove="Resources\Images\hide_pass.png" />
+	  <None Remove="Resources\Images\russia_flag.png" />
+	  <None Remove="Resources\Images\show_pass.png" />
+	  <None Remove="Resources\Images\usa_flag.png" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -7,9 +7,8 @@
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
-    <ShellContent
-        Title="SignIn"
-        ContentTemplate="{DataTemplate local:SignInPage}"
-        Route="SignInPage" />
+    <ShellContent Route="SignInPage" ContentTemplate="{DataTemplate local:SignInPage}" />
+    <ShellContent Route="SignUpPage" ContentTemplate="{DataTemplate local:SignUpPage}" />
+    <ShellContent Route="MainPage" ContentTemplate="{DataTemplate local:MainPage}" />
 
 </Shell>
