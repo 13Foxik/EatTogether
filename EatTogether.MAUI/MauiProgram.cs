@@ -1,4 +1,8 @@
 ﻿using CommunityToolkit.Maui;
+using EatTogether.MAUI.Services;
+using EatTogether.MAUI.Services.Interfaces;
+using EatTogether.MAUI.ViewModels;
+using EatTogether.MAUI.Views.Auth;
 using Microsoft.Extensions.Logging;
 
 namespace EatTogether.MAUI
@@ -18,11 +22,16 @@ namespace EatTogether.MAUI
                     fonts.AddFont("FontAwesome.ttf", "FontAwesome");
                 });
 
-
+            builder.Services.AddSingleton<CurrentUserService>();
+            builder.Services.AddSingleton<IAuthProvider, EmailAuthService>();
+            builder.Services.AddSingleton<IAuthService, AuthService>();
+            builder.Services.AddTransient<SignInViewModel>();
+            builder.Services.AddTransient<SignInPage>();
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
+            
 
             return builder.Build();
         }

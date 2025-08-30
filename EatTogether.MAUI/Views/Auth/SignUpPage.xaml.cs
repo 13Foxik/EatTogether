@@ -1,16 +1,16 @@
 using EatTogether.MAUI.ViewModels;
 
-namespace EatTogether.MAUI.Views;
+namespace EatTogether.MAUI.Views.Auth;
 
 public partial class SignUpPage : ContentPage
 {
-	public SignUpPage()
-	{
-		InitializeComponent();
+    public SignUpPage()
+    {
+        InitializeComponent();
 
         BindingContext = new SignUpViewModel();
 
-	}
+    }
     protected override bool OnBackButtonPressed()
     {
         // Вызываем команду возврата из ViewModel
@@ -23,5 +23,5 @@ public partial class SignUpPage : ContentPage
         return base.OnBackButtonPressed();
     }
 
-    
+
 }

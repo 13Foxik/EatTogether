@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:behaviors="clr-namespace:EatTogether.MAUI.Behaviors"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             x:Class="EatTogether.MAUI.Views.SignUpPage"
+             x:Class="EatTogether.MAUI.Views.Auth.SignUpPage"
              Title="SignUpPage"
              BackgroundColor="{StaticResource PageBackgroundColor}">
 
@@ -17,8 +17,8 @@
 
         <HorizontalStackLayout HorizontalOptions="End">
 
-    <!--Переключатель языка в правом верхнем углу-->
-    <Button Command="{Binding ChangeLanguageCommand}"
+            <!--Переключатель языка в правом верхнем углу-->
+            <Button Command="{Binding ChangeLanguageCommand}"
             Text="Русский"
             TextColor="Black"
             FontAttributes="Bold"
@@ -29,32 +29,32 @@
             Margin="0,-10,-10,20"
             Padding="8,0" 
             ContentLayout="Left,5">
-        <!-- Выравнивание иконки и текста -->
+                <!-- Выравнивание иконки и текста -->
 
-        <!-- Иконка -->
-        <Button.ImageSource>
-            <FileImageSource File="russia_flag.png"/>
-        </Button.ImageSource>
+                <!-- Иконка -->
+                <Button.ImageSource>
+                    <FileImageSource File="russia_flag.png"/>
+                </Button.ImageSource>
 
-        <!-- Добавляем бордер через стиль -->
-        <Button.Style>
-            <Style TargetType="Button">
-                <Setter Property="BorderColor" Value="#CCCCCC"/>
-                <Setter Property="BorderWidth" Value="1"/>
-                <Setter Property="CornerRadius" Value="5"/>
-            </Style>
-        </Button.Style>
+                <!-- Добавляем бордер через стиль -->
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="BorderColor" Value="#CCCCCC"/>
+                        <Setter Property="BorderWidth" Value="1"/>
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Button.Style>
 
-        <Button.Behaviors>
-            <behaviors:RippleBehavior/>
-        </Button.Behaviors>
+                <Button.Behaviors>
+                    <behaviors:RippleBehavior/>
+                </Button.Behaviors>
 
-        <Button.Shadow>
-            <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
-        </Button.Shadow>
+                <Button.Shadow>
+                    <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
+                </Button.Shadow>
 
-    </Button>
-</HorizontalStackLayout>
+            </Button>
+        </HorizontalStackLayout>
 
         <!-- ЛОГОТИП (важный branding-элемент) -->
         <Image Source="logo.png" 
@@ -176,7 +176,7 @@
                          WidthRequest="24"
                          HeightRequest="24"
                          VerticalOptions="Center"/>
-                    
+
                 </Grid>
             </Border>
 

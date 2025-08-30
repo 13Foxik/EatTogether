@@ -1,12 +1,20 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EatTogether.MAUI.Views;
-using System.Diagnostics;
+using EatTogether.MAUI.Services.Interfaces;
 
 namespace EatTogether.MAUI.ViewModels
 {
     public partial class SignInViewModel : ObservableObject
     {
+        private readonly IAuthService _authService;
+        public SignInViewModel(IAuthService authService)
+        {
+            _authService = authService;
+        }
+
+        [ObservableProperty]
+        private string _email;
+
         [ObservableProperty]
         private string _password;
 
@@ -14,9 +22,19 @@ namespace EatTogether.MAUI.ViewModels
         private bool _isPasswordVisible = true;
 
         [RelayCommand]
-        private async Task SignIn()
+        private async Task SignInAsync()
         {
-            
+            try
+            {
+                await _authService.SignInAsync(_email, _password);
+
+                await Shell.Current.GoToAsync("//MainPage");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Ошибка", ex.Message, "OK");
+            }
+
         }
         [RelayCommand]
         private async Task GoToSignUp()

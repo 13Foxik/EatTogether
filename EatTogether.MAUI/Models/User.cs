@@ -2,21 +2,21 @@
 {
     public class User
     {
-        public string Uid { get; private set; }
-        public string DisplayName { get; set; }
-        public string Email { get; set; }
-        public DateTime CreatedAt { get; private set; }
-        public int Age { get; set; }
-        
-        public User(string uid, string displayName, string email, DateTime createdAt, int age)
+        public string Uid { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public User() { }
+
+        public User(string uid, string email, string displayName)
         {
             Uid = uid;
-            DisplayName = displayName;
             Email = email;
-            CreatedAt = createdAt;
-            Age = age;
+            DisplayName = displayName;
         }
     }
     //Нужен будет FirestoreDataConverter
     //Доработать в момент создания регистрации
+    // Сервис текущего пользователя
 }

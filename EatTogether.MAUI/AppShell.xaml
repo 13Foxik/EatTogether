@@ -4,11 +4,12 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:EatTogether.MAUI.Views"
+    xmlns:auth="clr-namespace:EatTogether.MAUI.Views.Auth"
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
-    <ShellContent Route="SignInPage" ContentTemplate="{DataTemplate local:SignInPage}" />
-    <ShellContent Route="SignUpPage" ContentTemplate="{DataTemplate local:SignUpPage}" />
+    <ShellContent Route="SignInPage" ContentTemplate="{DataTemplate auth:SignInPage}" />
+    <ShellContent Route="SignUpPage" ContentTemplate="{DataTemplate auth:SignUpPage}" />
     <ShellContent Route="MainPage" ContentTemplate="{DataTemplate local:MainPage}" />
 
 </Shell>
