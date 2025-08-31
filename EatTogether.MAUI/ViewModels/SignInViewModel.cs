@@ -28,7 +28,7 @@ namespace EatTogether.MAUI.ViewModels
             {
                 await _authService.SignInAsync(_email, _password);
 
-                await Shell.Current.GoToAsync("//MainPage");
+                await Shell.Current.GoToAsync("//ProfilePage");
             }
             catch (Exception ex)
             {

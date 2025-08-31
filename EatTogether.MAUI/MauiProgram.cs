@@ -3,6 +3,8 @@ using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.ViewModels;
 using EatTogether.MAUI.Views.Auth;
+using EatTogether.MAUI.Views.Menu;
+using EatTogether.MAUI.Views.Profile;
 using Microsoft.Extensions.Logging;
 
 namespace EatTogether.MAUI
@@ -26,7 +28,10 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<IAuthProvider, EmailAuthService>();
             builder.Services.AddSingleton<IAuthService, AuthService>();
             builder.Services.AddTransient<SignInViewModel>();
+            builder.Services.AddTransient<ProfileViewModel>();
             builder.Services.AddTransient<SignInPage>();
+            builder.Services.AddTransient<MenuPage>();
+            builder.Services.AddTransient<ProfilePage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

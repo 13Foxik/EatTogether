@@ -3,13 +3,15 @@
     x:Class="EatTogether.MAUI.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:EatTogether.MAUI.Views"
+    xmlns:menu="clr-namespace:EatTogether.MAUI.Views.Menu"
     xmlns:auth="clr-namespace:EatTogether.MAUI.Views.Auth"
+    xmlns:profile="clr-namespace:EatTogether.MAUI.Views.Profile"
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
     <ShellContent Route="SignInPage" ContentTemplate="{DataTemplate auth:SignInPage}" />
     <ShellContent Route="SignUpPage" ContentTemplate="{DataTemplate auth:SignUpPage}" />
-    <ShellContent Route="MainPage" ContentTemplate="{DataTemplate local:MainPage}" />
+    <ShellContent Route="MenuPage" ContentTemplate="{DataTemplate menu:MenuPage}" />
+    <ShellContent Route="ProfilePage" ContentTemplate="{DataTemplate profile:ProfilePage}" />
 
 </Shell>
