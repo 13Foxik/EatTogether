@@ -4,11 +4,11 @@ namespace EatTogether.MAUI.Views.Auth;
 
 public partial class SignUpPage : ContentPage
 {
-    public SignUpPage()
+    public SignUpPage(SignUpViewModel viewModel)
     {
         InitializeComponent();
 
-        BindingContext = new SignUpViewModel();
+        BindingContext = viewModel;
 
     }
     protected override bool OnBackButtonPressed()

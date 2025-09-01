@@ -24,12 +24,20 @@ namespace EatTogether.MAUI
                     fonts.AddFont("FontAwesome.ttf", "FontAwesome");
                 });
 
+            //Services
             builder.Services.AddSingleton<CurrentUserService>();
             builder.Services.AddSingleton<IAuthProvider, EmailAuthService>();
+            builder.Services.AddSingleton<IEmailAuth, EmailAuthService>();
             builder.Services.AddSingleton<IAuthService, AuthService>();
+
+            //ViewModels
             builder.Services.AddTransient<SignInViewModel>();
+            builder.Services.AddTransient<SignUpViewModel>();
             builder.Services.AddTransient<ProfileViewModel>();
+
+            //Pages
             builder.Services.AddTransient<SignInPage>();
+            builder.Services.AddTransient<SignUpPage>();
             builder.Services.AddTransient<MenuPage>();
             builder.Services.AddTransient<ProfilePage>();
 

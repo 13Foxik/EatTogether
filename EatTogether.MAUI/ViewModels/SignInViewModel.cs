@@ -13,7 +13,7 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         [ObservableProperty]
-        private string _email;
+        private string _emaill;
 
         [ObservableProperty]
         private string _password;
@@ -26,7 +26,7 @@ namespace EatTogether.MAUI.ViewModels
         {
             try
             {
-                await _authService.SignInAsync(_email, _password);
+                await _authService.SignInAsync(Emaill, Password);
 
                 await Shell.Current.GoToAsync("//ProfilePage");
             }

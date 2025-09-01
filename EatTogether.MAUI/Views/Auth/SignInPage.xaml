@@ -78,7 +78,7 @@
                     StrokeShape="RoundRectangle 10"
                     BackgroundColor="{StaticResource InputBackgroundColor}"
                     Padding="10, 0">
-                <Entry Text="{Binding Email}"
+                <Entry Text="{Binding Emaill}"
                         Placeholder="email@domain.com"
                         Keyboard="Email"
                         ClearButtonVisibility="WhileEditing"

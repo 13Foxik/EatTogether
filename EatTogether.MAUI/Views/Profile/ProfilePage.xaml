@@ -5,13 +5,11 @@
              Title="ProfilePage">
     <VerticalStackLayout>
         <Grid>
-            <Label Text="DisplayName"
-                   VerticalOptions="Start"
-                   HorizontalOptions="Center">
+            <Label Text="DisplayName:"
+                   HorizontalOptions="Start">
                 
             </Label>
-            <Label Text="{Binding DispalyName}"
-                   VerticalOptions="Center"
+            <Label Text="{Binding DisplayName}"
                    HorizontalOptions="Center">
 
             </Label>
