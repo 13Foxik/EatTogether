@@ -50,16 +50,10 @@ namespace EatTogether.MAUI.Services
             );
         }
 
-        protected string GetFirebaseErrorMessage(AuthErrorReason reason)
+        protected virtual string GetFirebaseErrorMessage(AuthErrorReason reason)
         {
             return reason switch
             {
-                AuthErrorReason.MissingPassword => "Отсутствует пароль.",
-                AuthErrorReason.InvalidEmailAddress => "Неверный формат Email.",
-                AuthErrorReason.WrongPassword => "Неверный пароль.",
-                AuthErrorReason.UserNotFound => "Пользователь не найден.",
-                AuthErrorReason.EmailExists => "Пользователь с таким Email уже существует.",
-                AuthErrorReason.WeakPassword => "Пароль слишком слабый. Используйте не менее 6 символов.",
                 _ => "Произошла неизвестная ошибка аутентификации."
             };
         }

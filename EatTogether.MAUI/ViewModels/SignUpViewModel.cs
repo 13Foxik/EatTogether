@@ -41,7 +41,7 @@ namespace EatTogether.MAUI.ViewModels
         {
             try
             {
-                await _emailAuthService.SignUpAsync(Emaill, Password, DisplayName);
+                await _emailAuthService.SignUpAsync(Emaill, Password, ConfirmPassword, DisplayName);
                 await Shell.Current.GoToAsync("//ProfilePage");
             }
             catch (Exception ex)
