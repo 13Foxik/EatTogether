@@ -26,6 +26,7 @@ namespace EatTogether.MAUI
 
             //Services
             builder.Services.AddSingleton<CurrentUserService>();
+            builder.Services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
             builder.Services.AddSingleton<IAuthProvider, EmailAuthService>();
             builder.Services.AddSingleton<IEmailAuth, EmailAuthService>();
             builder.Services.AddSingleton<IAuthService, AuthService>();
@@ -40,6 +41,9 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<SignUpPage>();
             builder.Services.AddTransient<MenuPage>();
             builder.Services.AddTransient<ProfilePage>();
+
+            builder.Services.AddSingleton<AppShell>();
+
 
 #if DEBUG
             builder.Logging.AddDebug();

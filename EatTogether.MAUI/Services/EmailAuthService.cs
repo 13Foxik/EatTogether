@@ -7,16 +7,18 @@ using User = EatTogether.MAUI.Models.User;
 
 namespace EatTogether.MAUI.Services
 {
-    public class EmailAuthService : FirebaseAuthLogic, IEmailAuth
+    public class EmailAuthService : IEmailAuth
     {
         public AuthType Type => AuthType.Email;
 
-        private readonly CurrentUserService _currentUserService;
+        private readonly IFirebaseAuthService _firebaseAuthService;
 
-        public EmailAuthService(CurrentUserService currentUserService) : base (currentUserService)
+        public EmailAuthService(IFirebaseAuthService firebaseAuthService)
         {
-            _currentUserService = currentUserService;
+            _firebaseAuthService = firebaseAuthService;
         }
+
+        private FirebaseAuthClient GetAuthClient() => _firebaseAuthService.GetAuthClient();
         public async Task<User> SignInAsync()
         {
             throw new NotImplementedException("Use SignInAsync(email, password)");
@@ -25,7 +27,7 @@ namespace EatTogether.MAUI.Services
         {
             try
             {
-                var userCredential = await _firebaseAuthClient.SignInWithEmailAndPasswordAsync(email, password);
+                var userCredential = await GetAuthClient().SignInWithEmailAndPasswordAsync(email, password);
                 var firebaseUser = userCredential.User;
                 return MapFirebaseUserToAppUser(firebaseUser);
             }
@@ -61,7 +63,7 @@ namespace EatTogether.MAUI.Services
 
                 if (string.IsNullOrWhiteSpace(password)) throw new Exception("Введите Пароль");
 
-                if (password != null && password.Length > 15) throw new Exception("Пароль слишком длинный.");
+                if (password != null && password.Length > 30) throw new Exception("Пароль слишком длинный.");
 
                 if (password != null && password.Length < 6) throw new Exception("Пароль слишком короткий.");
 
@@ -69,7 +71,7 @@ namespace EatTogether.MAUI.Services
 
                 if (confirmPassword != password) throw new Exception("Пароли не совпадают");
 
-                var userCredential = await _firebaseAuthClient.CreateUserWithEmailAndPasswordAsync(email, password);
+                var userCredential = await GetAuthClient().CreateUserWithEmailAndPasswordAsync(email, password);
                 var firebaseUser = userCredential.User;
                 // Опционально: обновить DisplayName сразу после регистрации
                 await firebaseUser.ChangeDisplayNameAsync(displayName);
@@ -79,21 +81,27 @@ namespace EatTogether.MAUI.Services
             {
                 Console.WriteLine($"Firebase Auth Error during SignUp: {ex.Reason} - {ex.Message}");
 
-                
-
-
                 throw new Exception(GetFirebaseErrorMessage(ex.Reason));
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine($"General Error during SignUpWithEmailAsync: {ex.Message}");
                 throw;
             }
         }
-        protected override string GetFirebaseErrorMessage(AuthErrorReason reason)
+
+        private Models.User MapFirebaseUserToAppUser(Firebase.Auth.User firebaseUser)
         {
-            var specificError = reason switch
+            return new Models.User(
+                uid: firebaseUser.Uid,
+                email: firebaseUser.Info.Email,
+                displayName: firebaseUser.Info.DisplayName ?? firebaseUser.Info.Email
+            );
+        }
+
+        private string GetFirebaseErrorMessage(AuthErrorReason reason)
+        {
+            return reason switch
             {
                 AuthErrorReason.MissingPassword => "Отсутствует пароль.",
                 AuthErrorReason.MissingEmail => "Отсутствует Email.",
@@ -102,13 +110,8 @@ namespace EatTogether.MAUI.Services
                 AuthErrorReason.UserNotFound => "Пользователь не найден.",
                 AuthErrorReason.EmailExists => "Пользователь с таким Email уже существует.",
                 AuthErrorReason.WeakPassword => "Пароль слишком слабый. Используйте не менее 6 символов.",
-                _ => null
+                _ => "Произошла неизвестная ошибка аутентификации."
             };
-
-            if (specificError != null)
-                return specificError;
-
-            return base.GetFirebaseErrorMessage(reason);
         }
     }
 }

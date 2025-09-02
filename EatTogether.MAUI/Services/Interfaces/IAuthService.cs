@@ -5,5 +5,8 @@ namespace EatTogether.MAUI.Services.Interfaces
     public interface IAuthService
     {
         Task<User> SignInAsync(string email, string password);
+
+        Task SignOutAsync();
+
     }
 }

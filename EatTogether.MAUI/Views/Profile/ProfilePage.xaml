@@ -14,5 +14,11 @@
 
             </Label>
         </Grid>
+        <HorizontalStackLayout>
+            <Button Text="Sign out"
+                    Command="{Binding SignOutCommand}"
+                    VerticalOptions="End"
+                    HorizontalOptions="Center"/>
+            </HorizontalStackLayout>
     </VerticalStackLayout>
 </ContentPage>

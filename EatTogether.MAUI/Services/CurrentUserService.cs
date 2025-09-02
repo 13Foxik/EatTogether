@@ -6,13 +6,9 @@ namespace EatTogether.MAUI.Services
     {
         public User? CurrentUser { get; private set; }
 
-        public void SetTestUser()
+        public User? GetCurrentUser()
         {
-            CurrentUser = new User(
-                uid: "test-uid-123",
-                email: "test@test.com",
-                displayName: "Тестовый Пользователь"
-            );
+            return CurrentUser;
         }
         public void SetCurrentUser( User user)
         {

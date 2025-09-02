@@ -9,9 +9,9 @@
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
-    <ShellContent Route="SignInPage" ContentTemplate="{DataTemplate auth:SignInPage}" />
-    <ShellContent Route="SignUpPage" ContentTemplate="{DataTemplate auth:SignUpPage}" />
-    <ShellContent Route="MenuPage" ContentTemplate="{DataTemplate menu:MenuPage}" />
-    <ShellContent Route="ProfilePage" ContentTemplate="{DataTemplate profile:ProfilePage}" />
+    <ShellContent Route="SignInPage" ContentTemplate="{DataTemplate auth:SignInPage}"/>
+    <ShellContent Route="SignUpPage" ContentTemplate="{DataTemplate auth:SignUpPage}"/>
+    <ShellContent Route="MenuPage" ContentTemplate="{DataTemplate menu:MenuPage}"/>
+    <ShellContent Route="ProfilePage" ContentTemplate="{DataTemplate profile:ProfilePage}"/>
 
 </Shell>
