@@ -5,23 +5,19 @@ namespace EatTogether.MAUI.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly Dictionary<AuthType, IAuthProvider> _providers;
+        private readonly IAuthProviderFactory _providerFactory;
         private readonly IFirebaseAuthService _firebaseAuthService;
-        public AuthService(IAuthProvider emailAuth, IFirebaseAuthService firebaseAuthService)
+
+        public AuthService(IAuthProviderFactory providerFactory,IFirebaseAuthService firebaseAuthService)
         {
             _firebaseAuthService = firebaseAuthService;
-            _providers = new()
-            {
-                [AuthType.Email] = emailAuth
-            };
+            _providerFactory = providerFactory;
         }
-        public Task<User> SignInAsync(string email, string password)
+
+        public async Task<User> SignInWithEmailAsync (string email, string password)
         {
-            return _providers[AuthType.Email].SignInAsync(email, password);
-        }
-        public Task<User> SignInAsync(AuthType type)
-        {
-            return _providers[type].SignInAsync();
+            var emailProvider = _providerFactory.GetProvider<IEmailAuth>();
+            return await emailProvider.SignInAsync(email, password);
         }
         public Task SignOutAsync()
         {

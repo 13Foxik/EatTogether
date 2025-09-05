@@ -12,6 +12,5 @@ namespace EatTogether.MAUI.Services.Interfaces
     {
         AuthType Type { get; }
         Task<User> SignInAsync();
-        Task<User> SignInAsync(string email, string password);
     }
 }

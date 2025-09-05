@@ -5,7 +5,6 @@ namespace EatTogether.MAUI.Services
     public class CurrentUserService
     {
         public User? CurrentUser { get; private set; }
-
         public User? GetCurrentUser()
         {
             return CurrentUser;
@@ -14,7 +13,6 @@ namespace EatTogether.MAUI.Services
         {
             CurrentUser = user; 
         }
-
         public void ClearUser() => CurrentUser = null;
     }
 }

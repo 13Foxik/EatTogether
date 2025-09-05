@@ -123,7 +123,7 @@
 
             <!-- Кнопка входа -->
             <Button Text="Продолжить"
-                    Command="{Binding SignInCommand}"
+                    Command="{Binding SignInWithEmailCommand}"
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                     BackgroundColor="{StaticResource PrimaryColor}"
                     TextColor="White"

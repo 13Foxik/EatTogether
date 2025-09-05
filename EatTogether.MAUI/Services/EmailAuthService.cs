@@ -10,7 +10,6 @@ namespace EatTogether.MAUI.Services
     public class EmailAuthService : IEmailAuth
     {
         public AuthType Type => AuthType.Email;
-
         private readonly IFirebaseAuthService _firebaseAuthService;
 
         public EmailAuthService(IFirebaseAuthService firebaseAuthService)
@@ -19,6 +18,7 @@ namespace EatTogether.MAUI.Services
         }
 
         private FirebaseAuthClient GetAuthClient() => _firebaseAuthService.GetAuthClient();
+
         public async Task<User> SignInAsync()
         {
             throw new NotImplementedException("Use SignInAsync(email, password)");
@@ -33,20 +33,17 @@ namespace EatTogether.MAUI.Services
             }
             catch (FirebaseAuthException ex)
             {
-                Console.WriteLine($"Firebase Auth Error: {ex.Reason} - {ex.Message}");
-                // Обработай различные ошибки Firebase (например, неверный пароль, пользователь не найден)
+                Console.WriteLine($"Ошибка аунтификации Firebase: {ex.Reason} - {ex.Message}");
 
                 if (ex.Message.Contains("INVALID_LOGIN_CREDENTIALS"))
                 {
                     throw new Exception("Неверный Email или пароль.");
                 }
-
                 throw new Exception(GetFirebaseErrorMessage(ex.Reason));
             }
-
             catch (Exception ex)
             {
-                Console.WriteLine($"General Error during SignInWithEmailAsync: {ex.Message}");
+                Console.WriteLine($"Общая ошибка при входе в систему с помощью EmailAsync: {ex.Message}");
                 throw;
             }
         }
@@ -54,7 +51,6 @@ namespace EatTogether.MAUI.Services
         {
             try
             {
-
                 if (string.IsNullOrWhiteSpace(displayName)) throw new Exception("Введите имя пользователя");
 
                 if (displayName.Length < 4) throw new Exception("Имя пользователя слишком короткое");
@@ -73,7 +69,7 @@ namespace EatTogether.MAUI.Services
 
                 var userCredential = await GetAuthClient().CreateUserWithEmailAndPasswordAsync(email, password);
                 var firebaseUser = userCredential.User;
-                // Опционально: обновить DisplayName сразу после регистрации
+
                 await firebaseUser.ChangeDisplayNameAsync(displayName);
                 return MapFirebaseUserToAppUser(firebaseUser);
             }
@@ -85,11 +81,10 @@ namespace EatTogether.MAUI.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"General Error during SignUpWithEmailAsync: {ex.Message}");
+                Console.WriteLine($"Общая ошибка от SignUpAsyncEmailAsync: {ex.Message}");
                 throw;
             }
         }
-
         private Models.User MapFirebaseUserToAppUser(Firebase.Auth.User firebaseUser)
         {
             return new Models.User(
@@ -98,7 +93,6 @@ namespace EatTogether.MAUI.Services
                 displayName: firebaseUser.Info.DisplayName ?? firebaseUser.Info.Email
             );
         }
-
         private string GetFirebaseErrorMessage(AuthErrorReason reason)
         {
             return reason switch

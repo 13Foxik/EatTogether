@@ -16,7 +16,4 @@
             DisplayName = displayName;
         }
     }
-    //Нужен будет FirestoreDataConverter
-    //Доработать в момент создания регистрации
-    // Сервис текущего пользователя
 }

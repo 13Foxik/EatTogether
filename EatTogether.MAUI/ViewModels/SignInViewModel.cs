@@ -23,11 +23,11 @@ namespace EatTogether.MAUI.ViewModels
         private bool _isPasswordVisible = true;
 
         [RelayCommand]
-        private async Task SignInAsync()
+        private async Task SignInWithEmailAsync()
         {
             try
             {
-                await _authService.SignInAsync(Emaill, Password);
+                await _authService.SignInWithEmailAsync(Emaill, Password);
 
                 await Shell.Current.GoToAsync("//ProfilePage");
             }
