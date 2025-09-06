@@ -1,6 +1,8 @@
 ﻿using EatTogether.MAUI.Services.Interfaces;
 using Firebase.Auth;
 using Firebase.Auth.Providers;
+using Firebase.Auth.Repository;
+using Microsoft.Maui.ApplicationModel.Communication;
 using System.Diagnostics;
 
 namespace EatTogether.MAUI.Services
@@ -20,10 +22,12 @@ namespace EatTogether.MAUI.Services
                 Providers = new FirebaseAuthProvider[]
                 {
                     new EmailProvider(),
-                }
+                },
+                UserRepository = new FileUserRepository("FirebaseSample")
             };
             _firebaseAuthClient = new FirebaseAuthClient(config);
-             var currentUserFromFirebase = _firebaseAuthClient.User;
+            var currentUserFromFirebase = _firebaseAuthClient.User;
+
 
             if (currentUserFromFirebase != null)
             {
