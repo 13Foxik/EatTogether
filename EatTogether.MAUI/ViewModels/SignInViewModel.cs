@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
 
@@ -29,7 +30,7 @@ namespace EatTogether.MAUI.ViewModels
             {
                 await _authService.SignInWithEmailAsync(Emaill, Password);
 
-                await Shell.Current.GoToAsync("//ProfilePage");
+                Application.Current.MainPage = new MainPage();
             }
             catch (Exception ex)
             {

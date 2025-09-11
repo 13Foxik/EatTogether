@@ -45,11 +45,14 @@
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 		<MauiImage Include="Resources\Images\back_icon.png" />
+		<MauiImage Include="Resources\Images\family.png" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\google_icon.png" BaseSize="20,20" />
 		<MauiImage Include="Resources\Images\apple_icon.png" BaseSize="20,20" />
 		<MauiImage Include="Resources\Images\hide_pass.png" />
+		<MauiImage Include="Resources\Images\menu.png" />
+		<MauiImage Include="Resources\Images\profile.png" />
 		<MauiImage Include="Resources\Images\russia_flag.png" BaseSize="20,20" />
 		<MauiImage Include="Resources\Images\show_pass.png" />
 		<MauiImage Include="Resources\Images\usa_flag.png" BaseSize="20,20" />
@@ -63,7 +66,10 @@
 
 	<ItemGroup>
 	  <None Remove="Resources\Images\back_icon.png" />
+	  <None Remove="Resources\Images\family.png" />
 	  <None Remove="Resources\Images\hide_pass.png" />
+	  <None Remove="Resources\Images\menu.png" />
+	  <None Remove="Resources\Images\profile.png" />
 	  <None Remove="Resources\Images\russia_flag.png" />
 	  <None Remove="Resources\Images\show_pass.png" />
 	  <None Remove="Resources\Images\usa_flag.png" />
@@ -85,10 +91,16 @@
 	  <MauiXaml Update="Views\Auth\SignUpPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\Menu\MenuPage.xaml">
+	  <MauiXaml Update="Views\Main\FamilyPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\Profile\ProfilePage.xaml">
+	  <MauiXaml Update="Views\Main\MainPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Main\MenuPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Main\ProfilePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

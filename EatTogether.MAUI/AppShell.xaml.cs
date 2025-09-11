@@ -1,4 +1,5 @@
 ﻿using EatTogether.MAUI.Services;
+using EatTogether.MAUI.Views.Main;
 
 namespace EatTogether.MAUI
 {
@@ -8,8 +9,8 @@ namespace EatTogether.MAUI
 
         public AppShell(CurrentUserService currentUserService)
         {
-            _currentUserService = currentUserService;
             InitializeComponent();
+            _currentUserService = currentUserService;
 
             Task.Delay(500).ContinueWith(async _ =>
             {
@@ -23,12 +24,12 @@ namespace EatTogether.MAUI
             {
                 if (_currentUserService.CurrentUser != null)
                 {
-                    await GoToAsync("//ProfilePage");
+                    Application.Current.MainPage = new MainPage();
                 }
-                else
-                {
-                    await GoToAsync("//SignInPage");
-                }
+                //else
+                //{
+                //    await GoToAsync("//SignInPage");
+                //}
             });
         }
     }

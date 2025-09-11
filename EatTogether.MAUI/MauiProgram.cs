@@ -3,8 +3,7 @@ using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.ViewModels;
 using EatTogether.MAUI.Views.Auth;
-using EatTogether.MAUI.Views.Menu;
-using EatTogether.MAUI.Views.Profile;
+using EatTogether.MAUI.Views.Main;
 using Microsoft.Extensions.Logging;
 
 namespace EatTogether.MAUI
