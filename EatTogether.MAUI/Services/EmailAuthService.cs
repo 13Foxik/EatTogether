@@ -11,10 +11,12 @@ namespace EatTogether.MAUI.Services
     {
         public AuthType Type => AuthType.Email;
         private readonly IFirebaseAuthService _firebaseAuthService;
+        private readonly ICloudStoreService _cloudStoreService;
 
-        public EmailAuthService(IFirebaseAuthService firebaseAuthService)
+        public EmailAuthService(IFirebaseAuthService firebaseAuthService, ICloudStoreService cloudStoreService)
         {
             _firebaseAuthService = firebaseAuthService;
+            _cloudStoreService = cloudStoreService;
         }
 
         private FirebaseAuthClient GetAuthClient() => _firebaseAuthService.GetAuthClient();
@@ -71,6 +73,17 @@ namespace EatTogether.MAUI.Services
                 var firebaseUser = userCredential.User;
 
                 await firebaseUser.ChangeDisplayNameAsync(displayName);
+
+                var user = new User
+                {
+                    Uid = firebaseUser.Uid,
+                    Email = firebaseUser.Info.Email,
+                    DisplayName = displayName,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                await _cloudStoreService.InsertUserModel(user);
+
                 return MapFirebaseUserToAppUser(firebaseUser);
             }
             catch (FirebaseAuthException ex)

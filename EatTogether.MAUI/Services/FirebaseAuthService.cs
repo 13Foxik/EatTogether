@@ -11,9 +11,11 @@ namespace EatTogether.MAUI.Services
     {
         private readonly FirebaseAuthClient _firebaseAuthClient;
         private readonly CurrentUserService _currentUserService;
-        public FirebaseAuthService(CurrentUserService currentUserService)
+        private readonly ICloudStoreService _cloudStoreService;
+        public FirebaseAuthService(CurrentUserService currentUserService, ICloudStoreService cloudStoreService)
         {
             _currentUserService = currentUserService;
+            _cloudStoreService = cloudStoreService;
 
             var config = new FirebaseAuthConfig
             {
@@ -42,12 +44,21 @@ namespace EatTogether.MAUI.Services
             _firebaseAuthClient.AuthStateChanged += OnAuthStateChanged;
             Console.WriteLine("[FirebaseAuthService] Subscribed to AuthStateChanged event.");
         }
-        private void OnAuthStateChanged(object sender, UserEventArgs e)
+        private async void OnAuthStateChanged(object sender, UserEventArgs e)
         {
             if (e.User != null)
             {
-                _currentUserService.SetCurrentUser(MapFirebaseUserToAppUser(e.User));
-                Console.WriteLine($"[FirebaseAuthService] AuthStateChanged: User logged in: {e.User.Info.Email}");
+                Models.User? firestoreUser = null;
+                try
+                {
+                    firestoreUser = await _cloudStoreService.GetUserModels(e.User.Uid);
+                    _currentUserService.SetCurrentUser(firestoreUser);
+                    Console.WriteLine($"[FirebaseAuthService] AuthStateChanged: User {firestoreUser.Email} (Firestore) logged in.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[FirebaseAuthService] Error fetching user {e.User.Uid} from Firestore after auth state change: {ex.Message}");
+                }
             }
             else
             {

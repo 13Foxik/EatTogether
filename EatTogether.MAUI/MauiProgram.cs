@@ -29,6 +29,7 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<IAuthService, AuthService>();
             builder.Services.AddSingleton<IEmailAuth, EmailAuthService>();
             builder.Services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
+            builder.Services.AddSingleton<ICloudStoreService, FirestoreService>();
 
             //ViewModels
             builder.Services.AddTransient<SignInViewModel>();
