@@ -11,6 +11,10 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string Email { get; set; }
         [FirestoreProperty]
+        public string FirstName { get; set; }
+        [FirestoreProperty]
+        public string LastName { get; set; }
+        [FirestoreProperty]
         public string DisplayName { get; set; }
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; }

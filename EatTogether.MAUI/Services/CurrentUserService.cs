@@ -4,15 +4,41 @@ namespace EatTogether.MAUI.Services
 {
     public class CurrentUserService
     {
-        public User? CurrentUser { get; private set; }
-        public User? GetCurrentUser()
+        public event EventHandler<UserChangedEventArgs> UserChanged;
+
+        private User? _currentUser;
+        public User? CurrentUser
         {
-            return CurrentUser;
+            get => _currentUser;
+            private set
+            {
+                _currentUser = value;
+                OnUserChanged(value);
+            }
         }
-        public void SetCurrentUser( User user)
+
+        public User? GetCurrentUser() => CurrentUser;
+
+        public void SetCurrentUser(User user)
         {
-            CurrentUser = user; 
+            CurrentUser = user;
         }
+
         public void ClearUser() => CurrentUser = null;
+
+        protected virtual void OnUserChanged(User? user)
+        {
+            UserChanged?.Invoke(this, new UserChangedEventArgs(user));
+        }
+    }
+
+    public class UserChangedEventArgs : EventArgs
+    {
+        public User? User { get; }
+
+        public UserChangedEventArgs(User? user)
+        {
+            User = user;
+        }
     }
 }

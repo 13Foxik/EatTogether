@@ -29,12 +29,18 @@
                                  HorizontalOptions="Start"/>
 
                         <VerticalStackLayout Spacing="4" VerticalOptions="Center">
-                            <Label Text="Фамилия ИмяДлиное"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="{Binding FirstName}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                                <Label Text="{Binding LastName}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                            </HorizontalStackLayout>
 
-                            <Label Text="DisplayName"
+                            <Label Text="{Binding DisplayName}"
                                    FontSize="14"
                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                         </VerticalStackLayout>
@@ -52,7 +58,7 @@
                     <Label Text="Дата регистрации:"
                            Grid.Row="0" Grid.Column="0"
                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                    <Label Text="01.01.2024" 
+                    <Label Text="{Binding FormattedCreatedAt}" 
                         Grid.Row="0" Grid.Column="1"
                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                            HorizontalOptions="End"/>

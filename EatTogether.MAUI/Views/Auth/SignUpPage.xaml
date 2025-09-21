@@ -12,126 +12,80 @@
         <toolkit:StatusBarBehavior StatusBarColor="{StaticResource PrimaryColor}" StatusBarStyle="LightContent" />
     </ContentPage.Behaviors>
 
+    <ScrollView>
 
-    <VerticalStackLayout Padding="20" Spacing="5">
+        <VerticalStackLayout Padding="20" Spacing="5">
 
-        <HorizontalStackLayout HorizontalOptions="End">
+            <HorizontalStackLayout HorizontalOptions="End">
 
-            <!--Переключатель языка в правом верхнем углу-->
-            <Button Command="{Binding ChangeLanguageCommand}"
-            Text="Русский"
-            TextColor="Black"
-            FontAttributes="Bold"
-            BackgroundColor="White"
-            WidthRequest="95"
-            HeightRequest="40"
-            HorizontalOptions="End"
-            Margin="0,-10,-10,20"
-            Padding="8,0" 
-            ContentLayout="Left,5">
-                <!-- Выравнивание иконки и текста -->
+                <!--Переключатель языка в правом верхнем углу-->
+                <Button Command="{Binding ChangeLanguageCommand}"
+                Text="Русский"
+                TextColor="Black"
+                FontAttributes="Bold"
+                BackgroundColor="White"
+                WidthRequest="95"
+                HeightRequest="40"
+                HorizontalOptions="End"
+                Margin="0,-10,-10,20"
+                Padding="8,0" 
+                ContentLayout="Left,5">
+                    <!-- Выравнивание иконки и текста -->
 
-                <!-- Иконка -->
-                <Button.ImageSource>
-                    <FileImageSource File="russia_flag.png"/>
-                </Button.ImageSource>
+                    <!-- Иконка -->
+                    <Button.ImageSource>
+                        <FileImageSource File="russia_flag.png"/>
+                    </Button.ImageSource>
 
-                <!-- Добавляем бордер через стиль -->
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="BorderColor" Value="#CCCCCC"/>
-                        <Setter Property="BorderWidth" Value="1"/>
-                        <Setter Property="CornerRadius" Value="5"/>
-                    </Style>
-                </Button.Style>
+                    <!-- Добавляем бордер через стиль -->
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="BorderColor" Value="#CCCCCC"/>
+                            <Setter Property="BorderWidth" Value="1"/>
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Style>
 
-                <Button.Behaviors>
-                    <behaviors:RippleBehavior/>
-                </Button.Behaviors>
+                    <Button.Behaviors>
+                        <behaviors:RippleBehavior/>
+                    </Button.Behaviors>
 
-                <Button.Shadow>
-                    <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
-                </Button.Shadow>
+                    <Button.Shadow>
+                        <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
+                    </Button.Shadow>
 
-            </Button>
-        </HorizontalStackLayout>
+                </Button>
+            </HorizontalStackLayout>
 
-        <!-- ЛОГОТИП (важный branding-элемент) -->
-        <Image Source="logo.png" 
-               BackgroundColor="Gray"
-               HeightRequest="120"
-               WidthRequest="200"
-               HorizontalOptions="Center"
-               Margin="0,0,0,10"/>
-
-        <!-- ЗАГОЛОВОК и ПОДЗАГОЛОВОК -->
-        <Label Text="Регистрация"
-                   FontSize="18"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"/>
-        <Label Text="Создайте новый аккаунт"
-                   FontSize="16"
+            <!-- ЛОГОТИП (важный branding-элемент) -->
+            <Image Source="logo.png" 
+                   BackgroundColor="Gray"
+                   HeightRequest="120"
+                   WidthRequest="200"
                    HorizontalOptions="Center"
-                   TextColor="{StaticResource PrimaryTextColor}"
-                   Margin="0,0,0,20"/>
+                   Margin="0,0,0,10"/>
 
-        <!-- ПОЛЯ ВВОДА (обернутые в Border, как на входе) -->
-        <VerticalStackLayout Spacing="15" Margin="0, -10">
+            <!-- ЗАГОЛОВОК и ПОДЗАГОЛОВОК -->
+            <Label Text="Регистрация"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"/>
+            <Label Text="Создайте новый аккаунт"
+                       FontSize="16"
+                       HorizontalOptions="Center"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       Margin="0,0,0,20"/>
 
-            <!-- Имя пользователя -->
-            <Border Stroke="{StaticResource BorderColor}"
-            StrokeShape="RoundRectangle 10"
-            BackgroundColor="{StaticResource InputBackgroundColor}"
-            Padding="10, 0">
-                <Entry Text="{Binding DisplayName}"
-               Placeholder="Имя пользователя"
-               ClearButtonVisibility="WhileEditing"
-               TextColor="{StaticResource PrimaryTextColor}"
-               PlaceholderColor="{StaticResource SecondaryTextColor}">
-                    <Entry.Behaviors>
-                        <behaviors:FocusScaleBehavior />
-                    </Entry.Behaviors>
-                </Entry>
-            </Border>
+            <!-- ПОЛЯ ВВОДА (обернутые в Border, как на входе) -->
+            <VerticalStackLayout Spacing="15" Margin="0, -10">
 
-            <!-- Email -->
-            <Border Stroke="{StaticResource BorderColor}"
-            StrokeShape="RoundRectangle 10"
-            BackgroundColor="{StaticResource InputBackgroundColor}"
-            Padding="10, 0">
-                <Entry Text="{Binding Emaill}"
-               Placeholder="email@domain.com"
-               Keyboard="Email"
-               ClearButtonVisibility="WhileEditing"
-               TextColor="{StaticResource PrimaryTextColor}"
-               PlaceholderColor="{StaticResource SecondaryTextColor}">
-                    <Entry.Behaviors>
-                        <behaviors:FocusScaleBehavior />
-                    </Entry.Behaviors>
-                </Entry>
-            </Border>
-
-            <!-- Дата рождения -->
-            <Border Stroke="{StaticResource BorderColor}"
+                <!-- Имя пользователя -->
+                <Border Stroke="{StaticResource BorderColor}"
                 StrokeShape="RoundRectangle 10"
                 BackgroundColor="{StaticResource InputBackgroundColor}"
                 Padding="10, 0">
-                <!-- Можно использовать DatePicker вместо Entry -->
-                <DatePicker Date="{Binding BirthDate}"
-                        Format="dd.MM.yyyy"
-                        TextColor="{StaticResource PrimaryTextColor}"
-                        />
-            </Border>
-
-            <!-- Пароль -->
-            <Border Stroke="{StaticResource BorderColor}"
-                StrokeShape="RoundRectangle 10"
-                BackgroundColor="{StaticResource InputBackgroundColor}"
-                Padding="10, 0">
-                <Grid ColumnDefinitions="*,Auto,Auto">
-                    <Entry Text="{Binding Password}"
-                   Placeholder="Пароль"
-                   IsPassword="{Binding IsPasswordVisible}"
+                    <Entry Text="{Binding DisplayName}"
+                   Placeholder="Имя пользователя"
                    ClearButtonVisibility="WhileEditing"
                    TextColor="{StaticResource PrimaryTextColor}"
                    PlaceholderColor="{StaticResource SecondaryTextColor}">
@@ -139,27 +93,16 @@
                             <behaviors:FocusScaleBehavior />
                         </Entry.Behaviors>
                     </Entry>
+                </Border>
 
-                    <ImageButton Grid.Column="2"
-                         Source="{Binding IsPasswordVisible, Converter={StaticResource BoolToImageConverter}}"
-                         Command="{Binding TogglePasswordCommand}"
-                         CommandParameter="{Binding IsPasswordVisible}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="24"
-                         HeightRequest="24"
-                         VerticalOptions="Center"/>
-                </Grid>
-            </Border>
-
-            <!-- Подтверждение пароля -->
-            <Border Stroke="{StaticResource BorderColor}"
+                <!-- Email -->
+                <Border Stroke="{StaticResource BorderColor}"
                 StrokeShape="RoundRectangle 10"
                 BackgroundColor="{StaticResource InputBackgroundColor}"
                 Padding="10, 0">
-                <Grid ColumnDefinitions="*,Auto,Auto">
-                    <Entry Text="{Binding ConfirmPassword}"
-                   Placeholder="Подтвердите пароль"
-                   IsPassword="{Binding IsConfirmPasswordVisible}"
+                    <Entry Text="{Binding Emaill}"
+                   Placeholder="email@domain.com"
+                   Keyboard="Email"
                    ClearButtonVisibility="WhileEditing"
                    TextColor="{StaticResource PrimaryTextColor}"
                    PlaceholderColor="{StaticResource SecondaryTextColor}">
@@ -167,103 +110,194 @@
                             <behaviors:FocusScaleBehavior />
                         </Entry.Behaviors>
                     </Entry>
+                </Border>
+                
+                <!-- FirstName -->
+                <Border Stroke="{StaticResource BorderColor}"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource InputBackgroundColor}"
+                    Padding="10, 0">        
+                        <Entry Text="{Binding FirstName}"
+                   Placeholder="Имя"
+                   ClearButtonVisibility="WhileEditing"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   PlaceholderColor="{StaticResource SecondaryTextColor}">
+                        <Entry.Behaviors>
+                            <behaviors:FocusScaleBehavior />
+                        </Entry.Behaviors>
+                    </Entry>
+                </Border>
+                
+                <!-- LastName -->
+                <Border Stroke="{StaticResource BorderColor}"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource InputBackgroundColor}"
+                    Padding="10, 0">        
+                        <Entry Text="{Binding LastName}"
+                   Placeholder="Фамилия"
+                   ClearButtonVisibility="WhileEditing"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   PlaceholderColor="{StaticResource SecondaryTextColor}">
+                        <Entry.Behaviors>
+                            <behaviors:FocusScaleBehavior />
+                        </Entry.Behaviors>
+                    </Entry>
+                </Border>
 
-                    <ImageButton Grid.Column="2"
-                         Source="{Binding IsConfirmPasswordVisible, Converter={StaticResource BoolToImageConverter}}"
-                         Command="{Binding ToggleConfirmPasswordCommand}"
-                         CommandParameter="{Binding IsConfirmPasswordVisible}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="24"
-                         HeightRequest="24"
-                         VerticalOptions="Center"/>
+                <!-- Дата рождения -->
+                <Border Stroke="{StaticResource BorderColor}"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource InputBackgroundColor}"
+                    Padding="10, 0">
+                    <!-- Можно использовать DatePicker вместо Entry -->
+                    <DatePicker Date="{Binding BirthDate}"
+                            Format="dd.MM.yyyy"
+                            TextColor="{StaticResource PrimaryTextColor}"
+                            />
+                </Border>
 
-                </Grid>
-            </Border>
+                <!-- Пароль -->
+                <Border Stroke="{StaticResource BorderColor}"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource InputBackgroundColor}"
+                    Padding="10, 0">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <Entry Text="{Binding Password}"
+                       Placeholder="Пароль"
+                       IsPassword="{Binding IsPasswordVisible}"
+                       ClearButtonVisibility="WhileEditing"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       PlaceholderColor="{StaticResource SecondaryTextColor}">
+                            <Entry.Behaviors>
+                                <behaviors:FocusScaleBehavior />
+                            </Entry.Behaviors>
+                        </Entry>
 
-            <!-- КНОпКА РЕГИСТРАЦИИ -->
-            <Button Text="Зарегистрироваться"
-                        Command="{Binding SignUpCommand}"
-                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
-                        BackgroundColor="{StaticResource PrimaryColor}"
-                        TextColor="White"
-                        FontAttributes="Bold"
-                        CornerRadius="10"
-                        HeightRequest="45">
+                        <ImageButton Grid.Column="2"
+                             Source="{Binding IsPasswordVisible, Converter={StaticResource BoolToImageConverter}}"
+                             Command="{Binding TogglePasswordCommand}"
+                             CommandParameter="{Binding IsPasswordVisible}"
+                             BackgroundColor="Transparent"
+                             WidthRequest="24"
+                             HeightRequest="24"
+                             VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
 
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="BorderColor" Value="#CCCCCC"/>
-                        <Setter Property="BorderWidth" Value="1"/>
-                        <Setter Property="CornerRadius" Value="5"/>
-                    </Style>
-                </Button.Style>
+                <!-- Подтверждение пароля -->
+                <Border Stroke="{StaticResource BorderColor}"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource InputBackgroundColor}"
+                    Padding="10, 0">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <Entry Text="{Binding ConfirmPassword}"
+                       Placeholder="Подтвердите пароль"
+                       IsPassword="{Binding IsConfirmPasswordVisible}"
+                       ClearButtonVisibility="WhileEditing"
+                       TextColor="{StaticResource PrimaryTextColor}"
+                       PlaceholderColor="{StaticResource SecondaryTextColor}">
+                            <Entry.Behaviors>
+                                <behaviors:FocusScaleBehavior />
+                            </Entry.Behaviors>
+                        </Entry>
 
-                <Button.Behaviors>
-                    <behaviors:RippleBehavior/>
-                </Button.Behaviors>
+                        <ImageButton Grid.Column="2"
+                             Source="{Binding IsConfirmPasswordVisible, Converter={StaticResource BoolToImageConverter}}"
+                             Command="{Binding ToggleConfirmPasswordCommand}"
+                             CommandParameter="{Binding IsConfirmPasswordVisible}"
+                             BackgroundColor="Transparent"
+                             WidthRequest="24"
+                             HeightRequest="24"
+                             VerticalOptions="Center"/>
 
-                <Button.Shadow>
-                    <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
-                </Button.Shadow>
+                    </Grid>
+                </Border>
 
-            </Button>
-        </VerticalStackLayout>
+                <!-- КНОпКА РЕГИСТРАЦИИ -->
+                <Button Text="Зарегистрироваться"
+                            Command="{Binding SignUpCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                            BackgroundColor="{StaticResource PrimaryColor}"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            CornerRadius="10"
+                            HeightRequest="45">
 
-        <HorizontalStackLayout HorizontalOptions="Center" Spacing="5" Margin="0, 5">
-            <Label Text="Уже есть аккаунт?" 
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="BorderColor" Value="#CCCCCC"/>
+                            <Setter Property="BorderWidth" Value="1"/>
+                            <Setter Property="CornerRadius" Value="5"/>
+                        </Style>
+                    </Button.Style>
+
+                    <Button.Behaviors>
+                        <behaviors:RippleBehavior/>
+                    </Button.Behaviors>
+
+                    <Button.Shadow>
+                        <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
+                    </Button.Shadow>
+
+                </Button>
+            </VerticalStackLayout>
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="5" Margin="0, 5">
+                <Label Text="Уже есть аккаунт?" 
+                TextColor="{StaticResource SecondaryTextColor}"
+                VerticalOptions="Center"/>
+                <Button Text="Войти"
+                Command="{Binding GoToSignInCommand}"
+                TextColor="{StaticResource LinkColor}"
+                BackgroundColor="Transparent"
+                Padding="0"
+                FontAttributes="Bold"
+                VerticalOptions="Center">
+
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="VisualStateManager.VisualStateGroups">
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="Transparent"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Property="TextColor" Value="#0023AB"/>
+                                                <Setter Property="BackgroundColor" Value="Transparent"/>
+                                                <Setter Property="Opacity" Value="1"/>
+                                                <Setter Property="Scale" Value="0.98"/>
+                                            </VisualState.Setters>
+
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+
+                </Button>
+            </HorizontalStackLayout>
+
+            <!-- Условия использования -->
+            <Label Text="Нажимая 'Зарегистрироваться', вы соглашаетесь с нашими Условиями обслуживания и Политикой конфиденциальности"
+            FontSize="12"
             TextColor="{StaticResource SecondaryTextColor}"
-            VerticalOptions="Center"/>
-            <Button Text="Войти"
-            Command="{Binding GoToSignInCommand}"
-            TextColor="{StaticResource LinkColor}"
-            BackgroundColor="Transparent"
-            Padding="0"
-            FontAttributes="Bold"
-            VerticalOptions="Center">
+            HorizontalOptions="Center"
+            HorizontalTextAlignment="Center"
+            LineBreakMode="WordWrap"
+            Margin="0, -10"/>
 
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="VisualStateManager.VisualStateGroups">
-                            <VisualStateGroupList>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="Transparent"/>
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                    <VisualState x:Name="Pressed">
-                                        <VisualState.Setters>
-                                            <Setter Property="TextColor" Value="#0023AB"/>
-                                            <Setter Property="BackgroundColor" Value="Transparent"/>
-                                            <Setter Property="Opacity" Value="1"/>
-                                            <Setter Property="Scale" Value="0.98"/>
-                                        </VisualState.Setters>
+            <!-- Индикатор загрузки -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                        IsVisible="{Binding IsBusy}"
+                        Color="{StaticResource PrimaryColor}"
+                        HorizontalOptions="Center"/>
 
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateGroupList>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-
-            </Button>
-        </HorizontalStackLayout>
-
-        <!-- Условия использования -->
-        <Label Text="Нажимая 'Зарегистрироваться', вы соглашаетесь с нашими Условиями обслуживания и Политикой конфиденциальности"
-        FontSize="12"
-        TextColor="{StaticResource SecondaryTextColor}"
-        HorizontalOptions="Center"
-        HorizontalTextAlignment="Center"
-        LineBreakMode="WordWrap"
-        Margin="0, -10"/>
-
-        <!-- Индикатор загрузки -->
-        <ActivityIndicator IsRunning="{Binding IsBusy}"
-                    IsVisible="{Binding IsBusy}"
-                    Color="{StaticResource PrimaryColor}"
-                    HorizontalOptions="Center"/>
-
-    </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
@@ -10,6 +11,12 @@ namespace EatTogether.MAUI.ViewModels
     {
         [ObservableProperty]
         private string _displayName;
+
+        [ObservableProperty]
+        private string _firstName;
+
+        [ObservableProperty]
+        private string _lastName;
 
         [ObservableProperty]
         private string _emaill;
@@ -41,8 +48,8 @@ namespace EatTogether.MAUI.ViewModels
         {
             try
             {
-                await _emailAuthService.SignUpAsync(Emaill, Password, ConfirmPassword, DisplayName);
-                await Shell.Current.GoToAsync("//ProfilePage");
+                await _emailAuthService.SignUpAsync(Emaill, Password, ConfirmPassword, DisplayName, FirstName, LastName);
+                Application.Current.MainPage = new MainPage();
             }
             catch (Exception ex)
             {

@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Services;
-using EatTogether.MAUI.Views.Auth;
 using EatTogether.MAUI.Services.Interfaces;
+using EatTogether.MAUI.Views.Auth;
+using System.ComponentModel;
+using System.Globalization;
 
 namespace EatTogether.MAUI.ViewModels
 {
@@ -10,18 +12,37 @@ namespace EatTogether.MAUI.ViewModels
     {
         private readonly CurrentUserService _currentUserService;
         private readonly IAuthService _authService;
-        private readonly SignInViewModel _signInViewModel;
 
         [ObservableProperty]
         private string _displayName;
-        public ProfileViewModel(CurrentUserService currentUserService, IAuthService authService, SignInViewModel signInViewModel)
+
+        private DateTime _createdAt;
+        public DateTime CreatedAt
+        {
+            get => _createdAt;
+            set
+            {
+                if (SetProperty(ref _createdAt, value))
+                {
+                    FormattedCreatedAt = _createdAt.ToString("dd MMMM, yyyy", new CultureInfo("ru-RU"));
+                }
+               
+            }
+        }
+        [ObservableProperty]
+        private string _formattedCreatedAt;
+
+        [ObservableProperty]
+        private string _firstName;
+
+        [ObservableProperty]
+        private string _lastName;
+        public ProfileViewModel(CurrentUserService currentUserService, IAuthService authService)
         {
             _currentUserService = currentUserService;
             _authService = authService;
-            
-            _signInViewModel = signInViewModel;
 
-            DisplayName = _currentUserService.CurrentUser.DisplayName ?? "Гость";
+            _currentUserService.UserChanged += OnUserChanged;
         }
 
         [RelayCommand]
@@ -30,6 +51,31 @@ namespace EatTogether.MAUI.ViewModels
             await _authService.SignOutAsync();
             Application.Current.MainPage = new AppShell(_currentUserService);
             await Shell.Current.GoToAsync("//SignInPage");
+        }
+
+        private void OnUserChanged(object sender, UserChangedEventArgs e)
+        {
+            UpadateUserInfo();
+        }
+
+        private void UpadateUserInfo()
+        {
+            CheckFirstLastName();
+            CreatedAt = _currentUserService.CurrentUser?.CreatedAt ?? DateTime.MinValue;
+        }
+        private void CheckFirstLastName()
+        {
+            if (FirstName == null && LastName == null)
+            {
+                FirstName = _currentUserService.CurrentUser?.DisplayName ?? "Гость";
+                DisplayName = "Личные данные скрыты";
+            }
+            else
+            {
+                DisplayName = _currentUserService.CurrentUser?.DisplayName ?? "Гость";
+                FirstName = _currentUserService.CurrentUser?.FirstName ?? " ";
+                LastName = _currentUserService.CurrentUser?.LastName ?? " ";
+            }
         }
 
     }

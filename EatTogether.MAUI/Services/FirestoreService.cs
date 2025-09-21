@@ -1,12 +1,19 @@
 ﻿using Google.Cloud.Firestore;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.Interfaces;
+using EatTogether.MAUI.Services;
 
 namespace EatTogether.MAUI.Services
 {
     public class FirestoreService : ICloudStoreService
     {
         private FirestoreDb _db;
+        private readonly CurrentUserService _currentUserService;
+
+        public FirestoreService(CurrentUserService currentUserService)
+        {
+            _currentUserService = currentUserService;
+        }
 
         private async Task SetupFirestore()
         {
@@ -42,6 +49,7 @@ namespace EatTogether.MAUI.Services
         {
             await SetupFirestore();
             await _db.Collection("Users").Document(user.Uid).SetAsync(user);
+            _currentUserService.SetCurrentUser(user);
             Console.WriteLine($"User {user.Uid} saved to Firestore");
         }
         public async Task<User?> GetUserModels(string documentId)
