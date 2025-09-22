@@ -6,6 +6,6 @@ namespace EatTogether.MAUI.Services.Interfaces
     {
         Task<User> SignInAsync(string email, string password);
         Task<User> SignUpAsync(string email, string password, string confirmPassword, string displayName, 
-                               string firstName, string lastName);
+                               string firstName, string lastName, DateTime dateOfBirth);
     }
 }

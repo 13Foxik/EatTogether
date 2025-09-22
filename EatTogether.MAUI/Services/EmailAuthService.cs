@@ -49,7 +49,8 @@ namespace EatTogether.MAUI.Services
                 throw;
             }
         }
-        public async Task<User> SignUpAsync(string email, string password, string confirmPassword, string displayName, string firstName, string lastName)
+        public async Task<User> SignUpAsync(string email, string password, string confirmPassword, string displayName, string firstName, 
+                                            string lastName, DateTime dateOfBirth)
         {
             try
             {
@@ -82,11 +83,10 @@ namespace EatTogether.MAUI.Services
                     FirstName = firstName,
                     LastName = lastName,
                     CreatedAt = DateTime.UtcNow,
+                    DateOfBitrhDay = dateOfBirth,
                 };
 
                 await _cloudStoreService.InsertUserModel(user);
-
-
 
                 return MapFirebaseUserToAppUser(firebaseUser);
             }

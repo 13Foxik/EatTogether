@@ -26,17 +26,38 @@ namespace EatTogether.MAUI.ViewModels
                 {
                     FormattedCreatedAt = _createdAt.ToString("dd MMMM, yyyy", new CultureInfo("ru-RU"));
                 }
-               
             }
         }
+
+        private DateTime _dateOfBirth;
+        public DateTime DateOfBirth
+        {
+            get => _dateOfBirth;
+            set
+            {
+                if (SetProperty(ref _dateOfBirth, value))
+                {
+                    var utcDate = DateTime.SpecifyKind(_dateOfBirth, DateTimeKind.Utc);
+                    var localDate = utcDate.ToLocalTime();
+                    FormattedDateOfBirth = localDate.ToString("dd MMMM, yyyy", new CultureInfo("ru-RU"));
+                }
+            }
+        }
+
         [ObservableProperty]
         private string _formattedCreatedAt;
+
+        [ObservableProperty]
+        private string _formattedDateOfBirth;
 
         [ObservableProperty]
         private string _firstName;
 
         [ObservableProperty]
         private string _lastName;
+
+        [ObservableProperty]
+        private bool _stateOfSubscribe;
         public ProfileViewModel(CurrentUserService currentUserService, IAuthService authService)
         {
             _currentUserService = currentUserService;
@@ -62,10 +83,15 @@ namespace EatTogether.MAUI.ViewModels
         {
             CheckFirstLastName();
             CreatedAt = _currentUserService.CurrentUser?.CreatedAt ?? DateTime.MinValue;
+            DateOfBirth = _currentUserService.CurrentUser?.DateOfBitrhDay ?? DateTime.MinValue;
+            StateOfSubscribe = _currentUserService.CurrentUser?.stateOfSubscribe ?? false;
         }
         private void CheckFirstLastName()
         {
-            if (FirstName == null && LastName == null)
+            FirstName = _currentUserService.CurrentUser?.FirstName ?? "";
+            LastName = _currentUserService.CurrentUser?.LastName ?? "";
+
+            if (FirstName == "" && LastName == "")
             {
                 FirstName = _currentUserService.CurrentUser?.DisplayName ?? "Гость";
                 DisplayName = "Личные данные скрыты";

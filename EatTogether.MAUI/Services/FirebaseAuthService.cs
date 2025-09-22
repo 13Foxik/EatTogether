@@ -49,15 +49,32 @@ namespace EatTogether.MAUI.Services
             if (e.User != null)
             {
                 Models.User? firestoreUser = null;
-                try
+                int maxRetries = 3;
+                int delayMs = 500;
+
+                for (int attempt = 1; attempt <= maxRetries; attempt++)
                 {
-                    firestoreUser = await _cloudStoreService.GetUserModels(e.User.Uid);
-                    _currentUserService.SetCurrentUser(firestoreUser);
-                    Console.WriteLine($"[FirebaseAuthService] AuthStateChanged: User {firestoreUser.Email} (Firestore) logged in.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[FirebaseAuthService] Error fetching user {e.User.Uid} from Firestore after auth state change: {ex.Message}");
+                    try
+                    {
+                        firestoreUser = await _cloudStoreService.GetUserModels(e.User.Uid);
+                        _currentUserService.SetCurrentUser(firestoreUser);
+                        Console.WriteLine($"[FirebaseAuthService] AuthStateChanged: User {firestoreUser.Email} (Firestore) logged in.");
+                        attempt = 4;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[FirebaseAuthService] Attempt {attempt}: Error fetching user {e.User.Uid}: {ex.Message}");
+
+                        if (attempt < maxRetries)
+                        {
+                            await Task.Delay(delayMs);
+                            delayMs *= 2; // Экспоненциальная задержка
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[FirebaseAuthService] Failed to fetch user {e.User.Uid} after {maxRetries} attempts");
+                        }
+                    }
                 }
             }
             else
