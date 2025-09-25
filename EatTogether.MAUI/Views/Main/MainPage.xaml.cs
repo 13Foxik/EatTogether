@@ -5,23 +5,22 @@ public partial class MainPage : TabbedPage
     public MainPage()
     {
         InitializeComponent();
+        Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific.TabbedPage.SetIsSwipePagingEnabled(this, true);
         CurrentPage = Children[1];
     }
 
-    private void OnSwiped(object sender, SwipedEventArgs e)
+    public void SetSwipeEnabled(bool enabled)
     {
-        var currentIndex = Children.IndexOf(CurrentPage);
+        Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific.TabbedPage.SetIsSwipePagingEnabled(this, enabled);
 
-        switch (e.Direction)
+        // Можно добавить визуальную индикацию (опционально)
+        if (enabled)
         {
-            case SwipeDirection.Left:
-                if (currentIndex < Children.Count - 1)
-                    CurrentPage = Children[currentIndex + 1];
-                break;
-            case SwipeDirection.Right:
-                if (currentIndex > 0)
-                    CurrentPage = Children[currentIndex - 1];
-                break;
+            // Свайп между страницами разрешен
+        }
+        else
+        {
+            // Свайп между страницами заблокирован
         }
     }
 }

@@ -103,6 +103,5 @@ namespace EatTogether.MAUI.ViewModels
                 LastName = _currentUserService.CurrentUser?.LastName ?? " ";
             }
         }
-
     }
 }
