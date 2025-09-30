@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Views.Main;
 using System.Collections.ObjectModel;
 
@@ -7,11 +8,16 @@ namespace EatTogether.MAUI.ViewModels;
 
 public partial class FamilyViewModel : ObservableObject
 {
+    private readonly CurrentUserService _currentUserService;
+
     [ObservableProperty]
     private int _selectedTabIndex = 0;
 
     [ObservableProperty]
     private TabItem _currentTab;
+
+    [ObservableProperty]
+    private bool _hasFamily;
 
     [ObservableProperty]
     private double _scrollPosition;
@@ -26,9 +32,24 @@ public partial class FamilyViewModel : ObservableObject
         new TabItem { Type = TabType.Requests }
     };
 
-    public FamilyViewModel()
+    public FamilyViewModel(CurrentUserService currentUserService)
     {
         CurrentTab = Tabs.FirstOrDefault() ?? Tabs[0];
+        _currentUserService = currentUserService;
+
+        _currentUserService.UserChanged += OnUserChanged;
+    }
+    public FamilyViewModel() : this(Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>())
+    {
+    }
+
+    private void OnUserChanged(object sender, UserChangedEventArgs e)
+    {
+        UpadateUserInfo();
+    }
+    private void UpadateUserInfo()
+    {
+        HasFamily = _currentUserService.CurrentUser?.UserFamilies?.Count > 0;
     }
 
     [RelayCommand]

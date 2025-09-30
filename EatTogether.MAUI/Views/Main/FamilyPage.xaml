@@ -16,11 +16,12 @@
         <ResourceDictionary>
             <converters:TabTextColorConverter x:Key="TabTextColorConverter"/>
             <converters:TabIndicatorMarginConverter x:Key="TabIndicatorMarginConverter"/>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
     <ScrollView x:Name="MainScrollView"
-                Scrolled="OnScrollViewScrolled">
+            Scrolled="OnScrollViewScrolled">
 
         <VerticalStackLayout Padding="20" Spacing="24">
 
@@ -30,23 +31,26 @@
                 <SwipeGestureRecognizer Direction="Right" Command="{Binding SwipeRightCommand}"/>
             </VerticalStackLayout.GestureRecognizers>
 
-            <!-- Основная карточка семьи -->
-            <Frame Padding="20"
+            <!-- Контент когда ЕСТЬ семья -->
+            <VerticalStackLayout IsVisible="{Binding HasFamily}" Spacing="24">
+
+                <!-- Основная карточка семьи -->
+                <Frame Padding="20"
                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
                    BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
                    CornerRadius="16"
                    HasShadow="True">
 
-                <VerticalStackLayout Spacing="16">
-                    <!-- Заголовок карточки -->
-                    <HorizontalStackLayout HorizontalOptions="FillAndExpand">
-                        <Label Text="Информация о семье"
+                    <VerticalStackLayout Spacing="16">
+                        <!-- Заголовок карточки -->
+                        <HorizontalStackLayout HorizontalOptions="FillAndExpand">
+                            <Label Text="Информация о семье"
                                FontSize="18"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                HorizontalOptions="StartAndExpand"/>
 
-                        <Button Text="Редактировать"
+                            <Button Text="Редактировать"
                                 BackgroundColor="Transparent"
                                 TextColor="{StaticResource PrimaryColor}"
                                 FontSize="12"
@@ -55,94 +59,94 @@
                                 CornerRadius="8"
                                 Padding="12,6"
                                 HeightRequest="30"/>
-                    </HorizontalStackLayout>
+                        </HorizontalStackLayout>
 
-                    <!-- Основная информация -->
-                    <HorizontalStackLayout Spacing="16">
-                        <!-- Аватар -->
-                        <Frame WidthRequest="80"
+                        <!-- Основная информация -->
+                        <HorizontalStackLayout Spacing="16">
+                            <!-- Аватар -->
+                            <Frame WidthRequest="80"
                                HeightRequest="80"
                                CornerRadius="40"
                                BackgroundColor="{StaticResource PrimaryColor}"
                                Padding="0"
                                HasShadow="True">
-                            <Label Text="И"
+                                <Label Text="И"
                                     TextColor="White"
                                     FontSize="32"
                                     FontAttributes="Bold"
                                     HorizontalOptions="Center"
                                     VerticalOptions="Center"/>
-                        </Frame>
+                            </Frame>
 
-                        <!-- Информация -->
-                        <VerticalStackLayout Spacing="6" VerticalOptions="Center">
-                            <Label Text="Семья Ивановых"
+                            <!-- Информация -->
+                            <VerticalStackLayout Spacing="6" VerticalOptions="Center">
+                                <Label Text="Семья Ивановых"
                                    FontSize="20"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
-                            <HorizontalStackLayout Spacing="8">
-                                <Frame BackgroundColor="{StaticResource PrimaryColor}" 
+                                <HorizontalStackLayout Spacing="8">
+                                    <Frame BackgroundColor="{StaticResource PrimaryColor}" 
                                        CornerRadius="10" 
                                        Padding="8,4"
                                        HeightRequest="20">
-                                    <Label Text="4 участника"
+                                        <Label Text="4 участника"
                                            FontSize="10"
                                            TextColor="White"
                                            FontAttributes="Bold"/>
-                                </Frame>
+                                    </Frame>
 
-                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" 
+                                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" 
                                        CornerRadius="10" 
                                        Padding="8,4"
                                        HeightRequest="20">
-                                    <Label Text="Активна"
+                                        <Label Text="Активна"
                                            FontSize="10"
                                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                            FontAttributes="Bold"/>
-                                </Frame>
-                            </HorizontalStackLayout>
-                        </VerticalStackLayout>
-                    </HorizontalStackLayout>
+                                    </Frame>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
 
-                    <!-- Описание семьи -->
-                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                        <!-- Описание семьи -->
+                        <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                            CornerRadius="12"
                            Padding="16"
                            BorderColor="Transparent">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="О нашей семье"
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="О нашей семье"
                                    FontSize="14"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="Любим готовить вместе по выходным и пробовать новые рецепты со всего мира! Каждое воскресенье устраиваем семейные ужины с экспериментальными блюдами."
+                                <Label Text="Любим готовить вместе по выходным и пробовать новые рецепты со всего мира! Каждое воскресенье устраиваем семейные ужины с экспериментальными блюдами."
                                    FontSize="14"
                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                    MaxLines="3"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </VerticalStackLayout>
-            </Frame>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <!-- Панель вкладок -->
-            <Frame Padding="0"
+                <!-- Панель вкладок -->
+                <Frame Padding="0"
                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
                    BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
                    CornerRadius="16"
                    HasShadow="True">
 
-                <VerticalStackLayout Spacing="0">
-                    <!-- Заголовок панели вкладок -->
-                    <Border Stroke="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                    <VerticalStackLayout Spacing="0">
+                        <!-- Заголовок панели вкладок -->
+                        <Border Stroke="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
                             StrokeThickness="1">
-                        <Grid Padding="20,16" ColumnDefinitions="*,Auto">
-                            <Label Text="Управление семьей"
+                            <Grid Padding="20,16" ColumnDefinitions="*,Auto">
+                                <Label Text="Управление семьей"
                                    FontSize="16"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                    VerticalOptions="Center"/>
 
-                            <Button Text="Пригласить"
+                                <Button Text="Пригласить"
                                     Grid.Column="1"
                                     BackgroundColor="{StaticResource PrimaryColor}"
                                     TextColor="White"
@@ -150,17 +154,17 @@
                                     CornerRadius="8"
                                     Padding="16,8"
                                     HeightRequest="32"/>
-                        </Grid>
-                    </Border>
+                            </Grid>
+                        </Border>
 
-                    <!-- Переключатель вкладок -->
-                    <Grid ColumnDefinitions="*,*,*" 
+                        <!-- Переключатель вкладок -->
+                        <Grid ColumnDefinitions="*,*,*" 
                           ColumnSpacing="0" 
                           HeightRequest="48"
                           Padding="8,0">
 
-                        <!-- Activity Tab -->
-                        <Button Text="Активность"
+                            <!-- Activity Tab -->
+                            <Button Text="Активность"
                                 Grid.Column="0"
                                 BackgroundColor="Transparent"
                                 TextColor="{Binding SelectedTabIndex, Converter={StaticResource TabTextColorConverter}, ConverterParameter=0}"
@@ -170,8 +174,8 @@
                                 Command="{Binding SelectTabCommand}"
                                 CommandParameter="0"/>
 
-                        <!-- Members Tab -->
-                        <Button Text="Участники"
+                            <!-- Members Tab -->
+                            <Button Text="Участники"
                                 Grid.Column="1"
                                 BackgroundColor="Transparent"
                                 TextColor="{Binding SelectedTabIndex, Converter={StaticResource TabTextColorConverter}, ConverterParameter=1}"
@@ -181,8 +185,8 @@
                                 Command="{Binding SelectTabCommand}"
                                 CommandParameter="1"/>
 
-                        <!-- Requests Tab -->
-                        <Button Text="Запросы"
+                            <!-- Requests Tab -->
+                            <Button Text="Запросы"
                                 Grid.Column="2"
                                 BackgroundColor="Transparent"
                                 TextColor="{Binding SelectedTabIndex, Converter={StaticResource TabTextColorConverter}, ConverterParameter=2}"
@@ -191,18 +195,18 @@
                                 FontSize="14"
                                 Command="{Binding SelectTabCommand}"
                                 CommandParameter="2"/>
-                    </Grid>
+                        </Grid>
 
-                    <!-- Индикатор активной вкладки -->
-                    <BoxView HeightRequest="3"
+                        <!-- Индикатор активной вкладки -->
+                        <BoxView HeightRequest="3"
                              WidthRequest="80"
                              BackgroundColor="{StaticResource PrimaryColor}"
                              HorizontalOptions="Start"
                              Margin="{Binding SelectedTabIndex, Converter={StaticResource TabIndicatorMarginConverter}}"
                              VerticalOptions="End"/>
 
-                    <!-- Контент вкладок -->
-                    <CarouselView ItemsSource="{Binding Tabs}"
+                        <!-- Контент вкладок -->
+                        <CarouselView ItemsSource="{Binding Tabs}"
                           CurrentItem="{Binding CurrentTab}"
                           Loop="False"
                           PeekAreaInsets="0"
@@ -210,170 +214,170 @@
                           HeightRequest="400"
                           HorizontalOptions="FillAndExpand">
 
-                        <CarouselView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:TabItem">
-                                <Grid>
-                                    <!-- Активность -->
-                                    <ScrollView IsVisible="{Binding IsActivity}" Padding="20,16">
-                                        <VerticalStackLayout Spacing="16">
-                                            <!-- Статистика -->
-                                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryColorLight}, Dark={StaticResource PrimaryColorDark}}"
+                            <CarouselView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:TabItem">
+                                    <Grid>
+                                        <!-- Активность -->
+                                        <ScrollView IsVisible="{Binding IsActivity}" Padding="20,16">
+                                            <VerticalStackLayout Spacing="16">
+                                                <!-- Статистика -->
+                                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                                                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryColorLight}, Dark={StaticResource PrimaryColorDark}}"
                                                        CornerRadius="12"
                                                        Padding="16,12">
-                                                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                                                        <Label Text="12"
+                                                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                                            <Label Text="12"
                                                                FontSize="24"
                                                                FontAttributes="Bold"
                                                                TextColor="{StaticResource PrimaryColor}"
                                                                HorizontalOptions="Center"/>
-                                                        <Label Text="рецептов"
+                                                            <Label Text="рецептов"
                                                                FontSize="12"
                                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                HorizontalOptions="Center"/>
-                                                    </VerticalStackLayout>
-                                                </Frame>
+                                                        </VerticalStackLayout>
+                                                    </Frame>
 
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
                                                        CornerRadius="12"
                                                        Padding="16,12"
                                                        Grid.Column="1">
-                                                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                                                        <Label Text="7"
+                                                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                                            <Label Text="7"
                                                                FontSize="24"
                                                                FontAttributes="Bold"
                                                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                HorizontalOptions="Center"/>
-                                                        <Label Text="готовок"
+                                                            <Label Text="готовок"
                                                                FontSize="12"
                                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                HorizontalOptions="Center"/>
-                                                    </VerticalStackLayout>
-                                                </Frame>
+                                                        </VerticalStackLayout>
+                                                    </Frame>
 
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
                                                        CornerRadius="12"
                                                        Padding="16,12"
                                                        Grid.Column="2">
-                                                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                                                        <Label Text="4.8"
+                                                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                                                            <Label Text="4.8"
                                                                FontSize="24"
                                                                FontAttributes="Bold"
                                                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                HorizontalOptions="Center"/>
-                                                        <Label Text="рейтинг"
+                                                            <Label Text="рейтинг"
                                                                FontSize="12"
                                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                HorizontalOptions="Center"/>
-                                                    </VerticalStackLayout>
-                                                </Frame>
-                                            </Grid>
+                                                        </VerticalStackLayout>
+                                                    </Frame>
+                                                </Grid>
 
-                                            <!-- Последняя активность -->
-                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                <!-- Последняя активность -->
+                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                                    CornerRadius="12"
                                                    Padding="16">
-                                                <VerticalStackLayout Spacing="12">
-                                                    <Label Text="Последняя активность"
+                                                    <VerticalStackLayout Spacing="12">
+                                                        <Label Text="Последняя активность"
                                                            FontSize="14"
                                                            FontAttributes="Bold"
                                                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
-                                                    <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
-                                                        <BoxView WidthRequest="4"
+                                                        <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
+                                                            <BoxView WidthRequest="4"
                                                                  HeightRequest="40"
                                                                  BackgroundColor="{StaticResource PrimaryColor}"
                                                                  CornerRadius="2"
                                                                  VerticalOptions="Center"/>
 
-                                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                            <Label Text="Мария добавила новый рецепт"
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                                <Label Text="Мария добавила новый рецепт"
                                                                    FontSize="14"
                                                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                            <Label Text="2 часа назад"
+                                                                <Label Text="2 часа назад"
                                                                    FontSize="12"
                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                        </VerticalStackLayout>
-                                                    </Grid>
-                                                </VerticalStackLayout>
-                                            </Frame>
-                                        </VerticalStackLayout>
-                                    </ScrollView>
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </VerticalStackLayout>
+                                                </Frame>
+                                            </VerticalStackLayout>
+                                        </ScrollView>
 
-                                    <!-- Участники -->
-                                    <ScrollView IsVisible="{Binding IsMembers}" Padding="20,16">
-                                        <VerticalStackLayout Spacing="12">
-                                            <!-- Создатель -->
-                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                        <!-- Участники -->
+                                        <ScrollView IsVisible="{Binding IsMembers}" Padding="20,16">
+                                            <VerticalStackLayout Spacing="12">
+                                                <!-- Создатель -->
+                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                                    CornerRadius="12"
                                                    Padding="16">
-                                                <Grid ColumnDefinitions="Auto,1*,Auto" ColumnSpacing="12">
-                                                    <Frame WidthRequest="44"
+                                                    <Grid ColumnDefinitions="Auto,1*,Auto" ColumnSpacing="12">
+                                                        <Frame WidthRequest="44"
                                                            HeightRequest="44"
                                                            CornerRadius="22"
                                                            BackgroundColor="{StaticResource PrimaryColor}"
                                                            Padding="0">
-                                                        <Label Text="И"
+                                                            <Label Text="И"
                                                                 TextColor="White"
                                                                 FontSize="16"
                                                                 FontAttributes="Bold"
                                                                 HorizontalOptions="Center"
                                                                 VerticalOptions="Center"/>
-                                                    </Frame>
+                                                        </Frame>
 
-                                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                        <Label Text="Иван Иванов"
+                                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                            <Label Text="Иван Иванов"
                                                                FontSize="16"
                                                                FontAttributes="Bold"
                                                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                        <Label Text="Создатель семьи"
+                                                            <Label Text="Создатель семьи"
                                                                FontSize="12"
                                                                TextColor="{StaticResource PrimaryColor}"/>
-                                                    </VerticalStackLayout>
+                                                        </VerticalStackLayout>
 
-                                                    <Label Text="Вы"
+                                                        <Label Text="Вы"
                                                            Grid.Column="2"
                                                            FontSize="12"
                                                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                            VerticalOptions="Center"/>
-                                                </Grid>
-                                            </Frame>
+                                                    </Grid>
+                                                </Frame>
 
-                                            <!-- Остальные участники -->
-                                            <Label Text="Участники семьи"
+                                                <!-- Остальные участники -->
+                                                <Label Text="Участники семьи"
                                                    FontSize="14"
                                                    FontAttributes="Bold"
                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
 
-                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                                    CornerRadius="12"
                                                    Padding="16">
-                                                <VerticalStackLayout Spacing="12">
-                                                    <!-- Участник 1 -->
-                                                    <Grid ColumnDefinitions="Auto,1*,Auto" ColumnSpacing="12">
-                                                        <Frame WidthRequest="44"
+                                                    <VerticalStackLayout Spacing="12">
+                                                        <!-- Участник 1 -->
+                                                        <Grid ColumnDefinitions="Auto,1*,Auto" ColumnSpacing="12">
+                                                            <Frame WidthRequest="44"
                                                                HeightRequest="44"
                                                                CornerRadius="22"
                                                                BackgroundColor="{StaticResource SecondaryColor}"
                                                                Padding="0">
-                                                            <Label Text="М"
+                                                                <Label Text="М"
                                                                     TextColor="White"
                                                                     FontSize="16"
                                                                     FontAttributes="Bold"
                                                                     HorizontalOptions="Center"
                                                                     VerticalOptions="Center"/>
-                                                        </Frame>
+                                                            </Frame>
 
-                                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                            <Label Text="Мария Иванова"
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                                <Label Text="Мария Иванова"
                                                                    FontSize="16"
                                                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                            <Label Text="Участник"
+                                                                <Label Text="Участник"
                                                                    FontSize="12"
                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                        </VerticalStackLayout>
+                                                            </VerticalStackLayout>
 
-                                                        <Button Text="Профиль"
+                                                            <Button Text="Профиль"
                                                                 Grid.Column="2"
                                                                 BackgroundColor="Transparent"
                                                                 TextColor="{StaticResource PrimaryColor}"
@@ -383,37 +387,37 @@
                                                                 CornerRadius="6"
                                                                 Padding="12,4"
                                                                 HeightRequest="28"/>
-                                                    </Grid>
+                                                        </Grid>
 
-                                                    <!-- Разделитель -->
-                                                    <BoxView HeightRequest="1"
+                                                        <!-- Разделитель -->
+                                                        <BoxView HeightRequest="1"
                                                              BackgroundColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"/>
 
-                                                    <!-- Участник 2 -->
-                                                    <Grid ColumnDefinitions="Auto,1*,Auto" ColumnSpacing="12">
-                                                        <Frame WidthRequest="44"
+                                                        <!-- Участник 2 -->
+                                                        <Grid ColumnDefinitions="Auto,1*,Auto" ColumnSpacing="12">
+                                                            <Frame WidthRequest="44"
                                                                HeightRequest="44"
                                                                CornerRadius="22"
                                                                BackgroundColor="{StaticResource TertiaryColor}"
                                                                Padding="0">
-                                                            <Label Text="А"
+                                                                <Label Text="А"
                                                                     TextColor="White"
                                                                     FontSize="16"
                                                                     FontAttributes="Bold"
                                                                     HorizontalOptions="Center"
                                                                     VerticalOptions="Center"/>
-                                                        </Frame>
+                                                            </Frame>
 
-                                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                            <Label Text="Алексей Иванов"
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                                <Label Text="Алексей Иванов"
                                                                    FontSize="16"
                                                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                            <Label Text="Участник"
+                                                                <Label Text="Участник"
                                                                    FontSize="12"
                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                        </VerticalStackLayout>
+                                                            </VerticalStackLayout>
 
-                                                        <Button Text="Профиль"
+                                                            <Button Text="Профиль"
                                                                 Grid.Column="2"
                                                                 BackgroundColor="Transparent"
                                                                 TextColor="{StaticResource PrimaryColor}"
@@ -423,83 +427,137 @@
                                                                 CornerRadius="6"
                                                                 Padding="12,4"
                                                                 HeightRequest="28"/>
-                                                    </Grid>
-                                                </VerticalStackLayout>
-                                            </Frame>
-                                        </VerticalStackLayout>
-                                    </ScrollView>
+                                                        </Grid>
+                                                    </VerticalStackLayout>
+                                                </Frame>
+                                            </VerticalStackLayout>
+                                        </ScrollView>
 
-                                    <!-- Запросы -->
-                                    <ScrollView IsVisible="{Binding IsRequests}" Padding="20,16">
-                                        <VerticalStackLayout Spacing="16">
-                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                        <!-- Запросы -->
+                                        <ScrollView IsVisible="{Binding IsRequests}" Padding="20,16">
+                                            <VerticalStackLayout Spacing="16">
+                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                                    CornerRadius="12"
                                                    Padding="20">
-                                                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
-                                                    <Label Text="🎉"
+                                                    <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                                                        <Label Text="🎉"
                                                            FontSize="32"
                                                            HorizontalOptions="Center"/>
 
-                                                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                                                        <Label Text="Новых запросов нет"
+                                                        <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                                                            <Label Text="Новых запросов нет"
                                                                FontSize="16"
                                                                FontAttributes="Bold"
                                                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                HorizontalOptions="Center"/>
 
-                                                        <Label Text="Все запросы на вступление будут отображаться здесь"
+                                                            <Label Text="Все запросы на вступление будут отображаться здесь"
                                                                FontSize="14"
                                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                HorizontalOptions="Center"
                                                                VerticalTextAlignment="Center"/>
-                                                    </VerticalStackLayout>
+                                                        </VerticalStackLayout>
 
-                                                    <Button Text="Поделиться приглашением"
+                                                        <Button Text="Поделиться приглашением"
                                                             BackgroundColor="{StaticResource PrimaryColor}"
                                                             TextColor="White"
                                                             CornerRadius="8"
                                                             Padding="24,12"
                                                             FontSize="14"
                                                             HorizontalOptions="Center"/>
-                                                </VerticalStackLayout>
-                                            </Frame>
+                                                    </VerticalStackLayout>
+                                                </Frame>
 
-                                            <!-- История запросов -->
-                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                <!-- История запросов -->
+                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                                    CornerRadius="12"
                                                    Padding="16">
-                                                <VerticalStackLayout Spacing="12">
-                                                    <Label Text="Последние действия"
+                                                    <VerticalStackLayout Spacing="12">
+                                                        <Label Text="Последние действия"
                                                            FontSize="14"
                                                            FontAttributes="Bold"
                                                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
-                                                    <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
-                                                        <BoxView WidthRequest="4"
+                                                        <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
+                                                            <BoxView WidthRequest="4"
                                                                  HeightRequest="40"
                                                                  BackgroundColor="{StaticResource SuccessColor}"
                                                                  CornerRadius="2"
                                                                  VerticalOptions="Center"/>
 
-                                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                            <Label Text="Петр принят в семью"
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                                <Label Text="Петр принят в семью"
                                                                    FontSize="14"
                                                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                            <Label Text="3 дня назад"
+                                                                <Label Text="3 дня назад"
                                                                    FontSize="12"
                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                        </VerticalStackLayout>
-                                                    </Grid>
-                                                </VerticalStackLayout>
-                                            </Frame>
-                                        </VerticalStackLayout>
-                                    </ScrollView>
-                                </Grid>
-                            </DataTemplate>
-                        </CarouselView.ItemTemplate>
-                    </CarouselView>
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </VerticalStackLayout>
+                                                </Frame>
+                                            </VerticalStackLayout>
+                                        </ScrollView>
+                                    </Grid>
+                                </DataTemplate>
+                            </CarouselView.ItemTemplate>
+                        </CarouselView>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+            <!-- Контент когда НЕТ семьи -->
+            <VerticalStackLayout IsVisible="{Binding HasFamily, Converter={StaticResource InvertedBoolConverter}}"
+                    Spacing="32"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Padding="40,100">
+
+                <!-- Иконка -->
+                <Label Text="👨‍👩‍👧‍👦"
+                   FontSize="80"
+                   HorizontalOptions="Center"/>
+
+                <!-- Заголовок -->
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Label Text="Еще не вступили в семью?"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"/>
+
+                    <Label Text="Присоединитесь к существующей семье или создайте новую, чтобы начать делиться рецептами и планировать совместные обеды!"
+                       FontSize="16"
+                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"
+                       MaxLines="4"/>
                 </VerticalStackLayout>
-            </Frame>
+
+                <!-- Кнопки действий -->
+                <VerticalStackLayout Spacing="16" HorizontalOptions="FillAndExpand">
+                    <Button Text="Создать семью"
+                        BackgroundColor="{StaticResource PrimaryColor}"
+                        TextColor="White"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        CornerRadius="12"
+                        HeightRequest="54"
+                        HorizontalOptions="FillAndExpand"/>
+
+                    <Button Text="Присоединиться к семье"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource PrimaryColor}"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        BorderWidth="2"
+                        BorderColor="{StaticResource PrimaryColor}"
+                        CornerRadius="12"
+                        HeightRequest="54"
+                        HorizontalOptions="FillAndExpand"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>

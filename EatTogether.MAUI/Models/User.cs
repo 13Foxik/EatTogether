@@ -21,7 +21,7 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public DateTime DateOfBitrhDay { get; set; }
         [FirestoreProperty]
-        public List<Family> Families { get; set; }
+        public List<string> UserFamilies { get; set; }
         [FirestoreProperty]
         public bool stateOfSubscribe { get; set; }
         [FirestoreProperty]

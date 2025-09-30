@@ -1,4 +1,5 @@
 using EatTogether.MAUI.ViewModels;
+using CommunityToolkit.Maui.Converters;
 
 namespace EatTogether.MAUI.Views.Main;
 
