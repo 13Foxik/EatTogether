@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EatTogether.MAUI.Views.Main.FamilyPages.CreateFamilyPage"
+             xmlns:vm="clr-namespace:EatTogether.MAUI.ViewModels"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
+
+    <ContentPage.BindingContext>
+        <vm:CreateFamilyViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Верхняя полоса-отступ -->
+            <BoxView HeightRequest="10"
+                     BackgroundColor="{StaticResource PageBackgroundColor}"
+                     HorizontalOptions="FillAndExpand"/>
+
+            <!-- Основной хедер -->
+            <Grid HeightRequest="100"
+                  BackgroundColor="{StaticResource PrimaryColor}"
+                  HorizontalOptions="FillAndExpand">
+
+                
+            </Grid>
+
+            <!-- Основной контент -->
+            <Frame Margin="20,-60,20,20"
+                   Padding="0"
+                   BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                   BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                   CornerRadius="16"
+                   HasShadow="True">
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Заголовок -->
+                    <VerticalStackLayout Padding="24,20,24,16"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource Gray900}}"
+                          Spacing="12">
+                        <Button Text="‹"
+                                    Command="{Binding GoBackCommand}"
+                                    BackgroundColor="{AppThemeBinding Light=White, Dark=Black}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark=White}"
+                                    FontSize="25"
+                                    FontAttributes="Bold"
+                                    WidthRequest="38"
+                                    HeightRequest="38"
+                                    CornerRadius="25"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="Start"
+                                    Padding="0,0,0,2"
+                                    Margin="-10,0,0,0"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                    BorderWidth="1"/>
+                        <Label Text="👨‍👩‍👧‍👦"
+                               FontSize="32"
+                               HorizontalOptions="Center"
+                               Margin="0,-60, 0,-0"/>
+
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="Создать семью"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                   HorizontalOptions="Center"/>
+
+                            <Label Text="Начните ваше кулинарное путешествие вместе"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Форма -->
+                    <VerticalStackLayout Padding="24,20,24,24" Spacing="20">
+
+                        <!-- Аватар -->
+                        <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                            <Frame WidthRequest="80"
+                                   HeightRequest="80"
+                                   CornerRadius="40"
+                                   BackgroundColor="{StaticResource PrimaryColor}"
+                                   Padding="0"
+                                   HasShadow="True"
+                                   HorizontalOptions="Center">
+                                <!-- Кнопка назад -->
+                                <Label Text="С"
+                                       TextColor="White"
+                                       FontSize="24"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Frame>
+
+                            <Button Text="Выбрать аватар"
+                                    Command="{Binding ChangeAvatarCommand}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource PrimaryColor}"
+                                    FontSize="12"
+                                    BorderWidth="1"
+                                    BorderColor="{StaticResource PrimaryColor}"
+                                    CornerRadius="8"
+                                    Padding="16,6"
+                                    HeightRequest="32"/>
+                        </VerticalStackLayout>
+
+                        <!-- Поля ввода -->
+                        <VerticalStackLayout Spacing="16">
+
+                            <!-- Название семьи -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Название семьи"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                <Entry Text="{Binding FamilyName}"
+                                       Placeholder="Например: Семья Ивановых"
+                                       FontSize="16"
+                                       BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                       HeightRequest="50"/>
+                            </VerticalStackLayout>
+
+                            <!-- Описание -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Описание семьи"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                <Editor Text="{Binding FamilyDescription}"
+                                        Placeholder="Расскажите о ваших кулинарных традициях..."
+                                        HeightRequest="80"
+                                        FontSize="14"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                        PlaceholderColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Приватность -->
+                            <Grid ColumnDefinitions="*,Auto" 
+                                  ColumnSpacing="12"
+                                  VerticalOptions="Center">
+
+                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                    <Label Text="Закрытая семья"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                                    <Label Text="Только по приглашениям"
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                </VerticalStackLayout>
+
+                                <Switch Grid.Column="1"
+                                        IsToggled="{Binding IsPrivateFamily}"
+                                        HorizontalOptions="End"
+                                        VerticalOptions="Center"/>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Преимущества -->
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Что вас ждет:"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                            <VerticalStackLayout Spacing="10">
+                                <HorizontalStackLayout Spacing="12">
+                                    <Label Text="📚"
+                                           FontSize="16"/>
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="Общая коллекция рецептов"
+                                               FontSize="13"
+                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                                        <Label Text="Делитесь любимыми блюдами"
+                                               FontSize="11"
+                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Spacing="12">
+                                    <Label Text="📅"
+                                           FontSize="16"/>
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="Совместное планирование"
+                                               FontSize="13"
+                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                                        <Label Text="Организуйте семейные ужины"
+                                               FontSize="11"
+                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Spacing="12">
+                                    <Label Text="📊"
+                                           FontSize="16"/>
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="Статистика готовки"
+                                               FontSize="13"
+                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                                        <Label Text="Отслеживайте ваши успехи"
+                                               FontSize="11"
+                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Кнопки действий -->
+                        <VerticalStackLayout Spacing="12" Margin="0,16,0,0">
+
+                            <Button Text="Создать семью"
+                                    Command="{Binding CreateFamilyCommand}"
+                                    BackgroundColor="{StaticResource PrimaryColor}"
+                                    TextColor="White"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"
+                                    HorizontalOptions="FillAndExpand"/>
+
+                            <Button Text="У меня есть приглашение"
+                                    Command="{Binding NavigateToJoinCommand}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource PrimaryColor}"
+                                    FontSize="14"
+                                    BorderWidth="0"
+                                    HeightRequest="40"
+                                    HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

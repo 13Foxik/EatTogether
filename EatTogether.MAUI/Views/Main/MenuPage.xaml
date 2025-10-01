@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="EatTogether.MAUI.Views.Main.MenuPage"
-             Title="MenuPage">
+             NavigationPage.HasNavigationBar="False">
     <VerticalStackLayout>
         <Label 
             Text="Welcome to .NET MAUI!"

@@ -6,15 +6,25 @@
             BarBackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
             BarTextColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark={StaticResource White}}"
             UnselectedTabColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-            SelectedTabColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark={StaticResource White}}">
+            SelectedTabColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark={StaticResource White}}"
+            NavigationPage.HasNavigationBar="False">
 
-    <!-- Семья -->
-    <local:FamilyPage Title =""  IconImageSource="family.png"/>
+    <NavigationPage Title="" IconImageSource="family.png">
+        <x:Arguments>
+            <local:FamilyPage />
+        </x:Arguments>
+    </NavigationPage>
 
-    <!-- Главное меню -->
-    <local:MenuPage Title =""  IconImageSource="menu.png"/>
+    <NavigationPage Title="" IconImageSource="menu.png">
+        <x:Arguments>
+            <local:MenuPage />
+        </x:Arguments>
+    </NavigationPage>
 
-    <!-- Профиль -->
-    <local:ProfilePage Title =""  IconImageSource="profile.png"/>
+    <NavigationPage Title="" IconImageSource="profile.png">
+        <x:Arguments>
+            <local:ProfilePage />
+        </x:Arguments>
+    </NavigationPage>
 
 </TabbedPage>

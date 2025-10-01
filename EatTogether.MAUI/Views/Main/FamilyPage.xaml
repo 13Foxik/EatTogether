@@ -6,6 +6,7 @@
              xmlns:converters="clr-namespace:EatTogether.MAUI.Converters"
              xmlns:controls="clr-namespace:EatTogether.MAUI.Controls"
              x:DataType="vm:FamilyViewModel"
+             NavigationPage.HasNavigationBar="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.BindingContext>
@@ -538,6 +539,7 @@
                 <!-- Кнопки действий -->
                 <VerticalStackLayout Spacing="16" HorizontalOptions="FillAndExpand">
                     <Button Text="Создать семью"
+                        Command="{Binding CreateFamilyCommand}"
                         BackgroundColor="{StaticResource PrimaryColor}"
                         TextColor="White"
                         FontSize="16"
@@ -547,6 +549,7 @@
                         HorizontalOptions="FillAndExpand"/>
 
                     <Button Text="Присоединиться к семье"
+                        Command="{Binding JoinFamilyCommand}"
                         BackgroundColor="Transparent"
                         TextColor="{StaticResource PrimaryColor}"
                         FontSize="16"
