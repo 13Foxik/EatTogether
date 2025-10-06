@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:auth="clr-namespace:EatTogether.MAUI.Views.Auth"
     xmlns:main="clr-namespace:EatTogether.MAUI.Views.Main"
+    xmlns:family="clr-namespace:EatTogether.MAUI.Views.Main.FamilyPages"
     Shell.FlyoutBehavior="Disabled"
     Shell.NavBarIsVisible="False">
 
@@ -15,6 +16,7 @@
     <ShellContent Route="MainPage" ContentTemplate="{DataTemplate main:MainPage}"/>
     <ShellContent Route="FamilyPage" ContentTemplate="{DataTemplate main:FamilyPage}"/>
     <ShellContent Route="MenuPage" ContentTemplate="{DataTemplate main:MenuPage}"/>
+    <ShellContent Route="CreateFamilyPage" ContentTemplate="{DataTemplate family:CreateFamilyPage}"/>
 
 
 </Shell>

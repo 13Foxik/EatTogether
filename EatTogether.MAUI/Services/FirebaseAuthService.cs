@@ -56,7 +56,7 @@ namespace EatTogether.MAUI.Services
                 {
                     try
                     {
-                        firestoreUser = await _cloudStoreService.GetUserModels(e.User.Uid);
+                        firestoreUser = await _cloudStoreService.GetUserModel(e.User.Uid);
                         _currentUserService.SetCurrentUser(firestoreUser);
                         Console.WriteLine($"[FirebaseAuthService] AuthStateChanged: User {firestoreUser.Email} (Firestore) logged in.");
                         attempt = 4;

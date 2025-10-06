@@ -3,12 +3,14 @@ using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Views.Main;
 using System.Collections.ObjectModel;
+using EatTogether.MAUI.Views.Main.FamilyPages;
 
 namespace EatTogether.MAUI.ViewModels;
 
 public partial class FamilyViewModel : ObservableObject
 {
     private readonly CurrentUserService _currentUserService;
+    private readonly CreateFamilyViewModel _createFamilyViewModel;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -32,14 +34,15 @@ public partial class FamilyViewModel : ObservableObject
         new TabItem { Type = TabType.Requests }
     };
 
-    public FamilyViewModel(CurrentUserService currentUserService)
+    public FamilyViewModel(CurrentUserService currentUserService, CreateFamilyViewModel createFamilyViewModel)
     {
         CurrentTab = Tabs.FirstOrDefault() ?? Tabs[0];
         _currentUserService = currentUserService;
 
         _currentUserService.UserChanged += OnUserChanged;
+        _createFamilyViewModel = createFamilyViewModel;
     }
-    public FamilyViewModel() : this(Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>())
+    public FamilyViewModel() : this(Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>(), Application.Current.Handler.MauiContext.Services.GetService<CreateFamilyViewModel>())
     {
     }
 
@@ -106,6 +109,26 @@ public partial class FamilyViewModel : ObservableObject
     {
         // Уведомляем MainPage об изменении состояния скролла
         (App.Current.MainPage as MainPage)?.SetSwipeEnabled(!value);
+    }
+
+    [RelayCommand]
+    private async Task CreateFamily()
+    {
+        if (Application.Current?.MainPage is MainPage mainPage)
+        {
+            var currentNavigation = mainPage.CurrentPage as NavigationPage;
+            if (currentNavigation != null)
+            {
+                await currentNavigation.Navigation.PushAsync(new CreateFamilyPage(_createFamilyViewModel));
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task JoinFamily()
+    {
+        // Навигация на страницу присоединения к семье
+        await Shell.Current.GoToAsync("//joinfamily");
     }
 }
 

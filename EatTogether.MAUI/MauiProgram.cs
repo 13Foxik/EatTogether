@@ -4,6 +4,9 @@ using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.ViewModels;
 using EatTogether.MAUI.Views.Auth;
 using EatTogether.MAUI.Views.Main;
+using EatTogether.MAUI.Views.Main.FamilyPages;
+using EatTogether.MAUI.Services.FamilyService.Interfaces;
+using EatTogether.MAUI.Services.FamilyService.Implementation;
 using Microsoft.Extensions.Logging;
 
 namespace EatTogether.MAUI
@@ -30,17 +33,24 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<IEmailAuth, EmailAuthService>();
             builder.Services.AddSingleton<IFirebaseAuthService, FirebaseAuthService>();
             builder.Services.AddSingleton<ICloudStoreService, FirestoreService>();
+            builder.Services.AddSingleton<ICurrentFamilyService, CurrentFamilyService>();
+            builder.Services.AddSingleton<IFamilyService, FamilyService>();
+            builder.Services.AddSingleton<IUserService, UserSerivce>();
 
             //ViewModels
             builder.Services.AddTransient<SignInViewModel>();
             builder.Services.AddTransient<SignUpViewModel>();
             builder.Services.AddTransient<ProfileViewModel>();
+            builder.Services.AddTransient<FamilyViewModel>();
+            builder.Services.AddTransient<CreateFamilyViewModel>();
 
             //Pages
             builder.Services.AddTransient<SignInPage>();
             builder.Services.AddTransient<SignUpPage>();
             builder.Services.AddTransient<MenuPage>();
             builder.Services.AddTransient<ProfilePage>();
+            builder.Services.AddTransient<FamilyPage>();
+            builder.Services.AddTransient<CreateFamilyPage>();
 
             builder.Services.AddSingleton<AppShell>();
 

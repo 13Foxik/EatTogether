@@ -13,6 +13,8 @@ namespace EatTogether.MAUI.ViewModels
         private readonly CurrentUserService _currentUserService;
         private readonly IAuthService _authService;
 
+        private bool _firstSignIn = true;
+
         [ObservableProperty]
         private string _displayName;
 
@@ -63,7 +65,15 @@ namespace EatTogether.MAUI.ViewModels
             _currentUserService = currentUserService;
             _authService = authService;
 
-            _currentUserService.UserChanged += OnUserChanged;
+            if (_firstSignIn)
+            {
+                _currentUserService.UserChanged += OnUserChanged;
+                _firstSignIn = false;
+            }
+            else
+            {
+            }
+            UpadateUserInfo();
         }
 
         [RelayCommand]
@@ -77,6 +87,7 @@ namespace EatTogether.MAUI.ViewModels
         private void OnUserChanged(object sender, UserChangedEventArgs e)
         {
             UpadateUserInfo();
+            _currentUserService.UserChanged -= OnUserChanged;
         }
 
         private void UpadateUserInfo()

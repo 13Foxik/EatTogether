@@ -10,6 +10,10 @@ namespace EatTogether.MAUI.Services
         private FirestoreDb _db;
         private readonly CurrentUserService _currentUserService;
 
+        private const string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        private const int ID_LENGTH = 6;
+        private const int MAX_ATTEMPTS = 10; // на случай коллизий
+
         public FirestoreService(CurrentUserService currentUserService)
         {
             _currentUserService = currentUserService;
@@ -45,6 +49,11 @@ namespace EatTogether.MAUI.Services
             }
         }
 
+        public async Task UpdateUserModel(User user)
+        {
+
+        }
+
         public async Task InsertUserModel(User user)
         {
             await SetupFirestore();
@@ -52,7 +61,15 @@ namespace EatTogether.MAUI.Services
             _currentUserService.SetCurrentUser(user);
             Console.WriteLine($"User {user.Uid} saved to Firestore");
         }
-        public async Task<User?> GetUserModels(string documentId)
+
+        public async Task InsertFamilyModel(Family family)
+        {
+            await SetupFirestore();
+            await _db.Collection("Families").Document(family.Id).SetAsync(family);
+            Console.WriteLine($"User {family.Id} saved to Firestore");
+        }
+
+        public async Task<User?> GetUserModel(string documentId)
         {
             await SetupFirestore();
 
@@ -69,6 +86,39 @@ namespace EatTogether.MAUI.Services
                 return null;
             }
         }
+        public async Task<string> GenerateUniqueIdAsync(string collection)
+    {
+        await SetupFirestore();
+        
+        for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++)
+        {
+            string candidateId = GenerateRandomId();
+            
+            // Проверяем существует ли такой ID в коллекции
+            DocumentReference docRef = _db.Collection(collection).Document(candidateId);
+            DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+            
+            if (!snapshot.Exists)
+            {
+                return candidateId; // Нашли уникальный ID
+            }
+        }
+        
+        throw new InvalidOperationException($"Could not generate unique ID after {MAX_ATTEMPTS} attempts");
+    }
+
+    private string GenerateRandomId()
+    {
+        var random = new Random();
+        var result = new char[ID_LENGTH];
+        
+        for (int i = 0; i < ID_LENGTH; i++)
+        {
+            result[i] = CHARACTERS[random.Next(CHARACTERS.Length)];
+        }
+        
+        return new string(result);
+    }
 
     }
 }
