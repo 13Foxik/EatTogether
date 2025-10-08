@@ -58,6 +58,20 @@ namespace EatTogether.MAUI.Services
             Console.WriteLine($"User {user.Uid} saved to Firestore");
         }
 
+        public async Task UpdateUserFamilies(User user)
+        {
+            await SetupFirestore();
+            var document = _db.Collection("Users").Document(user.Uid);
+            var snapshot = await document.GetSnapshotAsync();
+
+            if (snapshot.Exists)
+            {
+                // Обновляем только поле UserFamilies
+                await document.UpdateAsync("UserFamilies", user.UserFamilies);
+                Console.WriteLine($"User {user.Uid} updated - UserFamilies changed");
+            }
+        }
+
         public async Task InsertFamilyModel(Family family)
         {
             await SetupFirestore();
@@ -106,6 +120,24 @@ namespace EatTogether.MAUI.Services
             else
             {
                 Console.WriteLine($"User document with ID {documentId} not found in Firestore.");
+                return null;
+            }
+        }
+
+        public async Task<Family?> GetFamilyModel(string documentId)
+        {
+            await SetupFirestore();
+
+            DocumentReference docRef = _db.Collection("Families").Document(documentId);
+            DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+
+            if (snapshot.Exists)
+            {
+                return snapshot.ConvertTo<Family>();
+            }
+            else
+            {
+                Console.WriteLine($"Family document with ID {documentId} not found in Firestore.");
                 return null;
             }
         }

@@ -11,11 +11,13 @@ namespace EatTogether.MAUI.Services
     {
         private readonly FirebaseAuthClient _firebaseAuthClient;
         private readonly CurrentUserService _currentUserService;
+        private readonly IUserService _userService;
         private readonly ICloudStoreService _cloudStoreService;
-        public FirebaseAuthService(CurrentUserService currentUserService, ICloudStoreService cloudStoreService)
+        public FirebaseAuthService(CurrentUserService currentUserService, ICloudStoreService cloudStoreService, IUserService userService)
         {
             _currentUserService = currentUserService;
             _cloudStoreService = cloudStoreService;
+            _userService = userService;
 
             var config = new FirebaseAuthConfig
             {
@@ -59,6 +61,7 @@ namespace EatTogether.MAUI.Services
                         firestoreUser = await _cloudStoreService.GetUserModel(e.User.Uid);
                         _currentUserService.SetCurrentUser(firestoreUser);
                         Console.WriteLine($"[FirebaseAuthService] AuthStateChanged: User {firestoreUser.Email} (Firestore) logged in.");
+                        await _userService.CheckFamilies();
                         attempt = 4;
                     }
                     catch (Exception ex)

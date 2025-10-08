@@ -38,5 +38,23 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 Console.WriteLine($"Произошла ошибка при попытке добавить семью: {ex}");
             }
         }
+
+        public async Task<bool> HasUserInFamily(string familyId, User user)
+        {
+            Family? family = null;
+            family = await _cloudStoreService.GetFamilyModel(familyId);
+
+            string userId = user.Uid;
+
+            if (family == null)
+            {
+                return false;
+            }
+            else if (family.Members.Exists(m => m.UserId == userId))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
