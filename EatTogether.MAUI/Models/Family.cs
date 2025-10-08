@@ -21,6 +21,9 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty(ConverterType = typeof(FamilyMemberListConverter))]
         public List<FamilyMember> Members { get; set; } = new();
 
+        [FirestoreProperty(ConverterType = typeof(MembershipRequestListConverter))]
+        public List<MembershipRequest> Memberships { get; set; } = new();
+
         [FirestoreProperty]
         public int CountUsers { get; set; }
 
@@ -108,6 +111,49 @@ namespace EatTogether.MAUI.Models
             {
                 return FamilyRole.Member;
             }
+        }
+    }
+    public class MembershipRequestListConverter : IFirestoreConverter<List<MembershipRequest>>
+    {
+        public object ToFirestore(List<MembershipRequest> value)
+        {
+            if (value == null || !value.Any())
+                return new List<object>();
+
+            return value.Select(request => new Dictionary<string, object>
+            {
+                ["id"] = request.Id,
+                ["familyId"] = request.FamilyId,
+                ["userId"] = request.UserId,
+                ["createdAt"] = request.CreatedAt,
+                ["message"] = request.Message ?? ""
+            }).ToList();
+        }
+
+        public List<MembershipRequest> FromFirestore(object value)
+        {
+            var requests = new List<MembershipRequest>();
+
+            if (value is List<object> list)
+            {
+                foreach (var item in list)
+                {
+                    if (item is Dictionary<string, object> dict)
+                    {
+                        var request = new MembershipRequest
+                        {
+                            Id = dict.ContainsKey("id") ? dict["id"]?.ToString() : "",
+                            FamilyId = dict.ContainsKey("familyId") ? dict["familyId"]?.ToString() : "",
+                            UserId = dict.ContainsKey("userId") ? dict["userId"]?.ToString() : "",
+                            CreatedAt = dict.ContainsKey("createdAt") ? ((Timestamp)dict["createdAt"]).ToDateTime() : DateTime.UtcNow,
+                            Message = dict.ContainsKey("message") ? dict["message"]?.ToString() : ""
+                        };
+                        requests.Add(request);
+                    }
+                }
+            }
+
+            return requests;
         }
     }
 }

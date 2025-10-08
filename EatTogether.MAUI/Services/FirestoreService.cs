@@ -1,7 +1,8 @@
-﻿using Google.Cloud.Firestore;
-using EatTogether.MAUI.Models;
-using EatTogether.MAUI.Services.Interfaces;
+﻿using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services;
+using EatTogether.MAUI.Services.Interfaces;
+using Google.Cloud.Firestore;
+using System.Reflection;
 
 namespace EatTogether.MAUI.Services
 {
@@ -49,11 +50,6 @@ namespace EatTogether.MAUI.Services
             }
         }
 
-        public async Task UpdateUserModel(User user)
-        {
-
-        }
-
         public async Task InsertUserModel(User user)
         {
             await SetupFirestore();
@@ -66,7 +62,34 @@ namespace EatTogether.MAUI.Services
         {
             await SetupFirestore();
             await _db.Collection("Families").Document(family.Id).SetAsync(family);
-            Console.WriteLine($"User {family.Id} saved to Firestore");
+            Console.WriteLine($"Family {family.Id} saved to Firestore");
+        }
+        public async Task InsertMembership(MembershipRequest request)
+        {
+            await SetupFirestore();
+
+            var familyDoc = await _db.Collection("Families").Document(request.FamilyId).GetSnapshotAsync();
+
+            if (familyDoc.Exists)
+            {
+                var family = familyDoc.ConvertTo<Family>();
+                bool hasPendingRequest = family.Memberships
+                                        .Any(m => m.UserId == request.UserId && m.Status == RequestStatus.Pending);
+                if (hasPendingRequest)
+                {
+                    await _db.Collection("Families")
+                        .Document(request.FamilyId)
+                        .UpdateAsync("Memberships", FieldValue.ArrayUnion(request));
+                }
+                else
+                {
+                    throw new Exception("Заявка уже подана");
+                }
+            }
+            else
+            {
+                throw new Exception("Такой семьи не существует");
+            }
         }
 
         public async Task<User?> GetUserModel(string documentId)
@@ -86,6 +109,8 @@ namespace EatTogether.MAUI.Services
                 return null;
             }
         }
+
+
         public async Task<string> GenerateUniqueIdAsync(string collection)
     {
         await SetupFirestore();

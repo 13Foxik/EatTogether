@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EatTogether.MAUI.Views.Main.FamilyPages.JoinFamilyPage"
+             xmlns:vm="clr-namespace:EatTogether.MAUI.ViewModels"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
+
+    <ContentPage.BindingContext>
+        <vm:JoinFamilyViewModel />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Верхняя полоса-отступ -->
+            <BoxView HeightRequest="10"
+                     BackgroundColor="{StaticResource PageBackgroundColor}"
+                     HorizontalOptions="FillAndExpand"/>
+
+            <!-- Основной хедер -->
+            <Grid HeightRequest="100"
+                  BackgroundColor="{StaticResource PrimaryColor}"
+                  HorizontalOptions="FillAndExpand">
+            </Grid>
+
+            <!-- Основной контент -->
+            <Frame Margin="20,-60,20,20"
+                   Padding="0"
+                   BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                   BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                   CornerRadius="16"
+                   HasShadow="True">
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Заголовок -->
+                    <VerticalStackLayout Padding="24,20,24,16"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource Gray900}}"
+                          Spacing="12">
+                        <Button Text="‹"
+                                Command="{Binding GoBackCommand}"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=Black}"
+                                TextColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark=White}"
+                                FontSize="25"
+                                FontAttributes="Bold"
+                                WidthRequest="38"
+                                HeightRequest="38"
+                                CornerRadius="25"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Start"
+                                Padding="0,0,0,2"
+                                Margin="-10,0,0,0"
+                                BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                BorderWidth="1"/>
+                        <Label Text="👥"
+                               FontSize="32"
+                               HorizontalOptions="Center"
+                               Margin="0,-60, 0,-0"/>
+
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label Text="Присоединиться к семье"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                   HorizontalOptions="Center"/>
+
+                            <Label Text="Введите ID семьи для отправки заявки"
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Форма -->
+                    <VerticalStackLayout Padding="24,20,24,24" Spacing="24">
+
+                        <!-- Поле ID семьи -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="ID семьи *"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                            <Entry Text="{Binding FamilyId}"
+                                   Placeholder="Например: FAM12345"
+                                   FontSize="16"
+                                   BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                                   HeightRequest="50"/>
+                        </VerticalStackLayout>
+
+                        <!-- Сообщение (опционально) -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Сообщение (необязательно)"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                            <Editor Text="{Binding JoinMessage}"
+                                    Placeholder="Напишите сообщение для создателя семьи..."
+                                    HeightRequest="80"
+                                    FontSize="14"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                    PlaceholderColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Сообщение об ошибке -->
+                        <Label Text="{Binding ErrorMessage}"
+                               IsVisible="{Binding HasError}"
+                               FontSize="12"
+                               TextColor="{StaticResource ErrorColor}"
+                               HorizontalOptions="Center"/>
+
+                        <!-- Кнопка отправки -->
+                        <Button Text="Отправить заявку"
+                                Command="{Binding SendJoinRequestCommand}"
+                                BackgroundColor="{StaticResource PrimaryColor}"
+                                TextColor="White"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                CornerRadius="10"
+                                HeightRequest="50"
+                                HorizontalOptions="FillAndExpand"/>
+
+                        <!-- Сообщение об успешной отправке -->
+                        <Frame IsVisible="{Binding IsRequestSent}"
+                               BackgroundColor="{StaticResource SuccessColor}"
+                               CornerRadius="10"
+                               Padding="16,12"
+                               BorderColor="Transparent">
+                            <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                                <Label Text="✓"
+                                       FontSize="16"
+                                       TextColor="White"
+                                       FontAttributes="Bold"/>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Заявка отправлена!"
+                                           FontSize="14"
+                                           TextColor="White"
+                                           FontAttributes="Bold"/>
+                                    <Label Text="Ожидайте подтверждения"
+                                           FontSize="12"
+                                           TextColor="White"/>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                        </Frame>
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

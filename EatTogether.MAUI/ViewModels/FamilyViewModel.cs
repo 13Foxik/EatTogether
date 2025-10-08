@@ -127,8 +127,14 @@ public partial class FamilyViewModel : ObservableObject
     [RelayCommand]
     private async Task JoinFamily()
     {
-        // Навигация на страницу присоединения к семье
-        await Shell.Current.GoToAsync("//joinfamily");
+        if (Application.Current?.MainPage is MainPage mainPage)
+        {
+            var currentNavigation = mainPage.CurrentPage as NavigationPage;
+            if (currentNavigation != null)
+            {
+                await currentNavigation.Navigation.PushAsync(new JoinFamilyPage());
+            }
+        }
     }
 }
 
