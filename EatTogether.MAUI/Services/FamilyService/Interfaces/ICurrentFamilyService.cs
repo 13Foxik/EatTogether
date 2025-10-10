@@ -7,5 +7,6 @@ namespace EatTogether.MAUI.Services.FamilyService.Interfaces
 
         public Family? GetCurrentFamily();
         public void SetCurrentFamily(Family family);
+        public void ClearFamily();
     }
 }

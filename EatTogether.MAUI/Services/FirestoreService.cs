@@ -89,7 +89,7 @@ namespace EatTogether.MAUI.Services
                 var family = familyDoc.ConvertTo<Family>();
                 bool hasPendingRequest = family.Memberships
                                         .Any(m => m.UserId == request.UserId && m.Status == RequestStatus.Pending);
-                if (hasPendingRequest)
+                if (!hasPendingRequest)
                 {
                     await _db.Collection("Families")
                         .Document(request.FamilyId)

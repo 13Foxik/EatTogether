@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:EatTogether.MAUI.ViewModels"
              xmlns:converters="clr-namespace:EatTogether.MAUI.Converters"
              xmlns:controls="clr-namespace:EatTogether.MAUI.Controls"
+             xmlns:models="clr-namespace:EatTogether.MAUI.Models"
              x:DataType="vm:FamilyViewModel"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
@@ -437,48 +438,146 @@
                                         <!-- Запросы -->
                                         <ScrollView IsVisible="{Binding IsRequests}" Padding="20,16">
                                             <VerticalStackLayout Spacing="16">
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                   CornerRadius="12"
-                                                   Padding="20">
+
+                                                <!-- Состояние когда запросов нет -->
+                                                <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:FamilyViewModel}}, Path=HasPendingRequests, Converter={StaticResource InvertedBoolConverter}}"
+                                                           BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                           CornerRadius="12"
+                                                           Padding="20">
                                                     <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
                                                         <Label Text="🎉"
-                                                           FontSize="32"
-                                                           HorizontalOptions="Center"/>
+                                                               FontSize="32"
+                                                               HorizontalOptions="Center"/>
 
                                                         <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                                                             <Label Text="Новых запросов нет"
-                                                               FontSize="16"
-                                                               FontAttributes="Bold"
-                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                                               HorizontalOptions="Center"/>
+                                                                   FontSize="16"
+                                                                   FontAttributes="Bold"    
+                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                   HorizontalOptions="Center"/>
 
                                                             <Label Text="Все запросы на вступление будут отображаться здесь"
-                                                               FontSize="14"
-                                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                                                               HorizontalOptions="Center"
-                                                               VerticalTextAlignment="Center"/>
+                                                                   FontSize="14"
+                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalTextAlignment="Center"/>
                                                         </VerticalStackLayout>
 
                                                         <Button Text="Поделиться приглашением"
-                                                            BackgroundColor="{StaticResource PrimaryColor}"
-                                                            TextColor="White"
-                                                            CornerRadius="8"
-                                                            Padding="24,12"
-                                                            FontSize="14"
-                                                            HorizontalOptions="Center"/>
+                                                                BackgroundColor="{StaticResource PrimaryColor}"
+                                                                TextColor="White"
+                                                                CornerRadius="8"
+                                                                Padding="24,12"
+                                                                FontSize="14"
+                                                                HorizontalOptions="Center"/>
                                                     </VerticalStackLayout>
                                                 </Frame>
 
+                                                <!-- Список активных запросов -->
+                                                <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:FamilyViewModel}}, Path=HasPendingRequests}" Spacing="12">
+                                                    <Label Text="Запросы на вступление"
+                                                                   FontSize="16"
+                                                                   FontAttributes="Bold"
+                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                                    <CollectionView ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type vm:FamilyViewModel}}, Path=PendingRequests}">
+                                                        <CollectionView.ItemTemplate>
+                                                            <DataTemplate x:DataType="models:MembershipRequest">
+                                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                                           CornerRadius="12"
+                                                                           Padding="16"
+                                                                           Margin="0,0,0,12">
+                                                                    <VerticalStackLayout Spacing="8">
+
+                                                                        <!-- 1. Аватар и имя пользователя -->
+                                                                        <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                                                                            <!-- Аватар -->
+                                                                            <Frame WidthRequest="44"
+                                                                                   HeightRequest="44"
+                                                                                   CornerRadius="22"
+                                                                                   BackgroundColor="{StaticResource PrimaryColor}"
+                                                                                   Padding="0"
+                                                                                   VerticalOptions="Center">
+                                                                                <Label Text="{Binding UserDisplayName}"
+                                                                                       TextColor="White"
+                                                                                       FontSize="16"
+                                                                                       FontAttributes="Bold"
+                                                                                       HorizontalOptions="Center"
+                                                                                       VerticalOptions="Center"/>
+                                                                            </Frame>
+
+                                                                            <!-- Имя пользователя -->
+                                                                            <Label Text="Binding UserDisplayName"
+                                                                                   FontSize="16"
+                                                                                   FontAttributes="Bold"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                                   VerticalOptions="Center"/>
+                                                                        </HorizontalStackLayout>
+
+                                                                        <!-- 2. Дата создания -->
+                                                                        <Label Text="{Binding CreatedAt, StringFormat='Запрос отправлен {0:dd.MM.yyyy в HH:mm}'}"
+                                                                                   FontSize="12"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                                                                   Margin="56,-15,0,10"/>
+
+                                                                        <!-- 3. Описание -->
+                                                                        <!--<Frame BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                                                                               BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                                                               CornerRadius="8"
+                                                                               Padding="12"
+                                                                               Margin="0,0,0,0"
+                                                                               HasShadow="False">
+                                                                            <Label Text="{Binding Message}"
+                                                                                   FontSize="12"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                                   LineBreakMode="WordWrap"
+                                                                                   MaxLines="4"/>
+                                                                        </Frame>-->
+                                                                        <!-- 4. Кнопки -->
+                                                                        <HorizontalStackLayout Spacing="12" 
+                                                                               HorizontalOptions="Center"
+                                                                               Margin="0,0,0,0">
+                                                                            <Button Text="Принять"
+                                                                                    BackgroundColor="{StaticResource PrimaryColor}"
+                                                                                    TextColor="White"
+                                                                                    FontSize="14"
+                                                                                    FontAttributes="Bold"
+                                                                                    CornerRadius="8"
+                                                                                    Padding="24,10"
+                                                                                    HeightRequest="40"
+                                                                                    MinimumWidthRequest="100"
+                                                                                    Command="{Binding AcceptRequestCommand, Source={RelativeSource AncestorType={x:Type vm:FamilyViewModel}}}"
+                                                                                    CommandParameter="{Binding}"/>
+
+                                                                            <Button Text="Отклонить"
+                                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}"
+                                                                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                                    FontSize="14"
+                                                                                    FontAttributes="Bold"
+                                                                                    CornerRadius="8"
+                                                                                    Padding="24,10"
+                                                                                    HeightRequest="40"
+                                                                                    MinimumWidthRequest="100"
+                                                                                    Command="{Binding RejectRequestCommand, Source={RelativeSource AncestorType={x:Type vm:FamilyViewModel}}}"
+                                                                                    CommandParameter="{Binding}"/>
+                                                                        </HorizontalStackLayout>
+                                                                    </VerticalStackLayout>
+                                                                </Frame>
+                                                            </DataTemplate>
+                                                        </CollectionView.ItemTemplate>
+                                                    </CollectionView>
+                                                </VerticalStackLayout>
                                                 <!-- История запросов -->
                                                 <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                   CornerRadius="12"
-                                                   Padding="16">
+                                                       CornerRadius="12"
+                                                       Padding="16">
                                                     <VerticalStackLayout Spacing="12">
                                                         <Label Text="Последние действия"
-                                                           FontSize="14"
-                                                           FontAttributes="Bold"
-                                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                                                               FontSize="14"
+                                                               FontAttributes="Bold"
+                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
+                                                        <!-- Здесь можно также сделать CollectionView для истории -->
                                                         <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
                                                             <BoxView WidthRequest="4"
                                                                  HeightRequest="40"
@@ -488,11 +587,11 @@
 
                                                             <VerticalStackLayout Grid.Column="1" Spacing="2">
                                                                 <Label Text="Петр принят в семью"
-                                                                   FontSize="14"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                                                                       FontSize="14"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
                                                                 <Label Text="3 дня назад"
-                                                                   FontSize="12"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                                                       FontSize="12"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                                                             </VerticalStackLayout>
                                                         </Grid>
                                                     </VerticalStackLayout>

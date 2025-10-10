@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Services;
+using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Views.Main;
 using System.Collections.ObjectModel;
 using EatTogether.MAUI.Views.Main.FamilyPages;
+using EatTogether.MAUI.Models;
 
 namespace EatTogether.MAUI.ViewModels;
 
@@ -11,6 +13,7 @@ public partial class FamilyViewModel : ObservableObject
 {
     private readonly CurrentUserService _currentUserService;
     private readonly CreateFamilyViewModel _createFamilyViewModel;
+    private readonly ICurrentFamilyService _currentFamilyService;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -27,6 +30,12 @@ public partial class FamilyViewModel : ObservableObject
     [ObservableProperty]
     private bool _isScrolledDown;
 
+    [ObservableProperty]
+    private ObservableCollection<MembershipRequest> _pendingRequests = new();
+
+    [ObservableProperty]
+    private bool _hasPendingRequests;
+
     public ObservableCollection<TabItem> Tabs { get; } = new()
     {
         new TabItem { Type = TabType.Activity },
@@ -34,23 +43,33 @@ public partial class FamilyViewModel : ObservableObject
         new TabItem { Type = TabType.Requests }
     };
 
-    public FamilyViewModel(CurrentUserService currentUserService, CreateFamilyViewModel createFamilyViewModel)
+    public FamilyViewModel(CurrentUserService currentUserService, CreateFamilyViewModel createFamilyViewModel, ICurrentFamilyService currentFamilyService)
     {
         CurrentTab = Tabs.FirstOrDefault() ?? Tabs[0];
         _currentUserService = currentUserService;
+        _createFamilyViewModel = createFamilyViewModel;
+        _currentFamilyService = currentFamilyService;
 
         _currentUserService.UserChanged += OnUserChanged;
-        _createFamilyViewModel = createFamilyViewModel;
+
+        // Загружаем запросы при инициализации
+        LoadPendingRequests();
     }
-    public FamilyViewModel() : this(Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>(), Application.Current.Handler.MauiContext.Services.GetService<CreateFamilyViewModel>())
+
+    public FamilyViewModel() : this(
+        Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>(),
+        Application.Current.Handler.MauiContext.Services.GetService<CreateFamilyViewModel>(),
+        Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>())
     {
     }
 
     private void OnUserChanged(object sender, UserChangedEventArgs e)
     {
-        UpadateUserInfo();
+        UpdateUserInfo();
+        LoadPendingRequests();
     }
-    private void UpadateUserInfo()
+
+    private void UpdateUserInfo()
     {
         HasFamily = _currentUserService.CurrentUser?.UserFamilies?.Count > 0;
     }
@@ -85,30 +104,14 @@ public partial class FamilyViewModel : ObservableObject
         }
     }
 
-    // Команда для обновления позиции скролла
     [RelayCommand]
     private void ScrollPositionChanged(object parameter)
     {
         if (parameter is double position)
         {
             ScrollPosition = position;
-            // Считаем что скролл достаточно опустился если позиция > 200 пикселей
             IsScrolledDown = position > 120;
         }
-    }
-
-    partial void OnCurrentTabChanged(TabItem value)
-    {
-        if (value != null)
-        {
-            SelectedTabIndex = Tabs.IndexOf(value);
-        }
-    }
-
-    partial void OnIsScrolledDownChanged(bool value)
-    {
-        // Уведомляем MainPage об изменении состояния скролла
-        (App.Current.MainPage as MainPage)?.SetSwipeEnabled(!value);
     }
 
     [RelayCommand]
@@ -135,6 +138,145 @@ public partial class FamilyViewModel : ObservableObject
                 await currentNavigation.Navigation.PushAsync(new JoinFamilyPage());
             }
         }
+    }
+
+    // Команды для работы с запросами
+    [RelayCommand]
+    private async Task AcceptRequest(MembershipRequest request)
+    {
+        if (request == null) return;
+
+        try
+        {
+            // TODO: Реализовать логику принятия запроса
+            // await _familyService.AcceptMembershipRequest(request.Id);
+
+            // Обновляем статус запроса
+            request.Status = RequestStatus.Accepted;
+
+            // Удаляем из списка pending запросов
+            PendingRequests.Remove(request);
+
+            // Показываем уведомление об успехе
+            await Shell.Current.DisplayAlert("Успех", "Запрос принят", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка", $"Не удалось принять запрос: {ex.Message}", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task RejectRequest(MembershipRequest request)
+    {
+        if (request == null) return;
+
+        try
+        {
+            // TODO: Реализовать логику отклонения запроса
+            // await _familyService.RejectMembershipRequest(request.Id);
+
+            // Обновляем статус запроса
+            request.Status = RequestStatus.Rejected;
+
+            // Удаляем из списка pending запросов
+            PendingRequests.Remove(request);
+
+            // Показываем уведомление об успехе
+            await Shell.Current.DisplayAlert("Успех", "Запрос отклонен", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка", $"Не удалось отклонить запрос: {ex.Message}", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task ShareInvitation()
+    {
+        try
+        {
+            // TODO: Реализовать логику поделиться приглашением
+            // var invitationLink = await _familyService.GenerateInvitationLink();
+            // await Share.RequestAsync(new ShareTextRequest
+            // {
+            //     Title = "Приглашение в семью",
+            //     Text = $"Присоединяйтесь к моей семье в EatTogether! {invitationLink}"
+            // });
+
+            await Shell.Current.DisplayAlert("Поделиться", "Функция поделиться приглашением будет реализована скоро", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка", $"Не удалось поделиться приглашением: {ex.Message}", "OK");
+        }
+    }
+
+    // Метод для загрузки запросов
+    private void LoadPendingRequests()
+    {
+        try
+        {
+            // Очищаем текущие запросы
+            PendingRequests.Clear();
+
+            // Получаем текущую семью пользователя
+            Family? currentFamily = _currentFamilyService?.GetCurrentFamily();
+
+            if (currentFamily?.Memberships != null)
+            {
+                // Фильтруем только pending запросы
+                var pending = currentFamily.Memberships
+                    .Where(r => r.Status == RequestStatus.Pending)
+                    .ToList();
+
+                // Добавляем в коллекцию
+                foreach (var request in pending)
+                {
+                    PendingRequests.Add(request);
+                }
+            }
+
+            // Обновляем флаг наличия запросов
+            HasPendingRequests = PendingRequests.Any();
+        }
+        catch (Exception ex)
+        {
+            // Логируем ошибку, но не падаем
+            System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке запросов: {ex.Message}");
+        }
+    }
+
+    // Частичные методы для реакций на изменения свойств
+    partial void OnCurrentTabChanged(TabItem value)
+    {
+        if (value != null)
+        {
+            SelectedTabIndex = Tabs.IndexOf(value);
+
+            // При переключении на вкладку запросов обновляем список
+            if (value.Type == TabType.Requests)
+            {
+                LoadPendingRequests();
+            }
+        }
+    }
+
+    partial void OnIsScrolledDownChanged(bool value)
+    {
+        (App.Current.MainPage as MainPage)?.SetSwipeEnabled(!value);
+    }
+
+    partial void OnPendingRequestsChanged(ObservableCollection<MembershipRequest> value)
+    {
+        // Автоматически обновляем флаг при изменении коллекции
+        HasPendingRequests = value?.Any() == true;
+    }
+
+    // Метод для ручного обновления запросов (можно вызвать извне)
+    public void RefreshRequests()
+    {
+        LoadPendingRequests();
     }
 }
 

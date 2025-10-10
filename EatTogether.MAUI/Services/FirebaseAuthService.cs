@@ -1,5 +1,7 @@
-﻿using EatTogether.MAUI.Services.Interfaces;
+﻿using EatTogether.MAUI.Services.FamilyService.Interfaces;
+using EatTogether.MAUI.Services.Interfaces;
 using Firebase.Auth;
+using EatTogether.MAUI.Models;
 using Firebase.Auth.Providers;
 using Firebase.Auth.Repository;
 using Microsoft.Maui.ApplicationModel.Communication;
@@ -11,12 +13,14 @@ namespace EatTogether.MAUI.Services
     {
         private readonly FirebaseAuthClient _firebaseAuthClient;
         private readonly CurrentUserService _currentUserService;
+        private readonly ICurrentFamilyService _currentFamilyService;
         private readonly IUserService _userService;
         private readonly ICloudStoreService _cloudStoreService;
-        public FirebaseAuthService(CurrentUserService currentUserService, ICloudStoreService cloudStoreService, IUserService userService)
+        public FirebaseAuthService(CurrentUserService currentUserService, ICloudStoreService cloudStoreService, IUserService userService, ICurrentFamilyService currentFamilyService)
         {
             _currentUserService = currentUserService;
             _cloudStoreService = cloudStoreService;
+            _currentFamilyService = currentFamilyService;
             _userService = userService;
 
             var config = new FirebaseAuthConfig
@@ -51,6 +55,7 @@ namespace EatTogether.MAUI.Services
             if (e.User != null)
             {
                 Models.User? firestoreUser = null;
+                Family? family = null;
                 int maxRetries = 3;
                 int delayMs = 500;
 
@@ -62,6 +67,12 @@ namespace EatTogether.MAUI.Services
                         _currentUserService.SetCurrentUser(firestoreUser);
                         Console.WriteLine($"[FirebaseAuthService] AuthStateChanged: User {firestoreUser.Email} (Firestore) logged in.");
                         await _userService.CheckFamilies();
+                        string? familyId = _currentUserService.GetCurrentUser().UserFamilies[0];
+                        if(familyId != null)
+                        {
+                            family = await _cloudStoreService.GetFamilyModel(familyId);
+                            _currentFamilyService.SetCurrentFamily(family);
+                        }
                         attempt = 4;
                     }
                     catch (Exception ex)
@@ -107,6 +118,7 @@ namespace EatTogether.MAUI.Services
             {
                 _firebaseAuthClient.SignOut();
                 _currentUserService.ClearUser();
+                _currentFamilyService.ClearFamily();
                 Console.WriteLine("User signed out successfully.");
             }
             catch (Exception ex)

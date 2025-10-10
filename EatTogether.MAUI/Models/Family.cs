@@ -142,11 +142,11 @@ namespace EatTogether.MAUI.Models
                     {
                         var request = new MembershipRequest
                         {
-                            Id = dict.ContainsKey("id") ? dict["id"]?.ToString() : "",
-                            FamilyId = dict.ContainsKey("familyId") ? dict["familyId"]?.ToString() : "",
-                            UserId = dict.ContainsKey("userId") ? dict["userId"]?.ToString() : "",
-                            CreatedAt = dict.ContainsKey("createdAt") ? ((Timestamp)dict["createdAt"]).ToDateTime() : DateTime.UtcNow,
-                            Message = dict.ContainsKey("message") ? dict["message"]?.ToString() : ""
+                            Id = dict.ContainsKey("Id") ? dict["Id"]?.ToString() : "",
+                            FamilyId = dict.ContainsKey("FamilyId") ? dict["FamilyId"]?.ToString() : "",
+                            UserId = dict.ContainsKey("UserId") ? dict["UserId"]?.ToString() : "",
+                            CreatedAt = dict.ContainsKey("CreatedAt") ? ((Timestamp)dict["CreatedAt"]).ToDateTime() : DateTime.UtcNow,
+                            Message = dict.ContainsKey("Message") ? dict["Message"]?.ToString() : ""
                         };
                         requests.Add(request);
                     }

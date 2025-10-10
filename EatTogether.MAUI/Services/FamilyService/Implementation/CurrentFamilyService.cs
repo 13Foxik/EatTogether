@@ -5,7 +5,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
 {
     public class CurrentFamilyService : ICurrentFamilyService
     {
-        public Family? CurrentFamily {  get; set; }
+        public Family? CurrentFamily { get; set; }
 
         public Family? GetCurrentFamily()
         {
@@ -15,6 +15,11 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
         public void SetCurrentFamily(Family? family)
         {
             CurrentFamily = family;
+        }
+
+        public void ClearFamily()
+        {
+            CurrentFamily = null;
         }
     }
 }
