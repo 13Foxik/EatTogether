@@ -6,5 +6,6 @@ namespace EatTogether.MAUI.Services.FamilyService.Interfaces
     {
         Task CreateFamily(Family family);
         Task<bool> HasUserInFamily(string familyId, User user);
+        Task AcceptMember(MembershipRequest request);
     }
 }

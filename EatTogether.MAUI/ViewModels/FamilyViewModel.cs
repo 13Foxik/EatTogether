@@ -14,6 +14,8 @@ public partial class FamilyViewModel : ObservableObject
     private readonly CurrentUserService _currentUserService;
     private readonly CreateFamilyViewModel _createFamilyViewModel;
     private readonly ICurrentFamilyService _currentFamilyService;
+    private readonly IMembershipService _membershipService;
+    private readonly IFamilyService _familyService;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -43,12 +45,15 @@ public partial class FamilyViewModel : ObservableObject
         new TabItem { Type = TabType.Requests }
     };
 
-    public FamilyViewModel(CurrentUserService currentUserService, CreateFamilyViewModel createFamilyViewModel, ICurrentFamilyService currentFamilyService)
+    public FamilyViewModel(CurrentUserService currentUserService, CreateFamilyViewModel createFamilyViewModel, 
+        ICurrentFamilyService currentFamilyService, IMembershipService membershipService, IFamilyService familyService)
     {
         CurrentTab = Tabs.FirstOrDefault() ?? Tabs[0];
         _currentUserService = currentUserService;
         _createFamilyViewModel = createFamilyViewModel;
         _currentFamilyService = currentFamilyService;
+        _membershipService = membershipService;
+        _familyService = familyService;
 
         _currentUserService.UserChanged += OnUserChanged;
 
@@ -59,7 +64,9 @@ public partial class FamilyViewModel : ObservableObject
     public FamilyViewModel() : this(
         Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>(),
         Application.Current.Handler.MauiContext.Services.GetService<CreateFamilyViewModel>(),
-        Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>())
+        Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>(),
+        Application.Current.Handler.MauiContext.Services.GetService<IMembershipService>(),
+        Application.Current.Handler.MauiContext.Services.GetService<IFamilyService>())
     {
     }
 
@@ -149,7 +156,8 @@ public partial class FamilyViewModel : ObservableObject
         try
         {
             // TODO: Реализовать логику принятия запроса
-            // await _familyService.AcceptMembershipRequest(request.Id);
+            await _familyService.AcceptMember(request);
+            await _membershipService.UpdateRequestStatus(request, RequestStatus.Accepted);
 
             // Обновляем статус запроса
             request.Status = RequestStatus.Accepted;
@@ -158,11 +166,11 @@ public partial class FamilyViewModel : ObservableObject
             PendingRequests.Remove(request);
 
             // Показываем уведомление об успехе
-            await Shell.Current.DisplayAlert("Успех", "Запрос принят", "OK");
+            //await Shell.Current.DisplayAlert("Успех", "Запрос принят", "OK");
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Ошибка", $"Не удалось принять запрос: {ex.Message}", "OK");
+            //await Shell.Current.DisplayAlert("Ошибка", $"Не удалось принять запрос: {ex.Message}", "OK");
         }
     }
 
@@ -183,11 +191,11 @@ public partial class FamilyViewModel : ObservableObject
             PendingRequests.Remove(request);
 
             // Показываем уведомление об успехе
-            await Shell.Current.DisplayAlert("Успех", "Запрос отклонен", "OK");
+            //await Shell.Current.DisplayAlert("Успех", "Запрос отклонен", "OK");
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Ошибка", $"Не удалось отклонить запрос: {ex.Message}", "OK");
+            //await Shell.Current.DisplayAlert("Ошибка", $"Не удалось отклонить запрос: {ex.Message}", "OK");
         }
     }
 

@@ -145,6 +145,8 @@ namespace EatTogether.MAUI.Models
                             Id = dict.ContainsKey("Id") ? dict["Id"]?.ToString() : "",
                             FamilyId = dict.ContainsKey("FamilyId") ? dict["FamilyId"]?.ToString() : "",
                             UserId = dict.ContainsKey("UserId") ? dict["UserId"]?.ToString() : "",
+                            UserDisplayName = dict.ContainsKey("UserDisplayName") ? dict["UserDisplayName"]?.ToString() : "",
+                            Status = dict.ContainsKey("Status") ? (RequestStatus)dict["Status"] : RequestStatus.Pending,
                             CreatedAt = dict.ContainsKey("CreatedAt") ? ((Timestamp)dict["CreatedAt"]).ToDateTime() : DateTime.UtcNow,
                             Message = dict.ContainsKey("Message") ? dict["Message"]?.ToString() : ""
                         };
@@ -155,5 +157,6 @@ namespace EatTogether.MAUI.Models
 
             return requests;
         }
+
     }
 }

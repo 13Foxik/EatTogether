@@ -1,6 +1,8 @@
 ﻿using EatTogether.MAUI.Models;
+using User = EatTogether.MAUI.Models.User;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
+using Firebase.Auth;
 using Google.Cloud.Firestore;
 using System.Reflection;
 
@@ -71,6 +73,31 @@ namespace EatTogether.MAUI.Services
                 Console.WriteLine($"User {user.Uid} updated - UserFamilies changed");
             }
         }
+        public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
+        {
+            await SetupFirestore();
+
+            // 1. Сначала получим текущий массив
+            var document = _db.Collection("Families").Document(request.FamilyId);
+            var snapshot = await document.GetSnapshotAsync();
+
+            if (snapshot.Exists)
+            {
+                var memberships = snapshot.GetValue<List<MembershipRequest>>("Memberships")
+                                 ?? new List<MembershipRequest>();
+
+                // 2. Найдем и обновим нужный запрос
+                var existingRequest = memberships.FirstOrDefault(m => m.Id == request.Id);
+                if (existingRequest != null)
+                {
+                    existingRequest.Status = status;
+
+                    // 3. Полностью заменяем массив
+                    await document.UpdateAsync("Memberships", memberships);
+                    Console.WriteLine($"Request {request.Id} status updated to {status}");
+                }
+            }
+        }
 
         public async Task InsertFamilyModel(Family family)
         {
@@ -78,6 +105,22 @@ namespace EatTogether.MAUI.Services
             await _db.Collection("Families").Document(family.Id).SetAsync(family);
             Console.WriteLine($"Family {family.Id} saved to Firestore");
         }
+
+        public async Task AddMemberToFamily(string familyId, FamilyMember member)
+        {
+            await SetupFirestore();
+            var document = _db.Collection("Families").Document(familyId);
+            try
+            {
+                await document.UpdateAsync("Members", FieldValue.ArrayUnion(member));
+                Console.WriteLine($"Member {member.UserId} added to family");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Ошибка добавления:{ex}");
+            }
+        }
+
         public async Task InsertMembership(MembershipRequest request)
         {
             await SetupFirestore();

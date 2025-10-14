@@ -25,7 +25,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 UserId = _currentUserService.GetCurrentUser().Uid,
                 DisplayName = _currentUserService.GetCurrentUser().DisplayName,
                 Email = _currentUserService.GetCurrentUser().Email,
-                Role = FamilyRole.Member
+                Role = FamilyRole.Admin
             };
             family.AddMember(member);
             try
@@ -33,7 +33,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 await _cloudStoreService.InsertFamilyModel(family);
                 _currentFamilyService.SetCurrentFamily(family);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Произошла ошибка при попытке добавить семью: {ex}");
             }
@@ -55,6 +55,26 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 return true;
             }
             return false;
+        }
+
+        public async Task AcceptMember(MembershipRequest request)
+        {
+            User user = await _cloudStoreService.GetUserModel(request.UserId);
+
+            var member = new FamilyMember
+            {
+                UserId = user.Uid,
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                JoinedAt = DateTime.UtcNow,
+                Role = FamilyRole.Member
+            };
+            var family = _currentFamilyService.GetCurrentFamily();
+            if (family != null &&request.FamilyId == family.Id)
+            {
+                family.AddMember(member);
+            }
+            await _cloudStoreService.AddMemberToFamily(request.FamilyId, member);
         }
     }
 }

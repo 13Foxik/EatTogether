@@ -507,7 +507,7 @@
                                                                             </Frame>
 
                                                                             <!-- Имя пользователя -->
-                                                                            <Label Text="Binding UserDisplayName"
+                                                                            <Label Text="{Binding UserDisplayName}"
                                                                                    FontSize="16"
                                                                                    FontAttributes="Bold"
                                                                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"

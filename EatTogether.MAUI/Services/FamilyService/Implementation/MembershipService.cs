@@ -24,5 +24,10 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
 
             await _cloudStoreService.InsertMembership(request);
         }
+        public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
+        {
+            await _cloudStoreService.UpdateRequestStatus(request, status);
+        }
+
     }
 }

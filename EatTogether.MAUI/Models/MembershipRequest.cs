@@ -29,7 +29,7 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string Message { get; set; }
 
-        [FirestoreProperty]
+        [FirestoreProperty(ConverterType = typeof(RequestStatusConverter))]
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
 
         [FirestoreProperty]
@@ -56,5 +56,27 @@ namespace EatTogether.MAUI.Models
         Accepted = 1,
         Rejected = 2,
         Cancelled = 3
+    }
+    public class RequestStatusConverter : IFirestoreConverter<RequestStatus>
+    {
+        public RequestStatus FromFirestore(object value)
+        {
+            if (value is string stringValue)
+            {
+                if (Enum.TryParse<RequestStatus>(stringValue, true, out var status))
+                    return status;
+            }
+            else if (value is long longValue && Enum.IsDefined(typeof(RequestStatus), (int)longValue))
+            {
+                return (RequestStatus)longValue;
+            }
+
+            return RequestStatus.Pending;
+        }
+
+        public object ToFirestore(RequestStatus value)
+        {
+            return value.ToString();
+        }
     }
 }
