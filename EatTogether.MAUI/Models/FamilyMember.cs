@@ -24,6 +24,7 @@ namespace EatTogether.MAUI.Models
 
         [FirestoreProperty]
         public DateTime JoinedAt { get; set; }
+        public bool IsCurrentUser { get; set; }
 
 
         public FamilyMember() { }
@@ -40,7 +41,8 @@ namespace EatTogether.MAUI.Models
     public enum FamilyRole
     {
        Member = 0,
-       Admin = 1
+       Admin = 1,
+       Owner = 2
     }
 
 }

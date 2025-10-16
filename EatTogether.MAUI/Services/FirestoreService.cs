@@ -109,10 +109,12 @@ namespace EatTogether.MAUI.Services
         public async Task AddMemberToFamily(string familyId, FamilyMember member)
         {
             await SetupFirestore();
-            var document = _db.Collection("Families").Document(familyId);
+            var documentFamily = _db.Collection("Families").Document(familyId);
+            var documentUser = _db.Collection("Users").Document(member.UserId);
             try
             {
-                await document.UpdateAsync("Members", FieldValue.ArrayUnion(member));
+                await documentFamily.UpdateAsync("Members", FieldValue.ArrayUnion(member));
+                await documentUser.UpdateAsync("UserFamilies", FieldValue.ArrayUnion(familyId));
                 Console.WriteLine($"Member {member.UserId} added to family");
             }
             catch(Exception ex)

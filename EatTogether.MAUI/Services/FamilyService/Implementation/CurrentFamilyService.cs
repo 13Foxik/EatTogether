@@ -5,7 +5,18 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
 {
     public class CurrentFamilyService : ICurrentFamilyService
     {
-        public Family? CurrentFamily { get; set; }
+        public event EventHandler<FamilyChangedEventArgs> FamilyChanged;
+
+        private Family? _currentFamily;
+        public Family? CurrentFamily
+        {
+            get => _currentFamily;
+            set
+            {
+                _currentFamily = value;
+                OnFamilyChanged(value);
+            }
+        }
 
         public Family? GetCurrentFamily()
         {
@@ -20,6 +31,10 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
         public void ClearFamily()
         {
             CurrentFamily = null;
+        }
+        protected virtual void OnFamilyChanged(Family? user)
+        {
+            FamilyChanged?.Invoke(this, new FamilyChangedEventArgs(user));
         }
     }
 }

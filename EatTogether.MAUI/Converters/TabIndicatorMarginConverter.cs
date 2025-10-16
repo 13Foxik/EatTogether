@@ -8,11 +8,17 @@ public class TabIndicatorMarginConverter : IValueConverter
     {
         if (value is int selectedIndex)
         {
-            // Используем относительное позиционирование вместо абсолютного
-            var margin = selectedIndex * 33.3; // 33.3% на каждую вкладку
-            return new Thickness(margin, 0, 0, 0);
+            // Фиксированные отступы, рассчитанные для центрирования
+            // под каждой вкладкой
+            switch (selectedIndex)
+            {
+                case 0: return new Thickness(25, -10, 0, 0);   // Центр под "Активность"
+                case 1: return new Thickness(137, -10, 0, 0);  // Центр под "Участники"  
+                case 2: return new Thickness(250, -10, 0, 0);  // Центр под "Запросы"
+                default: return new Thickness(25, 0, 0, 0);
+            }
         }
-        return new Thickness(0);
+        return new Thickness(25, 0, 0, 0);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -50,12 +50,12 @@ namespace EatTogether.MAUI.Models
 
             return value.Select(member => new Dictionary<string, object>
             {
-                ["userId"] = member.UserId,
-                ["displayName"] = member.DisplayName ?? "",
-                ["email"] = member.Email ?? "",
-                ["avatarUrl"] = member.AvatarUrl ?? "",
-                ["role"] = (int)member.Role, // Сохраняем как число
-                ["joinedAt"] = member.JoinedAt,
+                ["UserId"] = member.UserId,
+                ["DisplayName"] = member.DisplayName ?? "",
+                ["Email"] = member.Email ?? "",
+                ["AvatarUrl"] = member.AvatarUrl ?? "",
+                ["Role"] = (int)member.Role, // Сохраняем как число
+                ["JoinedAt"] = member.JoinedAt,
             }).ToList();
         }
 
@@ -71,12 +71,12 @@ namespace EatTogether.MAUI.Models
                     {
                         var member = new FamilyMember
                         {
-                            UserId = dict.ContainsKey("userId") ? dict["userId"]?.ToString() : "",
-                            DisplayName = dict.ContainsKey("displayName") ? dict["displayName"]?.ToString() : "",
-                            Email = dict.ContainsKey("email") ? dict["email"]?.ToString() : "",
-                            AvatarUrl = dict.ContainsKey("avatarUrl") ? dict["avatarUrl"]?.ToString() : "",
+                            UserId = dict.ContainsKey("UserId") ? dict["UserId"]?.ToString() : "",
+                            DisplayName = dict.ContainsKey("DisplayName") ? dict["DisplayName"]?.ToString() : "",
+                            Email = dict.ContainsKey("Email") ? dict["Email"]?.ToString() : "",
+                            AvatarUrl = dict.ContainsKey("AvatarUrl") ? dict["AvatarUrl"]?.ToString() : "",
                             Role = GetRoleFromFirestore(dict),
-                            JoinedAt = dict.ContainsKey("joinedAt") ? ((Timestamp)dict["joinedAt"]).ToDateTime() : DateTime.UtcNow,
+                            JoinedAt = dict.ContainsKey("JoinedAt") ? ((Timestamp)dict["JoinedAt"]).ToDateTime() : DateTime.UtcNow,
                         };
                         members.Add(member);
                     }
@@ -88,13 +88,13 @@ namespace EatTogether.MAUI.Models
 
         private FamilyRole GetRoleFromFirestore(Dictionary<string, object> dict)
         {
-            if (!dict.ContainsKey("role"))
+            if (!dict.ContainsKey("Role"))
                 return FamilyRole.Member;
 
             try
             {
                 // Пробуем разные варианты десериализации
-                var roleValue = dict["role"];
+                var roleValue = dict["Role"];
 
                 if (roleValue is long longValue)
                     return (FamilyRole)longValue;
@@ -146,7 +146,7 @@ namespace EatTogether.MAUI.Models
                             FamilyId = dict.ContainsKey("FamilyId") ? dict["FamilyId"]?.ToString() : "",
                             UserId = dict.ContainsKey("UserId") ? dict["UserId"]?.ToString() : "",
                             UserDisplayName = dict.ContainsKey("UserDisplayName") ? dict["UserDisplayName"]?.ToString() : "",
-                            Status = dict.ContainsKey("Status") ? (RequestStatus)dict["Status"] : RequestStatus.Pending,
+                            Status = dict.ContainsKey("Status") ? new RequestStatusConverter().FromFirestore(dict["Status"]) : RequestStatus.Pending,
                             CreatedAt = dict.ContainsKey("CreatedAt") ? ((Timestamp)dict["CreatedAt"]).ToDateTime() : DateTime.UtcNow,
                             Message = dict.ContainsKey("Message") ? dict["Message"]?.ToString() : ""
                         };

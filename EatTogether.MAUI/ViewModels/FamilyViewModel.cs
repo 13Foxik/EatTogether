@@ -38,6 +38,27 @@ public partial class FamilyViewModel : ObservableObject
     [ObservableProperty]
     private bool _hasPendingRequests;
 
+    [ObservableProperty]
+    private ObservableCollection<FamilyMember> _familyMembers = new();
+
+    [ObservableProperty]
+    private FamilyMember _currentUserMember;
+
+    [ObservableProperty]
+    private string _membersCount;
+
+    [ObservableProperty]
+    private string _familyName;
+
+    [ObservableProperty]
+    private string _familyDescription;
+
+    [ObservableProperty]
+    private string _familyAvatar;
+
+    [ObservableProperty]
+    private bool _isLoading;
+
     public ObservableCollection<TabItem> Tabs { get; } = new()
     {
         new TabItem { Type = TabType.Activity },
@@ -45,7 +66,7 @@ public partial class FamilyViewModel : ObservableObject
         new TabItem { Type = TabType.Requests }
     };
 
-    public FamilyViewModel(CurrentUserService currentUserService, CreateFamilyViewModel createFamilyViewModel, 
+    public FamilyViewModel(CurrentUserService currentUserService, CreateFamilyViewModel createFamilyViewModel,
         ICurrentFamilyService currentFamilyService, IMembershipService membershipService, IFamilyService familyService)
     {
         CurrentTab = Tabs.FirstOrDefault() ?? Tabs[0];
@@ -56,8 +77,11 @@ public partial class FamilyViewModel : ObservableObject
         _familyService = familyService;
 
         _currentUserService.UserChanged += OnUserChanged;
+        _currentFamilyService.FamilyChanged += OnFamilyChanged;
 
-        // Загружаем запросы при инициализации
+
+        // Загружаем данные при инициализации
+        LoadFamilyData();
         LoadPendingRequests();
     }
 
@@ -70,6 +94,10 @@ public partial class FamilyViewModel : ObservableObject
     {
     }
 
+    private void OnFamilyChanged(object sender, FamilyChangedEventArgs e)
+    {
+        LoadFamilyData();
+    }
     private void OnUserChanged(object sender, UserChangedEventArgs e)
     {
         UpdateUserInfo();
@@ -79,6 +107,121 @@ public partial class FamilyViewModel : ObservableObject
     private void UpdateUserInfo()
     {
         HasFamily = _currentUserService.CurrentUser?.UserFamilies?.Count > 0;
+    }
+
+    private async void LoadFamilyData()
+    {
+        if (IsLoading) return;
+
+        try
+        {
+            IsLoading = true;
+
+            // Очищаем текущие данные
+            FamilyMembers.Clear();
+
+            // Получаем текущую семью пользователя
+            Family? currentFamily = _currentFamilyService?.GetCurrentFamily();
+
+            if (currentFamily != null)
+            {
+                // Устанавливаем основную информацию о семье
+                FamilyName = currentFamily.Name ?? "Моя семья";
+                FamilyDescription = currentFamily.Description ?? "Описание семьи пока не добавлено";
+                //FamilyAvatar = currentFamily.Avatar;
+                MembersCount = $"{currentFamily.CountUsers} учатников";
+
+                // Загружаем участников из списка Members
+                if (currentFamily.Members != null && currentFamily.Members.Any())
+                {
+                    var currentUserId = _currentUserService.CurrentUser?.Uid;
+
+                    foreach (var member in currentFamily.Members)
+                    {
+                        // Устанавливаем флаг текущего пользователя
+                        member.IsCurrentUser = member.UserId == currentUserId;
+
+                        FamilyMembers.Add(member);
+
+                        // Сохраняем информацию о текущем пользователе
+                        if (member.IsCurrentUser)
+                        {
+                            CurrentUserMember = member;
+                        }
+                    }
+
+                    // Обновляем счетчик участников
+                    MembersCount = $"{FamilyMembers.Count} Участников";
+                }
+                else
+                {
+                    // Если нет участников в списке Members, используем Memberships
+                    await LoadMembersFromMemberships(currentFamily);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке данных семьи: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadMembersFromMemberships(Family currentFamily)
+    {
+        if (currentFamily.Memberships != null)
+        {
+            var acceptedMembers = currentFamily.Memberships
+                .Where(m => m.Status == RequestStatus.Accepted)
+                .ToList();
+
+            var currentUserId = _currentUserService.CurrentUser?.Uid;
+
+            foreach (var membership in acceptedMembers)
+            {
+                var member = new FamilyMember
+                {
+                    UserId = membership.UserId,
+                    DisplayName = membership.UserDisplayName ?? "Участник",
+                    Email = "", // Можно получить из сервиса пользователей
+                    AvatarUrl = membership.UserAvatarUrl,
+                    Role = FamilyRole.Member, // По умолчанию
+                    JoinedAt = membership.CreatedAt,
+                    IsCurrentUser = membership.UserId == currentUserId
+                };
+
+                FamilyMembers.Add(member);
+
+                if (member.IsCurrentUser)
+                {
+                    CurrentUserMember = member;
+                }
+            }
+
+            MembersCount = $"{FamilyMembers.Count} Участников";
+        }
+    }
+
+    private string GetInitial(string displayName)
+    {
+        if (string.IsNullOrEmpty(displayName))
+            return "?";
+
+        return displayName.Substring(0, 1).ToUpper();
+    }
+
+    private string GetRoleDisplayName(FamilyRole role)
+    {
+        return role switch
+        {
+            FamilyRole.Owner => "Создатель семьи",
+            FamilyRole.Admin => "Администратор",
+            FamilyRole.Member => "Участник",
+            _ => "Участник"
+        };
     }
 
     [RelayCommand]
@@ -117,7 +260,7 @@ public partial class FamilyViewModel : ObservableObject
         if (parameter is double position)
         {
             ScrollPosition = position;
-            IsScrolledDown = position > 120;
+            IsScrolledDown = position > 50;
         }
     }
 
@@ -147,6 +290,24 @@ public partial class FamilyViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private async Task ViewMemberProfile(FamilyMember member)
+    {
+        if (member == null) return;
+
+        try
+        {
+            // TODO: Реализовать переход к профилю участника
+            await Shell.Current.DisplayAlert("Профиль",
+                $"Профиль участника: {member.DisplayName}\nРоль: {GetRoleDisplayName(member.Role)}", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка",
+                $"Не удалось открыть профиль: {ex.Message}", "OK");
+        }
+    }
+
     // Команды для работы с запросами
     [RelayCommand]
     private async Task AcceptRequest(MembershipRequest request)
@@ -155,18 +316,34 @@ public partial class FamilyViewModel : ObservableObject
 
         try
         {
-            // TODO: Реализовать логику принятия запроса
+            // Создаем FamilyMember из запроса
+            var newMember = new FamilyMember
+            {
+                UserId = request.UserId,
+                DisplayName = request.UserDisplayName,
+                Email = "", // Можно получить из сервиса пользователей
+                AvatarUrl = request.UserAvatarUrl,
+                Role = FamilyRole.Member,
+                JoinedAt = DateTime.UtcNow
+            };
+
             await _familyService.AcceptMember(request);
             await _membershipService.UpdateRequestStatus(request, RequestStatus.Accepted);
 
             // Обновляем статус запроса
             request.Status = RequestStatus.Accepted;
+            request.RespondedAt = DateTime.UtcNow;
+            request.RespondedBy = _currentUserService.CurrentUser?.Uid;
 
             // Удаляем из списка pending запросов
             PendingRequests.Remove(request);
 
+            // Обновляем список участников
+            FamilyMembers.Add(newMember);
+            MembersCount = $"{FamilyMembers.Count} Участников";
+
             // Показываем уведомление об успехе
-            //await Shell.Current.DisplayAlert("Успех", "Запрос принят", "OK");
+            //await Shell.Current.DisplayAlert("Успех", "Участник принят в семью", "OK");
         }
         catch (Exception ex)
         {
@@ -181,11 +358,12 @@ public partial class FamilyViewModel : ObservableObject
 
         try
         {
-            // TODO: Реализовать логику отклонения запроса
-            // await _familyService.RejectMembershipRequest(request.Id);
-
             // Обновляем статус запроса
+            await _membershipService.UpdateRequestStatus(request, RequestStatus.Rejected);
+
             request.Status = RequestStatus.Rejected;
+            request.RespondedAt = DateTime.UtcNow;
+            request.RespondedBy = _currentUserService.CurrentUser?.Uid;
 
             // Удаляем из списка pending запросов
             PendingRequests.Remove(request);
@@ -202,22 +380,29 @@ public partial class FamilyViewModel : ObservableObject
     [RelayCommand]
     private async Task ShareInvitation()
     {
-        try
-        {
-            // TODO: Реализовать логику поделиться приглашением
-            // var invitationLink = await _familyService.GenerateInvitationLink();
-            // await Share.RequestAsync(new ShareTextRequest
-            // {
-            //     Title = "Приглашение в семью",
-            //     Text = $"Присоединяйтесь к моей семье в EatTogether! {invitationLink}"
-            // });
+        //try
+        //{
+        //    var currentFamily = _currentFamilyService?.GetCurrentFamily();
+        //    if (currentFamily != null)
+        //    {
+        //        var invitationLink = await _familyService.GenerateInvitationLink(currentFamily.Id);
 
-            await Shell.Current.DisplayAlert("Поделиться", "Функция поделиться приглашением будет реализована скоро", "OK");
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlert("Ошибка", $"Не удалось поделиться приглашением: {ex.Message}", "OK");
-        }
+        //        await Share.Default.RequestAsync(new ShareTextRequest
+        //        {
+        //            Title = "Приглашение в семью",
+        //            Text = $"Присоединяйтесь к моей семье '{currentFamily.Name}' в EatTogether! {invitationLink}",
+        //            Uri = invitationLink
+        //        });
+        //    }
+        //    else
+        //    {
+        //        await Shell.Current.DisplayAlert("Ошибка", "Не удалось получить информацию о семье", "OK");
+        //    }
+        //}
+        //catch (Exception ex)
+        //{
+        //    await Shell.Current.DisplayAlert("Ошибка", $"Не удалось поделиться приглашением: {ex.Message}", "OK");
+        //}
     }
 
     // Метод для загрузки запросов
@@ -262,6 +447,12 @@ public partial class FamilyViewModel : ObservableObject
         {
             SelectedTabIndex = Tabs.IndexOf(value);
 
+            // При переключении на вкладку участников обновляем список
+            if (value.Type == TabType.Members)
+            {
+                LoadFamilyData();
+            }
+
             // При переключении на вкладку запросов обновляем список
             if (value.Type == TabType.Requests)
             {
@@ -281,9 +472,10 @@ public partial class FamilyViewModel : ObservableObject
         HasPendingRequests = value?.Any() == true;
     }
 
-    // Метод для ручного обновления запросов (можно вызвать извне)
-    public void RefreshRequests()
+    // Метод для ручного обновления данных семьи
+    public void RefreshFamilyData()
     {
+        LoadFamilyData();
         LoadPendingRequests();
     }
 }
