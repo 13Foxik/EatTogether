@@ -8,6 +8,8 @@ using EatTogether.MAUI.Views.Main.FamilyPages;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.FamilyService.Implementation;
 using Microsoft.Extensions.Logging;
+using EatTogether.MAUI.Services.MenuService.Interfaces;
+using EatTogether.MAUI.Services.MenuService.Implementation;
 
 namespace EatTogether.MAUI
 {
@@ -37,6 +39,7 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<IFamilyService, FamilyService>();
             builder.Services.AddSingleton<IUserService, UserSerivce>();
             builder.Services.AddSingleton<IMembershipService, MembershipService>();
+            builder.Services.AddSingleton<ICategoryService, CategoryService>();
 
             //ViewModels
             builder.Services.AddTransient<SignInViewModel>();

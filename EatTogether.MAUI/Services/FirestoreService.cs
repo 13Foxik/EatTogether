@@ -1,10 +1,10 @@
 ﻿using EatTogether.MAUI.Models;
-using User = EatTogether.MAUI.Models.User;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
 using Firebase.Auth;
 using Google.Cloud.Firestore;
 using System.Reflection;
+using User = EatTogether.MAUI.Models.User;
 
 namespace EatTogether.MAUI.Services
 {
@@ -186,6 +186,80 @@ namespace EatTogether.MAUI.Services
                 return null;
             }
         }
+
+        public async Task<List<Category>> GetCategoriesAsync()
+        {
+            await SetupFirestore();
+
+            CollectionReference categoriesRef = _db.Collection("Categories");
+            QuerySnapshot snapshot = await categoriesRef.GetSnapshotAsync();
+
+            List<Category> categories = new List<Category>();
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (document.Exists)
+                {
+                    Category category = document.ConvertTo<Category>();
+                    categories.Add(category);
+                }
+            }
+
+            Console.WriteLine($"Retrieved {categories.Count} categories from Firestore.");
+            return categories;
+        }
+
+        public async Task<List<FamilyCategory>> GetFamilyCategoriesAsync(string documentId)
+        {
+            await SetupFirestore();
+
+            CollectionReference famCategoriesRef = _db.Collection("FamilyCategories");
+            QuerySnapshot snapshot = await famCategoriesRef.GetSnapshotAsync();
+
+            List<FamilyCategory> famCategories = new List<FamilyCategory>();
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (document.Exists)
+                {
+                    FamilyCategory famCategory = document.ConvertTo<FamilyCategory>();
+                    famCategories.Add(famCategory);
+                }
+            }
+
+            Console.WriteLine($"Retrieved {famCategories.Count} categories from Firestore.");
+            return famCategories;
+        }
+
+        public async Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories)
+        {
+            await SetupFirestore();
+
+            CollectionReference familyCategoriesRef = _db.Collection("FamilyCategories");
+
+            foreach (var familyCategory in familyCategories)
+            {
+                if (string.IsNullOrEmpty(familyCategory.FamilyId) || string.IsNullOrEmpty(familyCategory.CategoryId))
+                {
+                    Console.WriteLine("SKIP: FamilyId or CategoryId is empty");
+                    continue;
+                }
+
+                try
+                {
+                    DocumentReference newDocRef = familyCategoriesRef.Document();
+
+                    familyCategory.Id = newDocRef.Id;
+
+                    await newDocRef.SetAsync(familyCategory);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"✗ FAILED: {ex.Message}");
+                }
+            }
+        }
+
 
 
         public async Task<string> GenerateUniqueIdAsync(string collection)

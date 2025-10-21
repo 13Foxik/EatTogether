@@ -11,7 +11,10 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task AddMemberToFamily(string familyId, FamilyMember member);
         Task InsertMembership(MembershipRequest request);
         Task<User> GetUserModel(string documentId);
-        Task<Family> GetFamilyModel(string documentId); 
+        Task<Family> GetFamilyModel(string documentId);
+        Task<List<Category>> GetCategoriesAsync();
+        Task<List<FamilyCategory>> GetFamilyCategoriesAsync(string documentId);
+        Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories);
         Task<string> GenerateUniqueIdAsync(string collection);
     }
 }
