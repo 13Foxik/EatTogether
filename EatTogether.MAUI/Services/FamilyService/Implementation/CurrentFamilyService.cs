@@ -26,11 +26,13 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
         public void SetCurrentFamily(Family? family)
         {
             CurrentFamily = family;
+            Preferences.Set("family_id", family.Id);
         }
 
         public void ClearFamily()
         {
             CurrentFamily = null;
+            Preferences.Remove("family_id");
         }
         protected virtual void OnFamilyChanged(Family? user)
         {

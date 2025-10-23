@@ -13,10 +13,6 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
         {
             _cloudStoreService = cloudStoreService;
         }
-        public async Task<List<Category>> GetCategoriesAsync()
-        {
-            return await _cloudStoreService.GetCategoriesAsync();
-        }
         public async Task SetFamilyCategoriesAsync(string familyId)
         {
             List<Category> categories = await _cloudStoreService.GetCategoriesAsync();

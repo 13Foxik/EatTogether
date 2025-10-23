@@ -23,4 +23,21 @@ public partial class MainPage : TabbedPage
             // Свайп между страницами заблокирован
         }
     }
+    public void SelectTab(int tabIndex)
+    {
+        if (tabIndex >= 0 && tabIndex < Children.Count)
+        {
+            CurrentPage = Children[tabIndex];
+        }
+    }
+
+    // Альтернативный метод по имени страницы
+    public void SelectTab(string pageName)
+    {
+        var page = Children.FirstOrDefault(p => p.Title == pageName);
+        if (page != null)
+        {
+            CurrentPage = page;
+        }
+    }
 }

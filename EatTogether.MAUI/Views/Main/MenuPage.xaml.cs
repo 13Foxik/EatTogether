@@ -13,4 +13,11 @@ public partial class MenuPage : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
     }
+    private async void OnGoToFamilyClicked(object sender, EventArgs e)
+    {
+        if (Application.Current?.MainPage is MainPage mainPage)
+        {
+            mainPage.SelectTab(0); // Предполагая, что вкладка семьи имеет индекс 2
+        }
+    }
 }
