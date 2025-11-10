@@ -229,8 +229,6 @@
                              FontAttributes="Bold"
                              TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                              HorizontalOptions="Start"/>
-
-                        <!-- Описание под "Категории блюд" удалено -->
                     </VerticalStackLayout>
 
                     <!-- КНОПКА НАСТРОЕК В СТИЛЕ ПРЕМИУМ -->
@@ -274,6 +272,7 @@
 
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:Category">
+                            <!-- КЛИКАБЕЛЬНАЯ КАРТОЧКА КАТЕГОРИИ -->
                             <Frame WidthRequest="175"
                                  HeightRequest="220"
                                  Padding="0"
@@ -283,16 +282,13 @@
                                  HasShadow="True"
                                  Margin="0,0,0,24">
 
-                                <Frame.Shadow>
-                                    <Shadow Brush="{AppThemeBinding Light={StaticResource Gray200}, Dark=Black}"
-                                          Offset="0,8"
-                                          Radius="16"
-                                          Opacity="0.15"/>
-                                </Frame.Shadow>
+                                
 
+                                <!-- ОБРАБОТЧИК КЛИКА -->
                                 <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MenuViewModel}}, Path=CategoryTappedCommand}"
-                                                        CommandParameter="{Binding}"/>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MenuViewModel}}, Path=CategoryTappedCommand}"
+                                        CommandParameter="{Binding}"/>
                                 </Frame.GestureRecognizers>
 
                                 <Grid RowDefinitions="140,80"
@@ -304,20 +300,23 @@
                                          CornerRadius="16"
                                          Padding="0"
                                          HorizontalOptions="Fill"
-                                         VerticalOptions="Fill">
+                                         VerticalOptions="Fill"
+                                         InputTransparent="True">
 
                                         <Grid>
                                             <!-- Градиентный оверлей -->
                                             <BoxView BackgroundColor="{StaticResource PrimaryColor}"
                                                    Opacity="0.03"
                                                    HorizontalOptions="Fill"
-                                                   VerticalOptions="Fill"/>
+                                                   VerticalOptions="Fill"
+                                                   InputTransparent="True"/>
 
                                             <!-- Иконка категории в элегантном стиле -->
                                             <VerticalStackLayout Spacing="12"
                                                                HorizontalOptions="Center"
                                                                VerticalOptions="Center"
-                                                               Padding="20">
+                                                               Padding="20"
+                                                               InputTransparent="True">
                                                 <Frame BackgroundColor="{StaticResource PrimaryColor}"
                                                        Opacity="0.1"
                                                        CornerRadius="12"
@@ -379,7 +378,7 @@
                                                CornerRadius="1"
                                                Opacity="0.7"/>
 
-                                        <Label Text="13 рецептов"
+                                        <Label Text="13"
                                              FontSize="12"
                                              TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
                                              HorizontalOptions="Center"/>
@@ -406,7 +405,7 @@
                                  FontSize="12"
                                  TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
                                  HorizontalOptions="Start"/>
-                            <Label Text="156"
+                            <Label Text="15"
                                  FontSize="20"
                                  FontAttributes="Bold"
                                  TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
@@ -425,7 +424,7 @@
                                  FontSize="12"
                                  TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
                                  HorizontalOptions="Start"/>
-                            <Label Text="Основные блюда"
+                            <Label Text="Мясо"
                                  FontSize="14"
                                  FontAttributes="Bold"
                                  TextColor="{StaticResource PrimaryColor}"

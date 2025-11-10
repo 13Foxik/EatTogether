@@ -1,6 +1,7 @@
 ﻿using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
+using EatTogether.MAUI.ViewModels;
 using Firebase.Auth;
 using Google.Cloud.Firestore;
 using System.Reflection;
@@ -209,7 +210,7 @@ namespace EatTogether.MAUI.Services
             return categories;
         }
 
-        public async Task<List<FamilyCategory>> GetFamilyCategoriesAsync(string documentId)
+        public async Task<List<FamilyCategory>> GetFamilyCategoriesAsync(string familyId)
         {
             await SetupFirestore();
 
@@ -223,7 +224,10 @@ namespace EatTogether.MAUI.Services
                 if (document.Exists)
                 {
                     FamilyCategory famCategory = document.ConvertTo<FamilyCategory>();
-                    famCategories.Add(famCategory);
+                    if(famCategory.FamilyId == familyId)
+                    {
+                        famCategories.Add(famCategory);
+                    }
                 }
             }
 
@@ -231,6 +235,41 @@ namespace EatTogether.MAUI.Services
             return famCategories;
         }
 
+        public async Task CreateSubcategoriesAsync(string categoryId, string familyId, string name)
+        {
+            await SetupFirestore();
+            string id = await GenerateUniqueIdAsync("Subcategories");
+
+            Subcategory subcategory = new Subcategory(id, name, familyId, categoryId);
+
+            await _db.Collection("Subcategories").Document(subcategory.Id).SetAsync(subcategory);
+            Console.WriteLine($"Subcategory: {subcategory.Id}- saved to Firestore");
+        }
+
+        public async Task<List<Subcategory>> GetSubcategoriesAsync(string categoryId, string familyId)
+        {
+            await SetupFirestore();
+
+            CollectionReference subcategoriesRef = _db.Collection("Subcategories");
+            QuerySnapshot snapshot = await subcategoriesRef.GetSnapshotAsync();
+
+            List<Subcategory> subcategories = new List<Subcategory>();
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (document.Exists)
+                {
+                    Subcategory subcategory = document.ConvertTo<Subcategory>();
+                    if(subcategory.FamilyId == familyId && subcategory.CategoryId == categoryId)
+                    {
+                        subcategories.Add(subcategory);
+                    }
+                }
+            }
+
+            Console.WriteLine($"Retrieved {subcategories.Count} Subcategories from Firestore.");
+            return subcategories;
+        }
         public async Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories)
         {
             await SetupFirestore();
@@ -260,35 +299,54 @@ namespace EatTogether.MAUI.Services
             }
         }
 
-
-
         public async Task<string> GenerateUniqueIdAsync(string collection)
-    {
-        await SetupFirestore();
-        
-        for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++)
         {
-            string candidateId = GenerateRandomId();
-            
-            // Проверяем существует ли такой ID в коллекции
-            DocumentReference docRef = _db.Collection(collection).Document(candidateId);
-            DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
-            
-            if (!snapshot.Exists)
-            {
-                return candidateId; // Нашли уникальный ID
-            }
-        }
-        
-        throw new InvalidOperationException($"Could not generate unique ID after {MAX_ATTEMPTS} attempts");
-    }
+            await SetupFirestore();
 
-    private string GenerateRandomId()
+            for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++)
+            {
+                string candidateId = GenerateRandomId(20);
+
+                // Проверяем существует ли такой ID в коллекции
+                DocumentReference docRef = _db.Collection(collection).Document(candidateId);
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+
+                if (!snapshot.Exists)
+                {
+                    return candidateId; // Нашли уникальный ID
+                }
+            }
+
+            throw new InvalidOperationException($"Could not generate unique ID after {MAX_ATTEMPTS} attempts");
+        }
+
+        public async Task<string> GenerateUniqueFamilyIdAsync(string collection)
+        {
+            await SetupFirestore();
+        
+            for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++)
+            {
+                string candidateId = GenerateRandomId(6);
+            
+                // Проверяем существует ли такой ID в коллекции
+                DocumentReference docRef = _db.Collection(collection).Document(candidateId);
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+            
+                if (!snapshot.Exists)
+                {
+                    return candidateId; // Нашли уникальный ID
+                }
+            }
+        
+            throw new InvalidOperationException($"Could not generate unique ID after {MAX_ATTEMPTS} attempts");
+        }
+
+    private string GenerateRandomId(int lenght)
     {
         var random = new Random();
-        var result = new char[ID_LENGTH];
+        var result = new char[lenght];
         
-        for (int i = 0; i < ID_LENGTH; i++)
+        for (int i = 0; i < lenght; i++)
         {
             result[i] = CHARACTERS[random.Next(CHARACTERS.Length)];
         }

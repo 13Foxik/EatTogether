@@ -132,6 +132,11 @@ namespace EatTogether.MAUI.ViewModels
                 IsBusy = false;
             }
         }
+        [RelayCommand]
+        private async Task Settings()
+        {
+            Console.WriteLine("pizda");
+        }
 
         // Метод для обновления состояния при возвращении на страницу
         public void OnAppearing()

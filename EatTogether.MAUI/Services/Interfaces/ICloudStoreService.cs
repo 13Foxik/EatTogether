@@ -14,7 +14,9 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task<Family> GetFamilyModel(string documentId);
         Task<List<Category>> GetCategoriesAsync();
         Task<List<FamilyCategory>> GetFamilyCategoriesAsync(string documentId);
+        Task CreateSubcategoriesAsync(string categoryId, string familyId, string name);
+        Task<List<Subcategory>> GetSubcategoriesAsync(string categoryId, string familyId);
         Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories);
-        Task<string> GenerateUniqueIdAsync(string collection);
+        Task<string> GenerateUniqueFamilyIdAsync(string collection);
     }
 }

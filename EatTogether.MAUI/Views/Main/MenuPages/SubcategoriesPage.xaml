@@ -1,12 +1,537 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:EatTogether.MAUI.ViewModels"
+             xmlns:models="clr-namespace:EatTogether.MAUI.Models"
              x:Class="EatTogether.MAUI.Views.Main.MenuPages.SubcategoriesPage"
-             Title="SubcategoriesPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             x:DataType="vm:SubcategoriesViewModel"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <!-- ШАПКА С НАЗВАНИЕМ КАТЕГОРИИ -->
+        <Border Grid.Row="0"
+                BackgroundColor="{StaticResource PrimaryColor}"
+                StrokeShape="RoundRectangle 0,0,25,25"
+                Padding="0"
+                HeightRequest="140"
+                StrokeThickness="0"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="Start">
+
+            <Border.Shadow>
+                <Shadow Brush="{StaticResource PrimaryColor}"
+                        Offset="0,10"
+                        Radius="20"
+                        Opacity="0.3"/>
+            </Border.Shadow>
+
+            <Grid>
+                <!-- Декоративный узор -->
+                <BoxView BackgroundColor="{StaticResource PrimaryDarkColor}"
+                         Opacity="0.2"
+                         HorizontalOptions="Start"
+                         VerticalOptions="Start"
+                         WidthRequest="100"
+                         HeightRequest="100"
+                         CornerRadius="50"
+                         TranslationX="-50"
+                         TranslationY="-50"/>
+
+                <BoxView BackgroundColor="{StaticResource PrimaryDarkColor}"
+                         Opacity="0.1"
+                         HorizontalOptions="End"
+                         VerticalOptions="End"
+                         WidthRequest="80"
+                         HeightRequest="80"
+                         CornerRadius="40"
+                         TranslationX="40"
+                         TranslationY="40"/>
+
+                <!-- Контент шапки -->
+                <Grid ColumnDefinitions="Auto, *, Auto" Padding="20,0">
+
+                    <!-- Кнопка назад -->
+                    <Frame Grid.Column="0"
+                           BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
+                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                           CornerRadius="10"
+                           Padding="0"
+                           WidthRequest="36"
+                           HeightRequest="36"
+                           HorizontalOptions="Start"
+                           VerticalOptions="Center"
+                           HasShadow="True">
+
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                        </Frame.GestureRecognizers>
+
+                        <Label Text="←"
+                             FontSize="16"
+                             TextColor="{StaticResource PrimaryColor}"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"/>
+                    </Frame>
+
+                    <!-- Название категории -->
+                    <VerticalStackLayout Grid.Column="1"
+                                       Spacing="6"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center">
+
+                        <Label Text="{Binding CategoryName}"
+                             FontSize="22"
+                             FontAttributes="Bold"
+                             TextColor="White"
+                             HorizontalOptions="Center"
+                             HorizontalTextAlignment="Center"/>
+
+                        <Label Text="Подкатегории"
+                             FontSize="14"
+                             TextColor="White"
+                             Opacity="0.9"
+                             HorizontalOptions="Center"
+                             HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+
+                    <!-- Кнопка настроек -->
+                    <Frame Grid.Column="2"
+                           BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
+                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                           CornerRadius="10"
+                           Padding="0"
+                           WidthRequest="36"
+                           HeightRequest="36"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           HasShadow="True"
+                           Opacity="0.8">
+
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SettingsCommand}"/>
+                        </Frame.GestureRecognizers>
+
+                        <Label Text="⚙️"
+                             FontSize="14"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"/>
+                    </Frame>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="24">
+
+                <!-- Индикатор загрузки -->
+                <ActivityIndicator IsVisible="{Binding IsBusy}"
+                                 IsRunning="{Binding IsBusy}"
+                                 Color="{StaticResource PrimaryColor}"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 HeightRequest="50"/>
+
+                <!-- Сообщение "НЕТ ПОДКАТЕГОРИЙ" -->
+                <Frame IsVisible="{Binding ShowNoSubcategoriesMessage}"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                     CornerRadius="16"
+                     Padding="40"
+                     Margin="0,20"
+                     HorizontalOptions="FillAndExpand">
+
+                    <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+                        <Label Text="📂"
+                             FontSize="48"
+                             HorizontalOptions="Center"/>
+
+                        <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                            <Label Text="Подкатегории пока отсутствуют"
+                                 FontSize="18"
+                                 FontAttributes="Bold"
+                                 TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                 HorizontalOptions="Center"/>
+
+                            <Label Text="Здесь будут отображаться подкатегории для выбранной категории"
+                                 FontSize="14"
+                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                 HorizontalOptions="Center"
+                                 HorizontalTextAlignment="Center"/>
+                        </VerticalStackLayout>
+
+                        <Button Text="Создать первую подкатегорию"
+                              Command="{Binding CreateSubcategoryCommand}"
+                              BackgroundColor="{StaticResource PrimaryColor}"
+                              TextColor="White"
+                              CornerRadius="8"
+                              Padding="32,14"
+                              FontSize="14"
+                              FontAttributes="Bold"
+                              HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- ЗАГОЛОВОК ПОДКАТЕГОРИЙ -->
+                <Grid IsVisible="{Binding ShowSubcategoriesContent}"
+                      HorizontalOptions="FillAndExpand"
+                      Margin="0,0,0,16">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Заголовок с декоративными элементами -->
+                    <VerticalStackLayout Grid.Column="0" Spacing="12" HorizontalOptions="Start">
+                        <BoxView HeightRequest="1"
+                               WidthRequest="80"
+                               BackgroundColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                               HorizontalOptions="Start"/>
+
+                        <Label Text="Подкатегории"
+                             FontSize="24"
+                             FontAttributes="Bold"
+                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                             HorizontalOptions="Start"/>
+
+                        <Label Text="{Binding SubcategoriesCount, StringFormat='{0} подкатегорий'}"
+                             FontSize="14"
+                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                             HorizontalOptions="Start"/>
+                    </VerticalStackLayout>
+
+                    <!-- КНОПКА ДОБАВЛЕНИЯ -->
+                    <Frame Grid.Column="1"
+                           BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
+                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                           CornerRadius="12"
+                           Padding="0"
+                           WidthRequest="44"
+                           HeightRequest="44"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center"
+                           HasShadow="True">
+
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CreateSubcategoryCommand}"/>
+                        </Frame.GestureRecognizers>
+
+                        <Grid>
+                            <Label Text="➕"
+                                 FontSize="16"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+                </Grid>
+
+                <!-- СЕТКА ПОДКАТЕГОРИЙ -->
+                <FlexLayout BindableLayout.ItemsSource="{Binding Subcategories}"
+                          IsVisible="{Binding ShowSubcategoriesContent}"
+                          Direction="Row"
+                          Wrap="Wrap"
+                          JustifyContent="SpaceBetween"
+                          AlignItems="Start">
+
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:Subcategory">
+
+                            <!-- КАРТОЧКА ПОДКАТЕГОРИИ -->
+                            <Frame WidthRequest="165"
+                                 HeightRequest="190"
+                                 Padding="0"
+                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                                 BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                 CornerRadius="16"
+                                 HasShadow="True"
+                                 Margin="0,0,0,20">
+
+                                <Frame.Shadow>
+                                    <Shadow Brush="{AppThemeBinding Light={StaticResource Gray200}, Dark=Black}"
+                                          Offset="0,6"
+                                          Radius="12"
+                                          Opacity="0.15"/>
+                                </Frame.Shadow>
+
+                                <!-- ОБРАБОТЧИК КЛИКА -->
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=SubcategoryTappedCommand}"
+                                        CommandParameter="{Binding}"/>
+                                </Frame.GestureRecognizers>
+
+                                <Grid RowDefinitions="120,70"
+                                    RowSpacing="0">
+
+                                    <!-- Верхняя часть с иконкой -->
+                                    <Frame Grid.Row="0"
+                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                         CornerRadius="16"
+                                         Padding="0"
+                                         HorizontalOptions="Fill"
+                                         VerticalOptions="Fill"
+                                         InputTransparent="True">
+
+                                        <Grid>
+                                            <!-- Градиентный оверлей -->
+                                            <BoxView BackgroundColor="{StaticResource PrimaryColor}"
+                                                   Opacity="0.05"
+                                                   HorizontalOptions="Fill"
+                                                   VerticalOptions="Fill"
+                                                   InputTransparent="True"/>
+
+                                            <!-- Иконка подкатегории -->
+                                            <VerticalStackLayout Spacing="8"
+                                                               HorizontalOptions="Center"
+                                                               VerticalOptions="Center"
+                                                               Padding="16"
+                                                               InputTransparent="True">
+                                                <Frame BackgroundColor="{StaticResource PrimaryColor}"
+                                                       Opacity="0.1"
+                                                       CornerRadius="10"
+                                                       Padding="10"
+                                                       WidthRequest="44"
+                                                       HeightRequest="44"
+                                                       HorizontalOptions="Center">
+                                                    <Label Text="Binding Icon"
+                                                         FontSize="18"
+                                                         HorizontalOptions="Center"
+                                                         VerticalOptions="Center"
+                                                         TextColor="{StaticResource PrimaryColor}"/>
+                                                </Frame>
+                                            </VerticalStackLayout>
+
+                                            <!-- Бейдж количества рецептов -->
+                                            <Frame BackgroundColor="{StaticResource PrimaryColor}"
+                                                 CornerRadius="8"
+                                                 Padding="6,3"
+                                                 HorizontalOptions="End"
+                                                 VerticalOptions="Start"
+                                                 Margin="6"
+                                                 HeightRequest="20"
+                                                 HasShadow="True">
+                                                <Frame.Shadow>
+                                                    <Shadow Brush="{StaticResource PrimaryColor}"
+                                                          Offset="0,2"
+                                                          Radius="3"
+                                                          Opacity="0.3"/>
+                                                </Frame.Shadow>
+                                                <Label Text="Binding RecipeCount"
+                                                     FontSize="10"
+                                                     TextColor="White"
+                                                     FontAttributes="Bold"/>
+                                            </Frame>
+                                        </Grid>
+                                    </Frame>
+
+                                    <!-- Нижняя часть с названием -->
+                                    <VerticalStackLayout Grid.Row="1"
+                                                       Padding="12,10"
+                                                       Spacing="6"
+                                                       VerticalOptions="Center">
+
+                                        <Label Text="{Binding Name}"
+                                             FontSize="15"
+                                             FontAttributes="Bold"
+                                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                             HorizontalOptions="Center"
+                                             HorizontalTextAlignment="Center"
+                                             MaxLines="2"
+                                             LineBreakMode="TailTruncation"/>
+
+                                        <!-- Декоративный разделитель -->
+                                        <BoxView HeightRequest="2"
+                                               WidthRequest="28"
+                                               BackgroundColor="{StaticResource PrimaryColor}"
+                                               HorizontalOptions="Center"
+                                               CornerRadius="1"
+                                               Opacity="0.7"/>
+
+                                        <Label Text="13"
+                                             FontSize="11"
+                                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                             HorizontalOptions="Center"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+
+                <!-- СТАТИСТИКА КАТЕГОРИИ -->
+                <Grid IsVisible="{Binding ShowSubcategoriesContent}"
+                      Margin="0,10"
+                      ColumnDefinitions="*,*"
+                      ColumnSpacing="12">
+
+                    <!-- Общее количество рецептов в категории -->
+                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                           CornerRadius="12"
+                           Padding="14"
+                           HasShadow="False">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Всего рецептов"
+                                 FontSize="11"
+                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                 HorizontalOptions="Start"/>
+                            <Label Text="{Binding TotalRecipesInCategory}"
+                                 FontSize="18"
+                                 FontAttributes="Bold"
+                                 TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                 HorizontalOptions="Start"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Популярная подкатегория -->
+                    <Frame Grid.Column="1"
+                           BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                           CornerRadius="12"
+                           Padding="14"
+                           HasShadow="False">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Самая популярная"
+                                 FontSize="11"
+                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                 HorizontalOptions="Start"/>
+                            <Label Text="{Binding MostPopularSubcategory}"
+                                 FontSize="13"
+                                 FontAttributes="Bold"
+                                 TextColor="{StaticResource PrimaryColor}"
+                                 HorizontalOptions="Start"
+                                 MaxLines="1"
+                                 LineBreakMode="TailTruncation"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ДИАЛОГОВОЕ ОКНО СОЗДАНИЯ ПОДКАТЕГОРИИ -->
+        <Border IsVisible="{Binding IsCreateDialogVisible}"
+                Grid.RowSpan="2"
+                BackgroundColor="#80000000"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                Padding="20">
+
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelCreateSubcategoryCommand}"/>
+            </Border.GestureRecognizers>
+
+            <Frame HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   WidthRequest="320"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray900}}"
+                   BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                   CornerRadius="20"
+                   Padding="0"
+                   HasShadow="True">
+
+                <Frame.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="0,10"
+                            Radius="20"
+                            Opacity="0.2"/>
+                </Frame.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Заголовок диалога -->
+                    <Border BackgroundColor="{StaticResource PrimaryColor}"
+                            StrokeShape="RoundRectangle 20,20,0,0"
+                            HeightRequest="60"
+                            Padding="20,0"
+                            HorizontalOptions="Fill">
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0"
+                                   Text="Новая подкатегория"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+
+                            <!-- Кнопка закрытия -->
+                            <Frame Grid.Column="1"
+                                   BackgroundColor="Transparent"
+                                   BorderColor="Transparent"
+                                   Padding="0"
+                                   WidthRequest="32"
+                                   HeightRequest="32"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center">
+
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CancelCreateSubcategoryCommand}"/>
+                                </Frame.GestureRecognizers>
+
+                                <Label Text="✕"
+                                       FontSize="16"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Frame>
+                        </Grid>
+                    </Border>
+
+                    <!-- Содержимое диалога -->
+                    <VerticalStackLayout Spacing="20" Padding="24">
+
+                        <!-- Поле ввода названия -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Название подкатегории"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"/>
+
+                            <Entry Text="{Binding NewSubcategoryName}"
+                                   Placeholder="Введите название..."
+                                   FontSize="16"
+                                   BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="48"/>
+
+                            <Label Text="Максимум 50 символов"
+                                   FontSize="11"
+                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                   HorizontalOptions="End"/>
+                        </VerticalStackLayout>
+
+                        <!-- Кнопки действий -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                            <!-- Кнопка отмены -->
+                            <Button Grid.Column="0"
+                                    Text="Отмена"
+                                    Command="{Binding CancelCreateSubcategoryCommand}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                    CornerRadius="10"
+                                    HeightRequest="44"
+                                    FontSize="14"
+                                    FontAttributes="Bold"/>
+
+                            <!-- Кнопка создания -->
+                            <Button Grid.Column="1"
+                                    Text="Создать"
+                                    Command="{Binding ConfirmCreateSubcategoryCommand}"
+                                    BackgroundColor="{StaticResource PrimaryColor}"
+                                    TextColor="White"
+                                    CornerRadius="10"
+                                    HeightRequest="44"
+                                    FontSize="14"
+                                    FontAttributes="Bold"/>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </Border>
+
+    </Grid>
 </ContentPage>

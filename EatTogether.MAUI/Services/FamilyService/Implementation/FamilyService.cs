@@ -19,7 +19,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
 
         public async Task CreateFamily(Family family)
         {
-            family.Id = await _cloudStoreService.GenerateUniqueIdAsync("Families");
+            family.Id = await _cloudStoreService.GenerateUniqueFamilyIdAsync("Families");
             var member = new FamilyMember
             {
                 UserId = _currentUserService.GetCurrentUser().Uid,
