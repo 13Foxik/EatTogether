@@ -17,6 +17,12 @@ namespace EatTogether.MAUI.Models
         public string SubCategoryId { get; set; }
 
         public Dish() { }
+        public Dish(string name, string familyId, string subcategoryId) 
+        {
+            Name = name;
+            FamilyId = familyId;
+            SubCategoryId = subcategoryId;
+        }
 
     }
 }

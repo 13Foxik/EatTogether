@@ -5,6 +5,7 @@ using EatTogether.MAUI.ViewModels;
 using Firebase.Auth;
 using Google.Cloud.Firestore;
 using System.Reflection;
+using System.Xml.Linq;
 using User = EatTogether.MAUI.Models.User;
 
 namespace EatTogether.MAUI.Services
@@ -270,6 +271,39 @@ namespace EatTogether.MAUI.Services
             Console.WriteLine($"Retrieved {subcategories.Count} Subcategories from Firestore.");
             return subcategories;
         }
+        public async Task AddDishToDbAsync(Dish dish)
+        {
+            await SetupFirestore();
+            string id = await GenerateUniqueIdAsync("Dishes");
+
+            dish.Id = id;
+
+            await _db.Collection("Dishes").Document(dish.Id).SetAsync(dish);
+            Console.WriteLine($"Dish: {dish.Name}- saved to Firestore");
+        }
+
+        public async Task<List<Dish>> GetDishListFromDbAsync(string subcategoryId)
+        {
+            await SetupFirestore();
+
+            CollectionReference DishesRef = _db.Collection("Dishes");
+            QuerySnapshot snapshot = await DishesRef.GetSnapshotAsync();
+
+            List<Dish> Dishes = new List<Dish>();
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (document.Exists)
+                {
+                    Dish Dish = document.ConvertTo<Dish>();
+                    Dishes.Add(Dish);
+                }
+            }
+
+            Console.WriteLine($"Retrieved {Dishes.Count} Dishes from Firestore.");
+            return Dishes;
+        }
+
         public async Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories)
         {
             await SetupFirestore();

@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
+using EatTogether.MAUI.Views.Main;
+using EatTogether.MAUI.Views.Main.MenuPages;
 using System.Collections.ObjectModel;
 
 namespace EatTogether.MAUI.ViewModels
@@ -109,7 +111,14 @@ namespace EatTogether.MAUI.ViewModels
         [RelayCommand]
         private async Task GoBack()
         {
-            await Shell.Current.Navigation.PopAsync();
+            if (Application.Current?.MainPage is MainPage mainPage)
+            {
+                var currentNavigation = mainPage.CurrentPage as NavigationPage;
+                if (currentNavigation != null)
+                {
+                    await currentNavigation.Navigation.PushAsync(new MenuPage());
+                }
+            }
         }
 
         [RelayCommand]
