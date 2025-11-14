@@ -42,6 +42,7 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<IMembershipService, MembershipService>();
             builder.Services.AddSingleton<ICategoryService, CategoryService>();
             builder.Services.AddSingleton<ISubcategoryService, SubcategoryService>();
+            builder.Services.AddSingleton<IDishService, DishService>();
 
             //ViewModels
             builder.Services.AddTransient<SignInViewModel>();

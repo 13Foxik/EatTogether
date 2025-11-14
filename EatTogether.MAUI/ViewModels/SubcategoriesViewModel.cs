@@ -11,6 +11,7 @@ namespace EatTogether.MAUI.ViewModels
     public partial class SubcategoriesViewModel : ObservableObject
     {
         private readonly ISubcategoryService _subcategoryService;
+        private readonly IDishService _dishService;
         private readonly string _categoryId;
 
         [ObservableProperty]
@@ -23,37 +24,30 @@ namespace EatTogether.MAUI.ViewModels
         private bool isBusy;
 
         [ObservableProperty]
-        private int totalRecipesInCategory;
-
-        [ObservableProperty]
-        private string mostPopularSubcategory = "Загрузка...";
-
-        // Свойства для диалогового окна
-        [ObservableProperty]
         private bool isCreateDialogVisible;
 
         [ObservableProperty]
         private string newSubcategoryName;
 
-        // Вычисляемые свойства для управления видимостью
         public bool HasSubcategories => Subcategories?.Count > 0;
         public bool ShowNoSubcategoriesMessage => !IsBusy && !HasSubcategories;
         public bool ShowSubcategoriesContent => !IsBusy && HasSubcategories;
         public string SubcategoriesCount => HasSubcategories ? $"{Subcategories.Count}" : "0";
 
-        public SubcategoriesViewModel(string categoryId, string categoryName, ISubcategoryService subcategoryService)
+        public SubcategoriesViewModel(string categoryId, string categoryName, ISubcategoryService subcategoryService, IDishService dishService)
         {
             _categoryId = categoryId;
             _subcategoryService = subcategoryService;
+            _dishService = dishService;
             CategoryName = categoryName;
 
-            // Загружаем подкатегории при создании ViewModel
             LoadSubcategoriesAsync();
         }
 
-        // Конструктор для дизайнера
         public SubcategoriesViewModel(string categoryId, string categoryName)
-            : this(categoryId, categoryName, Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>())
+            : this(categoryId, categoryName,
+                  Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
+                  Application.Current.Handler.MauiContext.Services.GetService<IDishService>())
         {
         }
 
@@ -67,23 +61,23 @@ namespace EatTogether.MAUI.ViewModels
                 IsBusy = true;
 
                 var familyId = Preferences.Get("family_id", string.Empty);
-
-                // Загружаем подкатегории из сервиса
                 var subcategories = await _subcategoryService.GetSubcategoriesByCategoryAsync(_categoryId, familyId);
 
                 Subcategories.Clear();
                 foreach (var subcategory in subcategories)
                 {
+                    var dishes = await _dishService.GetDishListAsync(subcategory.Id);
+                    subcategory.Dishes = dishes;
+                    subcategory.IsExpanded = false;
+                    subcategory.IsAddingDish = false;
+                    subcategory.NewDishName = string.Empty;
+
                     Subcategories.Add(subcategory);
                 }
-
-                // Обновляем статистику
-                UpdateStatistics();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при загрузке подкатегорий: {ex}");
-                // Можно показать сообщение об ошибке
                 await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось загрузить подкатегории", "OK");
             }
             finally
@@ -94,18 +88,122 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         [RelayCommand]
-        private async Task SubcategoryTapped(Subcategory subcategory)
+        private void ToggleSubcategory(Subcategory subcategory)
         {
             if (subcategory == null) return;
 
-            // Здесь будет переход на страницу рецептов подкатегории
-            await Application.Current.MainPage.DisplayAlert(
-                "Подкатегория",
-                $"Выбрана: {subcategory.Name}\nID: {subcategory.Id}",
-                "OK");
+            Console.WriteLine($"ToggleSubcategory called for: {subcategory.Name}");
+            Console.WriteLine($"Current IsExpanded: {subcategory.IsExpanded}");
 
-            // Позже замените на:
-            // await Shell.Current.GoToAsync($"{nameof(RecipesPage)}?SubcategoryId={subcategory.Id}&SubcategoryName={subcategory.Name}");
+            // Переключаем состояние раскрытия
+            subcategory.IsExpanded = !subcategory.IsExpanded;
+
+            Console.WriteLine($"New IsExpanded: {subcategory.IsExpanded}");
+
+            // Обновляем только измененную подкатегорию
+            var index = Subcategories.IndexOf(subcategory);
+            if (index != -1)
+            {
+                // Создаем новый объект для принудительного обновления
+                var updatedSubcategory = new Subcategory
+                {
+                    Id = subcategory.Id,
+                    Name = subcategory.Name,
+                    FamilyId = subcategory.FamilyId,
+                    CategoryId = subcategory.CategoryId,
+                    SortOrder = subcategory.SortOrder,
+                    Dishes = subcategory.Dishes,
+                    IsExpanded = subcategory.IsExpanded,
+                    IsAddingDish = subcategory.IsAddingDish,
+                    NewDishName = subcategory.NewDishName
+                };
+
+                Subcategories[index] = updatedSubcategory;
+                Console.WriteLine($"Subcategory updated in collection");
+            }
+            else
+            {
+                Console.WriteLine($"Subcategory not found in collection");
+            }
+        }
+
+        [RelayCommand]
+        private void StartAddingDish(Subcategory subcategory)
+        {
+            if (subcategory == null) return;
+
+            // Сбрасываем режим добавления у всех подкатегорий
+            foreach (var item in Subcategories)
+            {
+                item.IsAddingDish = false;
+                item.NewDishName = string.Empty;
+            }
+
+            // Включаем режим добавления для выбранной подкатегории
+            subcategory.IsAddingDish = true;
+            subcategory.NewDishName = string.Empty;
+
+            var index = Subcategories.IndexOf(subcategory);
+            if (index != -1)
+            {
+                Subcategories[index] = subcategory;
+            }
+        }
+
+        [RelayCommand]
+        private async Task AddDish(Subcategory subcategory)
+        {
+            if (subcategory == null || string.IsNullOrWhiteSpace(subcategory.NewDishName))
+            {
+                return;
+            }
+
+            try
+            {
+                var dishName = subcategory.NewDishName.Trim();
+
+                // Создаем блюдо через сервис
+                await _dishService.CreateDishAsync(
+                    dishName,
+                    Preferences.Get("family_id", string.Empty),
+                    subcategory.Id);
+
+                // Выключаем режим добавления
+                subcategory.IsAddingDish = false;
+                subcategory.NewDishName = string.Empty;
+
+                // Обновляем список блюд для этой подкатегории
+                var dishes = await _dishService.GetDishListAsync(subcategory.Id);
+                subcategory.Dishes = dishes;
+
+                var index = Subcategories.IndexOf(subcategory);
+                if (index != -1)
+                {
+                    Subcategories[index] = subcategory;
+                }
+
+                await Application.Current.MainPage.DisplayAlert("Успех", $"Блюдо \"{dishName}\" добавлено", "OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при добавлении блюда: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось добавить блюдо", "OK");
+            }
+        }
+
+        [RelayCommand]
+        private void CancelAddingDish(Subcategory subcategory)
+        {
+            if (subcategory == null) return;
+
+            subcategory.IsAddingDish = false;
+            subcategory.NewDishName = string.Empty;
+
+            var index = Subcategories.IndexOf(subcategory);
+            if (index != -1)
+            {
+                Subcategories[index] = subcategory;
+            }
         }
 
         [RelayCommand]
@@ -124,7 +222,6 @@ namespace EatTogether.MAUI.ViewModels
         [RelayCommand]
         private async Task CreateSubcategory()
         {
-            // Открываем диалоговое окно
             IsCreateDialogVisible = true;
             NewSubcategoryName = string.Empty;
         }
@@ -142,19 +239,15 @@ namespace EatTogether.MAUI.ViewModels
             {
                 IsBusy = true;
 
-                // Создаем подкатегорию через сервис
                 await _subcategoryService.CreateSubcategoryAsync(
                     _categoryId,
                     Preferences.Get("family_id", string.Empty),
                     NewSubcategoryName.Trim());
 
-                // Закрываем диалоговое окно
                 IsCreateDialogVisible = false;
                 NewSubcategoryName = string.Empty;
 
-                // Обновляем список подкатегорий
                 await LoadSubcategoriesAsync();
-
                 await Application.Current.MainPage.DisplayAlert("Успех", "Подкатегория создана", "OK");
             }
             catch (Exception ex)
@@ -171,7 +264,6 @@ namespace EatTogether.MAUI.ViewModels
         [RelayCommand]
         private void CancelCreateSubcategory()
         {
-            // Закрываем диалоговое окно без создания
             IsCreateDialogVisible = false;
             NewSubcategoryName = string.Empty;
         }
@@ -179,21 +271,10 @@ namespace EatTogether.MAUI.ViewModels
         [RelayCommand]
         private async Task Settings()
         {
-            // Настройки категории
             await Application.Current.MainPage.DisplayAlert(
                 "Настройки",
                 $"Настройки категории: {CategoryName}",
                 "OK");
-        }
-
-        private void UpdateStatistics()
-        {
-            //// Обновляем общее количество рецептов
-            //TotalRecipesInCategory = Subcategories.Sum(s => s.RecipeCount);
-
-            //// Находим самую популярную подкатегорию
-            //var mostPopular = Subcategories.OrderByDescending(s => s.RecipeCount).FirstOrDefault();
-            //MostPopularSubcategory = mostPopular?.Name ?? "Нет данных";
         }
 
         private void UpdateComputedProperties()
@@ -204,11 +285,9 @@ namespace EatTogether.MAUI.ViewModels
             OnPropertyChanged(nameof(SubcategoriesCount));
         }
 
-        // Обновляем вычисляемые свойства при изменении коллекции
         partial void OnSubcategoriesChanged(ObservableCollection<Subcategory> value)
         {
             UpdateComputedProperties();
-            UpdateStatistics();
         }
 
         partial void OnIsBusyChanged(bool value)

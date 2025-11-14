@@ -1,5 +1,4 @@
 ﻿using Google.Cloud.Firestore;
-
 namespace EatTogether.MAUI.Models
 {
     [FirestoreData]
@@ -10,11 +9,19 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string Name { get; set; }
         [FirestoreProperty]
-        public string FamilyId {  get; set; }
+        public string FamilyId { get; set; }
         [FirestoreProperty]
         public string CategoryId { get; set; }
         [FirestoreProperty]
         public int SortOrder { get; set; }
+
+        public List<Dish> Dishes { get; set; } = new List<Dish>();
+        public bool IsExpanded { get; set; }
+
+        // Добавляем свойство для нового блюда
+        public string NewDishName { get; set; }
+        public bool IsAddingDish { get; set; }
+
         public Subcategory() { }
         public Subcategory(string id, string name, string familyId, string categoryId)
         {
@@ -22,7 +29,6 @@ namespace EatTogether.MAUI.Models
             Name = name;
             FamilyId = familyId;
             CategoryId = categoryId;
-            //SortOrder = sortOrder;
         }
     }
 }
