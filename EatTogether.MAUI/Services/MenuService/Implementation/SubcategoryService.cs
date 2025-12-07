@@ -19,8 +19,18 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
 
         public async Task<List<Subcategory>> GetSubcategoriesByCategoryAsync(string categoryId, string familyId)
         {
-            var subcategories = await _cloudStoreService.GetSubcategoriesAsync(categoryId,familyId);
+            var subcategories = await _cloudStoreService.GetSubcategoriesAsync(categoryId, familyId);
             return subcategories;
+        }
+
+        public async Task DeleteSubcategoryAsync(string subcategoryId)
+        {
+            await _cloudStoreService.DeleteSubcategoryFromDBAsync(subcategoryId);
+        }
+
+        public async Task EditSubcategoryAsync(Subcategory subcategory)
+        {
+            await _cloudStoreService.EditSubcategoryFromDBAsync(subcategory);
         }
     }
 }

@@ -6,5 +6,7 @@ namespace EatTogether.MAUI.Services.MenuService.Interfaces
     {
         Task CreateDishAsync(string name, string familyId, string subcategoryId);
         Task<List<Dish>> GetDishListAsync(string subcategoryId);
+        Task DeleteDishAsync(string Id);
+        Task EditDishAsync(Dish dish);
     }
 }

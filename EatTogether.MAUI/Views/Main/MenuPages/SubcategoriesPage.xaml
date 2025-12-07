@@ -17,6 +17,9 @@
             <!-- Конвертер для проверки количества -->
             <helpers:IntToBoolConverter x:Key="IntToBoolConverter"/>
             <helpers:IntToInverseBoolConverter x:Key="IntToInverseBoolConverter"/>
+
+            <!-- Конвертер для инвертирования bool -->
+            <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -214,29 +217,55 @@
                              HorizontalOptions="Start"/>
                     </VerticalStackLayout>
 
-                    <!-- КНОПКА ДОБАВЛЕНИЯ -->
-                    <Frame Grid.Column="1"
-                           BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
-                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
-                           CornerRadius="12"
-                           Padding="0"
-                           WidthRequest="44"
-                           HeightRequest="44"
-                           HorizontalOptions="End"
-                           VerticalOptions="Center"
-                           HasShadow="True">
+                    <!-- КНОПКИ ДОБАВЛЕНИЯ -->
+                    <HorizontalStackLayout Grid.Column="1" Spacing="8" HorizontalOptions="End" VerticalOptions="Center">
 
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding CreateSubcategoryCommand}"/>
-                        </Frame.GestureRecognizers>
+                        <!-- Кнопка добавления блюда -->
+                        <Frame BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
+                               BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                               CornerRadius="12"
+                               Padding="0"
+                               WidthRequest="44"
+                               HeightRequest="44"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center"
+                               HasShadow="True">
 
-                        <Grid>
-                            <Label Text="➕"
-                                 FontSize="16"
-                                 HorizontalOptions="Center"
-                                 VerticalOptions="Center"/>
-                        </Grid>
-                    </Frame>
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AddDishCommand}"/>
+                            </Frame.GestureRecognizers>
+
+                            <Grid>
+                                <Label Text="🍽️"
+                                     FontSize="16"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center"/>
+                            </Grid>
+                        </Frame>
+
+                        <!-- Кнопка добавления подкатегории -->
+                        <Frame BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
+                               BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                               CornerRadius="12"
+                               Padding="0"
+                               WidthRequest="44"
+                               HeightRequest="44"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center"
+                               HasShadow="True">
+
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CreateSubcategoryCommand}"/>
+                            </Frame.GestureRecognizers>
+
+                            <Grid>
+                                <Label Text="➕"
+                                     FontSize="16"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center"/>
+                            </Grid>
+                        </Frame>
+                    </HorizontalStackLayout>
                 </Grid>
 
                 <!-- АККОРДЕОН ПОДКАТЕГОРИЙ -->
@@ -265,7 +294,7 @@
 
                                     <!-- ЗАГОЛОВОК ПОДКАТЕГОРИИ (кликабельный) -->
                                     <Grid Padding="20,16"
-                                          ColumnDefinitions="*, Auto"
+                                          ColumnDefinitions="*, Auto, Auto, Auto"
                                           BackgroundColor="Transparent">
 
                                         <!-- ОБЩИЙ КЛИК ПО ВСЕЙ СТРОКЕ -->
@@ -287,8 +316,56 @@
                                                  TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
                                         </VerticalStackLayout>
 
+                                        <!-- Кнопка редактирования подкатегории -->
+                                        <Frame Grid.Column="1"
+                                               BackgroundColor="Transparent"
+                                               BorderColor="Transparent"
+                                               Padding="0"
+                                               WidthRequest="32"
+                                               HeightRequest="32"
+                                               HorizontalOptions="End"
+                                               VerticalOptions="Center"
+                                               Margin="0,0,8,0">
+
+                                            <Frame.GestureRecognizers>
+                                                <TapGestureRecognizer 
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=EditSubcategoryCommand}"
+                                                    CommandParameter="{Binding}"/>
+                                            </Frame.GestureRecognizers>
+
+                                            <Label Text="✎"
+                                                 FontSize="12"
+                                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                                 HorizontalOptions="Center"
+                                                 VerticalOptions="Center"/>
+                                        </Frame>
+
+                                        <!-- Кнопка удаления подкатегории -->
+                                        <Frame Grid.Column="2"
+                                               BackgroundColor="Transparent"
+                                               BorderColor="Transparent"
+                                               Padding="0"
+                                               WidthRequest="32"
+                                               HeightRequest="32"
+                                               HorizontalOptions="End"
+                                               VerticalOptions="Center"
+                                               Margin="0,0,12,0">
+
+                                            <Frame.GestureRecognizers>
+                                                <TapGestureRecognizer 
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=DeleteSubcategoryCommand}"
+                                                    CommandParameter="{Binding}"/>
+                                            </Frame.GestureRecognizers>
+
+                                            <Label Text="🗑️"
+                                                 FontSize="12"
+                                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                                 HorizontalOptions="Center"
+                                                 VerticalOptions="Center"/>
+                                        </Frame>
+
                                         <!-- СТРЕЛКА ДЛЯ РАСКРЫТИЯ (тоже кликабельная) -->
-                                        <Label Grid.Column="1"
+                                        <Label Grid.Column="3"
                                                Text="{Binding IsExpanded, Converter={x:StaticResource BoolToArrowConverter}}"
                                                FontSize="16"
                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
@@ -347,7 +424,7 @@
                                         </Frame>
 
                                         <!-- ФОРМА ДОБАВЛЕНИЯ БЛЮДА -->
-                                        <Frame IsVisible="True"
+                                        <Frame IsVisible="{Binding IsAddingDish}" 
                                                  BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
                                                  CornerRadius="12"
                                                  Padding="16"
@@ -412,14 +489,74 @@
 
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate x:DataType="models:Dish">
-                                                    <!-- КАРТОЧКА БЛЮДА -->
+                                                    <!-- КАРТОЧКА БЛЮДА С КНОПКАМИ УПРАВЛЕНИЯ -->
                                                     <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
                                                            CornerRadius="12"
-                                                           Padding="16,12"
+                                                           Padding="0"
                                                            HasShadow="False">
-                                                        <Label Text="{Binding Name}"
-                                                             FontSize="15"
-                                                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                                        <Grid ColumnDefinitions="*, Auto, Auto"
+                                                              Padding="12,8">
+
+                                                            <!-- Название блюда -->
+                                                            <Label Grid.Column="0"
+                                                                 Text="{Binding Name}"
+                                                                 FontSize="15"
+                                                                 TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                 VerticalOptions="Center"
+                                                                 Margin="8,0,0,0"/>
+
+                                                            <!-- Кнопка редактирования -->
+                                                            <Frame Grid.Column="1"
+                                                                   BackgroundColor="{AppThemeBinding Light={StaticResource Blue100}, Dark={StaticResource Blue900}}"
+                                                                   BorderColor="{AppThemeBinding Light={StaticResource Blue300}, Dark={StaticResource Blue700}}"
+                                                                   CornerRadius="8"
+                                                                   Padding="0"
+                                                                   WidthRequest="36"
+                                                                   HeightRequest="36"
+                                                                   HorizontalOptions="End"
+                                                                   VerticalOptions="Center"
+                                                                   Margin="0,0,8,0">
+
+                                                                <Frame.GestureRecognizers>
+                                                                    <TapGestureRecognizer 
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=EditDishCommand}"
+                                                                        CommandParameter="{Binding}"/>
+                                                                </Frame.GestureRecognizers>
+
+                                                                <Label Text="✎"
+                                                                     FontSize="12"
+                                                                     FontAttributes="Bold"
+                                                                     TextColor="{AppThemeBinding Light={StaticResource Blue600}, Dark={StaticResource Blue200}}"
+                                                                     HorizontalOptions="Center"
+                                                                     VerticalOptions="Center"/>
+                                                            </Frame>
+
+                                                            <!-- Кнопка удаления -->
+                                                            <Frame Grid.Column="2"
+                                                                   BackgroundColor="{AppThemeBinding Light={StaticResource Red100}, Dark={StaticResource Red900}}"
+                                                                   BorderColor="{AppThemeBinding Light={StaticResource Red300}, Dark={StaticResource Red700}}"
+                                                                   CornerRadius="8"
+                                                                   Padding="0"
+                                                                   WidthRequest="36"
+                                                                   HeightRequest="36"
+                                                                   HorizontalOptions="End"
+                                                                   VerticalOptions="Center">
+
+                                                                <Frame.GestureRecognizers>
+                                                                    <TapGestureRecognizer 
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=DeleteDishCommand}"
+                                                                        CommandParameter="{Binding}"/>
+                                                                </Frame.GestureRecognizers>
+
+                                                                <Label Text="✕"
+                                                                     FontSize="12"
+                                                                     FontAttributes="Bold"
+                                                                     TextColor="{AppThemeBinding Light={StaticResource Red600}, Dark={StaticResource Red200}}"
+                                                                     HorizontalOptions="Center"
+                                                                     VerticalOptions="Center"/>
+                                                            </Frame>
+                                                        </Grid>
                                                     </Frame>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -554,6 +691,394 @@
                                     HeightRequest="44"
                                     FontSize="14"
                                     FontAttributes="Bold"/>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </Border>
+
+        <!-- ДИАЛОГОВОЕ ОКНО ДОБАВЛЕНИЯ БЛЮДА -->
+        <Border IsVisible="{Binding IsAddDishDialogVisible}"
+                Grid.RowSpan="2"
+                BackgroundColor="#80000000"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                Padding="20">
+
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelAddDishCommand}"/>
+            </Border.GestureRecognizers>
+
+            <Frame HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   WidthRequest="340"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray900}}"
+                   BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                   CornerRadius="20"
+                   Padding="0"
+                   HasShadow="True">
+
+                <Frame.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="0,10"
+                            Radius="20"
+                            Opacity="0.2"/>
+                </Frame.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Заголовок диалога -->
+                    <Border BackgroundColor="{StaticResource PrimaryColor}"
+                            StrokeShape="RoundRectangle 20,20,0,0"
+                            HeightRequest="60"
+                            Padding="20,0"
+                            HorizontalOptions="Fill">
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0"
+                                   Text="Новое блюдо"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+
+                            <!-- Кнопка закрытия -->
+                            <Frame Grid.Column="1"
+                                   BackgroundColor="Transparent"
+                                   BorderColor="Transparent"
+                                   Padding="0"
+                                   WidthRequest="32"
+                                   HeightRequest="32"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center">
+
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CancelAddDishCommand}"/>
+                                </Frame.GestureRecognizers>
+
+                                <Label Text="✕"
+                                       FontSize="16"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Frame>
+                        </Grid>
+                    </Border>
+
+                    <!-- Содержимое диалога -->
+                    <VerticalStackLayout Spacing="20" Padding="24">
+
+                        <!-- Поле ввода названия блюда -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Название блюда"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"/>
+
+                            <Entry Text="{Binding NewDishName}"
+                                   Placeholder="Введите название блюда..."
+                                   FontSize="16"
+                                   BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="48"/>
+                        </VerticalStackLayout>
+
+                        <!-- Выбор подкатегории -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Выберите подкатегорию"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"/>
+
+                            <Picker Title="Выберите подкатегорию..."
+                                    ItemsSource="{Binding Subcategories}"
+                                    ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding SelectedSubcategoryForDish}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                    HeightRequest="48"/>
+                        </VerticalStackLayout>
+
+                        <!-- Кнопки действий -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                            <!-- Кнопка отмены -->
+                            <Button Grid.Column="0"
+                                    Text="Отмена"
+                                    Command="{Binding CancelAddDishCommand}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                    CornerRadius="10"
+                                    HeightRequest="44"
+                                    FontSize="14"
+                                    FontAttributes="Bold"/>
+
+                            <!-- Кнопка добавления -->
+                            <Button Grid.Column="1"
+                                    Text="Добавить"
+                                    Command="{Binding ConfirmAddDishCommand}"
+                                    BackgroundColor="{StaticResource PrimaryColor}"
+                                    TextColor="White"
+                                    CornerRadius="10"
+                                    HeightRequest="44"
+                                    FontSize="14"
+                                    FontAttributes="Bold"/>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </Border>
+
+        <!-- ДИАЛОГОВОЕ ОКНО РЕДАКТИРОВАНИЯ БЛЮДА -->
+        <Border IsVisible="{Binding IsEditDishDialogVisible}"
+                Grid.RowSpan="2"
+                BackgroundColor="#80000000"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"
+                Padding="20">
+
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelEditDishCommand}"/>
+            </Border.GestureRecognizers>
+
+            <Frame HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   WidthRequest="340"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray900}}"
+                   BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                   CornerRadius="20"
+                   Padding="0"
+                   HasShadow="True">
+
+                <Frame.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="0,10"
+                            Radius="20"
+                            Opacity="0.2"/>
+                </Frame.Shadow>
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Заголовок диалога -->
+                    <Border BackgroundColor="{StaticResource PrimaryColor}"
+                            StrokeShape="RoundRectangle 20,20,0,0"
+                            HeightRequest="60"
+                            Padding="20,0"
+                            HorizontalOptions="Fill">
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0"
+                                   Text="Редактировать блюдо"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   VerticalOptions="Center"/>
+
+                            <!-- Кнопка закрытия -->
+                            <Frame Grid.Column="1"
+                                   BackgroundColor="Transparent"
+                                   BorderColor="Transparent"
+                                   Padding="0"
+                                   WidthRequest="32"
+                                   HeightRequest="32"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center">
+
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CancelEditDishCommand}"/>
+                                </Frame.GestureRecognizers>
+
+                                <Label Text="✕"
+                                       FontSize="16"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Frame>
+                        </Grid>
+                    </Border>
+
+                    <!-- Содержимое диалога -->
+                    <VerticalStackLayout Spacing="20" Padding="24">
+
+                        <!-- Поле ввода названия блюда -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Название блюда"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"/>
+
+                            <Entry Text="{Binding EditDishName}"
+                                   Placeholder="Введите название блюда..."
+                                   FontSize="16"
+                                   BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                   ClearButtonVisibility="WhileEditing"
+                                   HeightRequest="48"/>
+                        </VerticalStackLayout>
+
+                        <!-- Выбор подкатегории -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Выберите подкатегорию"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"/>
+
+                            <Picker Title="Выберите подкатегорию..."
+                                    ItemsSource="{Binding Subcategories}"
+                                    ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding SelectedSubcategoryForEdit}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                    HeightRequest="48"/>
+                        </VerticalStackLayout>
+
+                        <!-- Кнопки действий -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                            <!-- Кнопка отмены -->
+                            <Button Grid.Column="0"
+                                    Text="Отмена"
+                                    Command="{Binding CancelEditDishCommand}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                    CornerRadius="10"
+                                    HeightRequest="44"
+                                    FontSize="14"
+                                    FontAttributes="Bold"/>
+
+                            <!-- Кнопка сохранения -->
+                            <Button Grid.Column="1"
+                                    Text="Сохранить"
+                                    Command="{Binding ConfirmEditDishCommand}"
+                                    BackgroundColor="{StaticResource PrimaryColor}"
+                                    TextColor="White"
+                                    CornerRadius="10"
+                                    HeightRequest="44"
+                                    FontSize="14"
+                                    FontAttributes="Bold"/>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </Border>
+
+        <!-- ДИАЛОГОВОЕ ОКНО РЕДАКТИРОВАНИЯ ПОДКАТЕГОРИИ -->
+        <Border IsVisible="{Binding IsEditSubcategoryDialogVisible}"
+             Grid.RowSpan="2"
+             BackgroundColor="#80000000"
+             HorizontalOptions="Fill"
+             VerticalOptions="Fill"
+             Padding="20">
+
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelEditSubcategoryCommand}"/>
+            </Border.GestureRecognizers>
+
+            <Frame HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="320"
+                BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray900}}"
+                BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                CornerRadius="20"
+                Padding="0"
+                HasShadow="True">
+
+
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Заголовок диалога -->
+                    <Border BackgroundColor="{StaticResource PrimaryColor}"
+                     StrokeShape="RoundRectangle 20,20,0,0"
+                     HeightRequest="60"
+                     Padding="20,0"
+                     HorizontalOptions="Fill">
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Grid.Column="0"
+                        Text="Редактировать подкатегорию"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        VerticalOptions="Center"/>
+
+                            <!-- Кнопка закрытия -->
+                            <Frame Grid.Column="1"
+                        BackgroundColor="Transparent"
+                        BorderColor="Transparent"
+                        Padding="0"
+                        WidthRequest="32"
+                        HeightRequest="32"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CancelEditSubcategoryCommand}"/>
+                                </Frame.GestureRecognizers>
+
+                                <Label Text="✕"
+                            FontSize="16"
+                            TextColor="White"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"/>
+                            </Frame>
+                        </Grid>
+                    </Border>
+
+                    <!-- Содержимое диалога -->
+                    <VerticalStackLayout Spacing="20" Padding="24">
+
+                        <!-- Поле ввода названия -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Название подкатегории"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"/>
+
+                            <Entry Text="{Binding EditSubcategoryName}"
+                        Placeholder="Введите название..."
+                        FontSize="16"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                        PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                        ClearButtonVisibility="WhileEditing"
+                        HeightRequest="48"/>
+
+                            <Label Text="Максимум 50 символов"
+                        FontSize="11"
+                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                        HorizontalOptions="End"/>
+                        </VerticalStackLayout>
+
+                        <!-- Кнопки действий -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                            <!-- Кнопка отмены -->
+                            <Button Grid.Column="0"
+                         Text="Отмена"
+                         Command="{Binding CancelEditSubcategoryCommand}"
+                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                         TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                         CornerRadius="10"
+                         HeightRequest="44"
+                         FontSize="14"
+                         FontAttributes="Bold"/>
+
+                            <!-- Кнопка сохранения -->
+                            <Button Grid.Column="1"
+                         Text="Сохранить"
+                         Command="{Binding ConfirmEditSubcategoryCommand}"
+                         BackgroundColor="{StaticResource PrimaryColor}"
+                         TextColor="White"
+                         CornerRadius="10"
+                         HeightRequest="44"
+                         FontSize="14"
+                         FontAttributes="Bold"/>
                         </Grid>
 
                     </VerticalStackLayout>

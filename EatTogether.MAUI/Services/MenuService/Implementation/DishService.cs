@@ -21,5 +21,15 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
         {
             return await _cloudStoreService.GetDishListFromDbAsync(subcategoryId);
         }
+
+        public async Task DeleteDishAsync(string dishId)
+        {
+            await _cloudStoreService.DeleteDishFromDBAsync(dishId);
+        }
+
+        public async Task EditDishAsync(Dish dish)
+        {
+            await _cloudStoreService.EditDishFromDBAsync(dish);
+        }
     }
 }

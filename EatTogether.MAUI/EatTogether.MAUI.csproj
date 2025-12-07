@@ -21,7 +21,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>EatTogether.MAUI</ApplicationTitle>
+		<ApplicationTitle>EatTogether</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.eattogether.maui</ApplicationId>
@@ -117,5 +117,18 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
+
+	<!-- ДОБАВЬТЕ ЭТИ НАСТРОЙКИ -->
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<AndroidLinkMode>None</AndroidLinkMode>
+		<Optimize>false</Optimize>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<AndroidLinkMode>None</AndroidLinkMode>
+	</PropertyGroup>
 
 </Project>

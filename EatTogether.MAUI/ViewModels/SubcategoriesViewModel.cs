@@ -29,6 +29,36 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private string newSubcategoryName;
 
+        [ObservableProperty]
+        private bool isAddDishDialogVisible;
+
+        [ObservableProperty]
+        private string newDishName;
+
+        [ObservableProperty]
+        private Subcategory selectedSubcategoryForDish;
+
+        [ObservableProperty]
+        private bool isEditDishDialogVisible;
+
+        [ObservableProperty]
+        private string editDishName;
+
+        [ObservableProperty]
+        private Subcategory selectedSubcategoryForEdit;
+
+        [ObservableProperty]
+        private bool isEditSubcategoryDialogVisible;
+
+        [ObservableProperty]
+        private string editSubcategoryName;
+
+        [ObservableProperty]
+        private Subcategory subcategoryToEdit;
+
+        [ObservableProperty]
+        private Dish dishToEdit;
+
         public bool HasSubcategories => Subcategories?.Count > 0;
         public bool ShowNoSubcategoriesMessage => !IsBusy && !HasSubcategories;
         public bool ShowSubcategoriesContent => !IsBusy && HasSubcategories;
@@ -67,6 +97,10 @@ namespace EatTogether.MAUI.ViewModels
                 foreach (var subcategory in subcategories)
                 {
                     var dishes = await _dishService.GetDishListAsync(subcategory.Id);
+                    foreach(var dish in dishes)
+                    {
+                        Console.WriteLine(dish.Name);
+                    }
                     subcategory.Dishes = dishes;
                     subcategory.IsExpanded = false;
                     subcategory.IsAddingDish = false;
@@ -128,6 +162,60 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         [RelayCommand]
+        private async Task AddDish()
+        {
+            if (!HasSubcategories)
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Сначала создайте подкатегорию", "OK");
+                return;
+            }
+
+            IsAddDishDialogVisible = true;
+            NewDishName = string.Empty;
+            SelectedSubcategoryForDish = null;
+        }
+
+        [RelayCommand]
+        private async Task ConfirmAddDish()
+        {
+            if (string.IsNullOrWhiteSpace(NewDishName))
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Введите название блюда", "OK");
+                return;
+            }
+
+            if (SelectedSubcategoryForDish == null)
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Выберите подкатегорию", "OK");
+                return;
+            }
+
+            try
+            {
+                var dishName = NewDishName.Trim();
+
+                // Создаем блюдо через сервис
+                await _dishService.CreateDishAsync(
+                    dishName,
+                    Preferences.Get("family_id", string.Empty),
+                    SelectedSubcategoryForDish.Id);
+
+                IsAddDishDialogVisible = false;
+                NewDishName = string.Empty;
+                SelectedSubcategoryForDish = null;
+
+                // Обновляем список подкатегорий для отображения обновленного количества блюд
+                await LoadSubcategoriesAsync();
+                await Application.Current.MainPage.DisplayAlert("Успех", $"Блюдо \"{dishName}\" добавлено", "OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при добавлении блюда: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось добавить блюдо", "OK");
+            }
+        }
+
+        [RelayCommand]
         private void StartAddingDish(Subcategory subcategory)
         {
             if (subcategory == null) return;
@@ -150,60 +238,136 @@ namespace EatTogether.MAUI.ViewModels
             }
         }
 
+
+
         [RelayCommand]
-        private async Task AddDish(Subcategory subcategory)
+        private void CancelAddDish()
         {
-            if (subcategory == null || string.IsNullOrWhiteSpace(subcategory.NewDishName))
-            {
-                return;
-            }
+            IsAddDishDialogVisible = false;
+            NewDishName = string.Empty;
+            SelectedSubcategoryForDish = null;
+        }
+
+        [RelayCommand]
+        private async Task DeleteDish(Dish dish)
+        {
+            if (dish == null) return;
+
+            bool confirm = await Application.Current.MainPage.DisplayAlert(
+                "Удаление блюда",
+                $"Вы уверены, что хотите удалить блюдо \"{dish.Name}\"?",
+                "Удалить",
+                "Отмена");
+
+            if (!confirm) return;
 
             try
             {
-                var dishName = subcategory.NewDishName.Trim();
+                await _dishService.DeleteDishAsync(dish.Id);
 
-                // Создаем блюдо через сервис
-                await _dishService.CreateDishAsync(
-                    dishName,
-                    Preferences.Get("family_id", string.Empty),
-                    subcategory.Id);
-
-                // Выключаем режим добавления
-                subcategory.IsAddingDish = false;
-                subcategory.NewDishName = string.Empty;
-
-                // Обновляем список блюд для этой подкатегории
-                var dishes = await _dishService.GetDishListAsync(subcategory.Id);
-                subcategory.Dishes = dishes;
-
-                var index = Subcategories.IndexOf(subcategory);
-                if (index != -1)
+                // Находим и обновляем подкатегорию, содержащую это блюдо
+                var subcategory = Subcategories.FirstOrDefault(s => s.Dishes?.Any(d => d.Id == dish.Id) == true);
+                if (subcategory != null)
                 {
-                    Subcategories[index] = subcategory;
-                }
+                    // Удаляем блюдо из коллекции
+                    var dishToRemove = subcategory.Dishes.FirstOrDefault(d => d.Id == dish.Id);
+                    if (dishToRemove != null)
+                    {
+                        subcategory.Dishes.Remove(dishToRemove);
 
-                await Application.Current.MainPage.DisplayAlert("Успех", $"Блюдо \"{dishName}\" добавлено", "OK");
+                        // Обновляем подкатегорию в коллекции для принудительного обновления UI
+                        var index = Subcategories.IndexOf(subcategory);
+                        if (index != -1)
+                        {
+                            Subcategories[index] = subcategory;
+                        }
+                    }
+                }
+                await LoadSubcategoriesAsync();
+                await Application.Current.MainPage.DisplayAlert("Успех", "Блюдо удалено", "OK");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при добавлении блюда: {ex}");
-                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось добавить блюдо", "OK");
+                Console.WriteLine($"Ошибка при удалении блюда: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось удалить блюдо", "OK");
             }
         }
 
         [RelayCommand]
-        private void CancelAddingDish(Subcategory subcategory)
+        private async Task EditDish(Dish dish)
         {
-            if (subcategory == null) return;
+            if (dish == null) return;
 
-            subcategory.IsAddingDish = false;
-            subcategory.NewDishName = string.Empty;
-
-            var index = Subcategories.IndexOf(subcategory);
-            if (index != -1)
+            try
             {
-                Subcategories[index] = subcategory;
+                DishToEdit = dish;
+                EditDishName = dish.Name;
+
+                // Находим подкатегорию, к которой принадлежит блюдо
+                SelectedSubcategoryForEdit = Subcategories.FirstOrDefault(s => s.Dishes?.Any(d => d.Id == dish.Id) == true);
+
+                IsEditDishDialogVisible = true;
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при подготовке редактирования блюда: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось загрузить данные для редактирования", "OK");
+            }
+        }
+
+        [RelayCommand]
+        private async Task ConfirmEditDish()
+        {
+            if (string.IsNullOrWhiteSpace(EditDishName))
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Введите название блюда", "OK");
+                return;
+            }
+
+            if (SelectedSubcategoryForEdit == null)
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Выберите подкатегорию", "OK");
+                return;
+            }
+
+            if (DishToEdit == null) return;
+
+            try
+            {
+                var updatedDish = new Dish
+                {
+                    Id = DishToEdit.Id,
+                    Name = EditDishName.Trim(),
+                    FamilyId = DishToEdit.FamilyId,
+                    SubCategoryId = SelectedSubcategoryForEdit.Id
+                };
+
+                // Обновляем блюдо через сервис
+                await _dishService.EditDishAsync(updatedDish);
+
+                IsEditDishDialogVisible = false;
+                EditDishName = string.Empty;
+                SelectedSubcategoryForEdit = null;
+                DishToEdit = null;
+
+                // Обновляем список подкатегорий для отображения изменений
+                await LoadSubcategoriesAsync();
+                await Application.Current.MainPage.DisplayAlert("Успех", "Блюдо обновлено", "OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при редактировании блюда: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось обновить блюдо", "OK");
+            }
+        }
+
+        [RelayCommand]
+        private void CancelEditDish()
+        {
+            IsEditDishDialogVisible = false;
+            EditDishName = string.Empty;
+            SelectedSubcategoryForEdit = null;
+            DishToEdit = null;
         }
 
         [RelayCommand]
@@ -237,7 +401,6 @@ namespace EatTogether.MAUI.ViewModels
 
             try
             {
-                IsBusy = true;
 
                 await _subcategoryService.CreateSubcategoryAsync(
                     _categoryId,
@@ -266,6 +429,106 @@ namespace EatTogether.MAUI.ViewModels
         {
             IsCreateDialogVisible = false;
             NewSubcategoryName = string.Empty;
+        }
+
+        [RelayCommand]
+        private async Task DeleteSubcategory(Subcategory subcategory)
+        {
+            if (subcategory == null) return;
+
+            bool confirm = await Application.Current.MainPage.DisplayAlert(
+                "Удаление подкатегории",
+                $"Вы уверены, что хотите удалить подкатегорию \"{subcategory.Name}\"?\n\nВсе блюда в этой подкатегории также будут удалены.",
+                "Удалить",
+                "Отмена");
+
+            if (!confirm) return;
+
+            try
+            {
+                await _subcategoryService.DeleteSubcategoryAsync(subcategory.Id);
+
+                // Удаляем подкатегорию из коллекции
+                var subcategoryToRemove = Subcategories.FirstOrDefault(s => s.Id == subcategory.Id);
+                if (subcategoryToRemove != null)
+                {
+                    Subcategories.Remove(subcategoryToRemove);
+                }
+
+                await Application.Current.MainPage.DisplayAlert("Успех", "Подкатегория удалена", "OK");
+                UpdateComputedProperties();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при удалении подкатегории: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось удалить подкатегорию", "OK");
+            }
+        }
+
+        [RelayCommand]
+        private async Task EditSubcategory(Subcategory subcategory)
+        {
+            if (subcategory == null) return;
+
+            try
+            {
+                SubcategoryToEdit = subcategory;
+                EditSubcategoryName = subcategory.Name;
+                IsEditSubcategoryDialogVisible = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при подготовке редактирования подкатегории: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось загрузить данные для редактирования", "OK");
+            }
+        }
+
+        [RelayCommand]
+        private async Task ConfirmEditSubcategory()
+        {
+            if (string.IsNullOrWhiteSpace(EditSubcategoryName))
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Введите название подкатегории", "OK");
+                return;
+            }
+
+            if (SubcategoryToEdit == null) return;
+
+            try
+            {
+                var updatedSubcategory = new Subcategory
+                {
+                    Id = SubcategoryToEdit.Id,
+                    Name = EditSubcategoryName.Trim(),
+                    FamilyId = SubcategoryToEdit.FamilyId,
+                    CategoryId = SubcategoryToEdit.CategoryId,
+                    SortOrder = SubcategoryToEdit.SortOrder
+                };
+
+                // Обновляем подкатегорию через сервис
+                await _subcategoryService.EditSubcategoryAsync(updatedSubcategory);
+
+                IsEditSubcategoryDialogVisible = false;
+                EditSubcategoryName = string.Empty;
+                SubcategoryToEdit = null;
+
+                // Обновляем список подкатегорий для отображения изменений
+                await LoadSubcategoriesAsync();
+                await Application.Current.MainPage.DisplayAlert("Успех", "Подкатегория обновлена", "OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при редактировании подкатегории: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось обновить подкатегорию", "OK");
+            }
+        }
+
+        [RelayCommand]
+        private void CancelEditSubcategory()
+        {
+            IsEditSubcategoryDialogVisible = false;
+            EditSubcategoryName = string.Empty;
+            SubcategoryToEdit = null;
         }
 
         [RelayCommand]

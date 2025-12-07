@@ -6,6 +6,9 @@
 
 
     <Color x:Key="PrimaryColor">#1F744D</Color>
+    <Color x:Key="PrimaryColorLight">#1F744D</Color>
+    <Color x:Key="SuccessColor">#1F744D</Color>
+    <Color x:Key="PrimaryColorDark">#1F744D</Color>
     <!-- Зеленый -->
     <Color x:Key="PageBackgroundColor">#FFF5F5F5</Color>
     <Color x:Key="InputBackgroundColor">#FFFFFFFF</Color>

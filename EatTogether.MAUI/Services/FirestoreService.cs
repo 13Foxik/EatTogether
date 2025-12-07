@@ -271,6 +271,61 @@ namespace EatTogether.MAUI.Services
             Console.WriteLine($"Retrieved {subcategories.Count} Subcategories from Firestore.");
             return subcategories;
         }
+
+        public async Task<bool> DeleteSubcategoryFromDBAsync(string subcategoryId)
+        {
+            List<Dish> dishes = new List<Dish>();
+            try
+            {
+                await SetupFirestore();
+
+                if (string.IsNullOrEmpty(subcategoryId))
+                {
+                    Console.WriteLine("subcategory ID cannot be null or empty.");
+                    return false;
+                }
+
+                DocumentReference subcategoryRef = _db.Collection("Subcategories").Document(subcategoryId);
+                DocumentSnapshot snapshot = await subcategoryRef.GetSnapshotAsync();
+
+                if (!snapshot.Exists)
+                {
+                    Console.WriteLine($"subcategory with ID {subcategoryId} does not exist.");
+                    return false;
+                }
+
+                dishes = await GetDishListFromDbAsync(subcategoryId);
+
+                foreach(Dish dish in dishes)
+                {
+                    await DeleteDishFromDBAsync(dish.Id);
+                }
+
+                await subcategoryRef.DeleteAsync();
+                Console.WriteLine($"subcategory with ID {subcategoryId} successfully deleted.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting dish with ID {subcategoryId}: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task EditSubcategoryFromDBAsync(Subcategory subcategory)
+        {
+            await SetupFirestore();
+            var document = _db.Collection("Subcategories").Document(subcategory.Id);
+            var snapshot = await document.GetSnapshotAsync();
+
+            if (snapshot.Exists)
+            {
+                // Обновляем только поле UserFamilies
+                await document.UpdateAsync("Name", subcategory.Name);
+                Console.WriteLine($"Subcategory {subcategory.Id} updated");
+            }
+        }
+
         public async Task AddDishToDbAsync(Dish dish)
         {
             await SetupFirestore();
@@ -296,12 +351,63 @@ namespace EatTogether.MAUI.Services
                 if (document.Exists)
                 {
                     Dish Dish = document.ConvertTo<Dish>();
-                    Dishes.Add(Dish);
+                    if(Dish.SubCategoryId == subcategoryId)
+                    {
+
+                        Dishes.Add(Dish);
+                    }
                 }
             }
 
             Console.WriteLine($"Retrieved {Dishes.Count} Dishes from Firestore.");
             return Dishes;
+        }
+
+        public async Task<bool> DeleteDishFromDBAsync(string dishId)
+        {
+            try
+            {
+                await SetupFirestore();
+
+                if (string.IsNullOrEmpty(dishId))
+                {
+                    Console.WriteLine("Dish ID cannot be null or empty.");
+                    return false;
+                }
+
+                DocumentReference dishRef = _db.Collection("Dishes").Document(dishId);
+                DocumentSnapshot snapshot = await dishRef.GetSnapshotAsync();
+
+                if (!snapshot.Exists)
+                {
+                    Console.WriteLine($"Dish with ID {dishId} does not exist.");
+                    return false;
+                }
+
+                await dishRef.DeleteAsync();
+                Console.WriteLine($"Dish with ID {dishId} successfully deleted.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting dish with ID {dishId}: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task EditDishFromDBAsync(Dish dish)
+        {
+            await SetupFirestore();
+            var document = _db.Collection("Dishes").Document(dish.Id);
+            var snapshot = await document.GetSnapshotAsync();
+
+            if (snapshot.Exists)
+            {
+                // Обновляем только поле UserFamilies
+                await document.UpdateAsync("Name", dish.Name);
+                await document.UpdateAsync("SubCategoryId", dish.SubCategoryId);
+                Console.WriteLine($"Dish {dish.Id} updated");
+            }
         }
 
         public async Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories)

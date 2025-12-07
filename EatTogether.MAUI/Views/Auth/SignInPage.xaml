@@ -7,6 +7,13 @@
              x:Class="EatTogether.MAUI.Views.Auth.SignInPage"
              BackgroundColor="{StaticResource PageBackgroundColor}">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Конвертер для инвертирования bool -->
+            <converters:InvertedBoolConverter x:Key="InverseBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <ContentPage.Behaviors>
         <toolkit:StatusBarBehavior StatusBarColor="{StaticResource PrimaryColor}" StatusBarStyle="LightContent" />
     </ContentPage.Behaviors>
