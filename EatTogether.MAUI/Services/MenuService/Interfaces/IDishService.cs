@@ -8,5 +8,6 @@ namespace EatTogether.MAUI.Services.MenuService.Interfaces
         Task<List<Dish>> GetDishListAsync(string subcategoryId);
         Task DeleteDishAsync(string Id);
         Task EditDishAsync(Dish dish);
+        Task<Dish> GetDishAsync(string id);
     }
 }

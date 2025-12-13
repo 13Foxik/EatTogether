@@ -43,6 +43,7 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<ICategoryService, CategoryService>();
             builder.Services.AddSingleton<ISubcategoryService, SubcategoryService>();
             builder.Services.AddSingleton<IDishService, DishService>();
+            builder.Services.AddSingleton<IPlateService, PlateService>();
 
             //ViewModels
             builder.Services.AddTransient<SignInViewModel>();
@@ -52,6 +53,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<CreateFamilyViewModel>();
             builder.Services.AddTransient<SubcategoriesViewModel>();
             builder.Services.AddTransient<MenuViewModel>();
+            builder.Services.AddTransient<PlateViewModel>();
 
             //Pages
             builder.Services.AddTransient<SignInPage>();
@@ -61,6 +63,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<FamilyPage>();
             builder.Services.AddTransient<CreateFamilyPage>();
             builder.Services.AddTransient<SubcategoriesPage>();
+            builder.Services.AddTransient<PlatePage>();
 
             builder.Services.AddSingleton<AppShell>();
 

@@ -395,6 +395,21 @@ namespace EatTogether.MAUI.Services
             }
         }
 
+        public async Task<Dish> GetDishAsync(string dishId)
+        {
+            await SetupFirestore();
+
+            DocumentReference dishRef = _db.Collection("Dishes").Document(dishId);
+            DocumentSnapshot document = await dishRef.GetSnapshotAsync();
+
+            if (document.Exists)
+            {
+                return document.ConvertTo<Dish>();
+            }
+
+            return null;
+        }
+
         public async Task EditDishFromDBAsync(Dish dish)
         {
             await SetupFirestore();

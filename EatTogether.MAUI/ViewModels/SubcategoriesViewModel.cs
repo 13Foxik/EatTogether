@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using EatTogether.MAUI.Messages;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Main;
@@ -12,6 +14,7 @@ namespace EatTogether.MAUI.ViewModels
     {
         private readonly ISubcategoryService _subcategoryService;
         private readonly IDishService _dishService;
+        private readonly IPlateService _plateService;
         private readonly string _categoryId;
 
         [ObservableProperty]
@@ -59,25 +62,75 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private Dish dishToEdit;
 
+        [ObservableProperty]
+        private int dishesInPlateCount;
+
+        // Новое свойство для отображения плавающей панели
+        [ObservableProperty]
+        private bool showPlatePanel;
+
         public bool HasSubcategories => Subcategories?.Count > 0;
         public bool ShowNoSubcategoriesMessage => !IsBusy && !HasSubcategories;
         public bool ShowSubcategoriesContent => !IsBusy && HasSubcategories;
         public string SubcategoriesCount => HasSubcategories ? $"{Subcategories.Count}" : "0";
 
-        public SubcategoriesViewModel(string categoryId, string categoryName, ISubcategoryService subcategoryService, IDishService dishService)
+        public SubcategoriesViewModel(string categoryId, string categoryName,
+            ISubcategoryService subcategoryService,
+            IDishService dishService,
+            IPlateService plateService)
         {
             _categoryId = categoryId;
             _subcategoryService = subcategoryService;
             _dishService = dishService;
+            _plateService = plateService;
             CategoryName = categoryName;
 
-            LoadSubcategoriesAsync();
+            // Инициализация
+            Subcategories = new ObservableCollection<Subcategory>();
+
+            WeakReferenceMessenger.Default.Register<PlateUpdatedMessage>(
+                this,
+                (recipient, message) =>
+                {
+                    // Обновляем в основном потоке UI
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        UpdateDishesInPlateCount();
+                        await RefreshDishesStateAsync();
+                    });
+                });
+
+            // Загружаем данные
+            Task.Run(async () => await LoadSubcategoriesAsync());
+        }
+
+        private async Task RefreshDishesStateAsync()
+        {
+            try
+            {
+                foreach (var subcategory in Subcategories)
+                {
+                    foreach (var dish in subcategory.Dishes)
+                    {
+                        dish.IsInPlate = _plateService.HasDish(dish.Id);
+                    }
+                }
+
+                // Обновляем коллекцию, чтобы UI отреагировал
+                var tempList = new ObservableCollection<Subcategory>(Subcategories);
+                Subcategories = tempList;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обновлении состояния блюд: {ex}");
+            }
         }
 
         public SubcategoriesViewModel(string categoryId, string categoryName)
             : this(categoryId, categoryName,
                   Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
-                  Application.Current.Handler.MauiContext.Services.GetService<IDishService>())
+                  Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
+                  Application.Current.Handler.MauiContext.Services.GetService<IPlateService>())
         {
         }
 
@@ -93,21 +146,40 @@ namespace EatTogether.MAUI.ViewModels
                 var familyId = Preferences.Get("family_id", string.Empty);
                 var subcategories = await _subcategoryService.GetSubcategoriesByCategoryAsync(_categoryId, familyId);
 
-                Subcategories.Clear();
+                var tempList = new ObservableCollection<Subcategory>();
+
                 foreach (var subcategory in subcategories)
                 {
                     var dishes = await _dishService.GetDishListAsync(subcategory.Id);
-                    foreach(var dish in dishes)
-                    {
-                        Console.WriteLine(dish.Name);
-                    }
-                    subcategory.Dishes = dishes;
-                    subcategory.IsExpanded = false;
-                    subcategory.IsAddingDish = false;
-                    subcategory.NewDishName = string.Empty;
 
-                    Subcategories.Add(subcategory);
+                    // Создаем ObservableCollection для блюд
+                    var dishCollection = new ObservableCollection<Dish>();
+
+                    // Обновляем состояние "в тарелке" для каждого блюда
+                    foreach (var dish in dishes)
+                    {
+                        dish.IsInPlate = _plateService.HasDish(dish.Id);
+                        dishCollection.Add(dish);
+                    }
+
+                    var newSubcategory = new Subcategory
+                    {
+                        Id = subcategory.Id,
+                        Name = subcategory.Name,
+                        FamilyId = subcategory.FamilyId,
+                        CategoryId = subcategory.CategoryId,
+                        SortOrder = subcategory.SortOrder,
+                        Dishes = dishCollection,
+                        IsExpanded = false,
+                        IsAddingDish = false,
+                        NewDishName = string.Empty
+                    };
+
+                    tempList.Add(newSubcategory);
                 }
+
+                Subcategories = tempList;
+                UpdateDishesInPlateCount();
             }
             catch (Exception ex)
             {
@@ -126,19 +198,11 @@ namespace EatTogether.MAUI.ViewModels
         {
             if (subcategory == null) return;
 
-            Console.WriteLine($"ToggleSubcategory called for: {subcategory.Name}");
-            Console.WriteLine($"Current IsExpanded: {subcategory.IsExpanded}");
-
-            // Переключаем состояние раскрытия
             subcategory.IsExpanded = !subcategory.IsExpanded;
 
-            Console.WriteLine($"New IsExpanded: {subcategory.IsExpanded}");
-
-            // Обновляем только измененную подкатегорию
             var index = Subcategories.IndexOf(subcategory);
             if (index != -1)
             {
-                // Создаем новый объект для принудительного обновления
                 var updatedSubcategory = new Subcategory
                 {
                     Id = subcategory.Id,
@@ -146,18 +210,15 @@ namespace EatTogether.MAUI.ViewModels
                     FamilyId = subcategory.FamilyId,
                     CategoryId = subcategory.CategoryId,
                     SortOrder = subcategory.SortOrder,
-                    Dishes = subcategory.Dishes,
+                    Dishes = new ObservableCollection<Dish>(subcategory.Dishes),
                     IsExpanded = subcategory.IsExpanded,
                     IsAddingDish = subcategory.IsAddingDish,
                     NewDishName = subcategory.NewDishName
                 };
 
-                Subcategories[index] = updatedSubcategory;
-                Console.WriteLine($"Subcategory updated in collection");
-            }
-            else
-            {
-                Console.WriteLine($"Subcategory not found in collection");
+                var tempList = Subcategories.ToList();
+                tempList[index] = updatedSubcategory;
+                Subcategories = new ObservableCollection<Subcategory>(tempList);
             }
         }
 
@@ -204,7 +265,6 @@ namespace EatTogether.MAUI.ViewModels
                 NewDishName = string.Empty;
                 SelectedSubcategoryForDish = null;
 
-                // Обновляем список подкатегорий для отображения обновленного количества блюд
                 await LoadSubcategoriesAsync();
                 await Application.Current.MainPage.DisplayAlert("Успех", $"Блюдо \"{dishName}\" добавлено", "OK");
             }
@@ -234,11 +294,156 @@ namespace EatTogether.MAUI.ViewModels
             var index = Subcategories.IndexOf(subcategory);
             if (index != -1)
             {
-                Subcategories[index] = subcategory;
+                var tempList = Subcategories.ToList();
+                tempList[index] = subcategory;
+                Subcategories = new ObservableCollection<Subcategory>(tempList);
             }
         }
 
+        [RelayCommand]
+        private async Task TogglePlate(Dish dish)
+        {
+            if (dish == null) return;
 
+            try
+            {
+                if (dish.IsInPlate)
+                {
+                    // Если блюдо уже в тарелке - удаляем
+                    _plateService.RemoveDish(dish.Id);
+                    dish.IsInPlate = false;
+
+                    await Application.Current.MainPage.DisplayAlert("Удалено",
+                        $"Блюдо \"{dish.Name}\" удалено из тарелки",
+                        "OK");
+                }
+                else
+                {
+                    // Если блюдо не в тарелке - добавляем
+                    _plateService.AddDish(dish.Id);
+                    dish.IsInPlate = true;
+
+                    await ShowAddToPlateNotification(dish.Name);
+
+                }
+
+                // Обновляем UI
+                await UpdateDishInCollection(dish);
+                UpdateDishesInPlateCount();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при переключении тарелки: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка",
+                    "Не удалось изменить состояние тарелки",
+                    "OK");
+            }
+        }
+
+        [RelayCommand]
+        private async Task ViewPlateDetails()
+        {
+            if (DishesInPlateCount == 0)
+            {
+                await Application.Current.MainPage.DisplayAlert("Тарелка пуста",
+                    "Добавьте блюда в тарелку",
+                    "OK");
+                return;
+            }
+
+            // Показываем детали тарелки
+            await ShowPlateDetailsDialog();
+        }
+
+        private async Task ShowPlateDetailsDialog()
+        {
+            // Собираем названия блюд в тарелке
+            var dishIds = new List<string>();
+            foreach (var dishId in _plateService.GetDishIds())
+            {
+                Dish dish = await _dishService.GetDishAsync(dishId);
+                if (_plateService.HasDish(dish.Id))
+                {
+                    dishIds.Add(dishId);
+                }
+            }
+
+            //var message = $"В вашей тарелке:\n\n";
+            //foreach (var dishName in dishNames)
+            //{
+            //    message += $"• {dishName}\n";
+            //}
+            //message += $"\nВсего: {DishesInPlateCount} блюд";
+
+            //await Application.Current.MainPage.DisplayAlert("Ваша тарелка", message, "OK");
+
+            if (Application.Current?.MainPage is MainPage mainPage)
+            {
+                var currentNavigation = mainPage.CurrentPage as NavigationPage;
+                if (currentNavigation != null)
+                {
+                    // Переходим на страницу тарелки
+                    var platePage = new PlatePage(new PlateViewModel());
+                    await currentNavigation.Navigation.PushAsync(platePage);
+                }
+            }
+        }
+
+        private async Task ShowAddToPlateNotification(string dishName)
+        {
+            await Application.Current.MainPage.DisplayAlert("Добавлено в тарелку",
+                $"Блюдо \"{dishName}\" добавлено в тарелку\n\nВ тарелке: {DishesInPlateCount} блюд",
+                "OK");
+        }
+
+        private async Task UpdateDishInCollection(Dish dish)
+        {
+            try
+            {
+                // Находим подкатегорию
+                var subcategory = Subcategories.FirstOrDefault(s => s.Dishes?.Any(d => d.Id == dish.Id) == true);
+                if (subcategory != null)
+                {
+                    // Находим индекс блюда
+                    var dishIndex = subcategory.Dishes.ToList().FindIndex(d => d.Id == dish.Id);
+                    if (dishIndex != -1)
+                    {
+                        // Обновляем блюдо
+                        subcategory.Dishes[dishIndex] = dish;
+
+                        // Создаем новую коллекцию для обновления UI
+                        var updatedDishes = new ObservableCollection<Dish>(subcategory.Dishes);
+                        subcategory.Dishes = updatedDishes;
+
+                        // Обновляем подкатегорию в основной коллекции
+                        var subcategoryIndex = Subcategories.IndexOf(subcategory);
+                        if (subcategoryIndex != -1)
+                        {
+                            var updatedSubcategory = new Subcategory
+                            {
+                                Id = subcategory.Id,
+                                Name = subcategory.Name,
+                                FamilyId = subcategory.FamilyId,
+                                CategoryId = subcategory.CategoryId,
+                                SortOrder = subcategory.SortOrder,
+                                Dishes = new ObservableCollection<Dish>(subcategory.Dishes),
+                                IsExpanded = subcategory.IsExpanded,
+                                IsAddingDish = subcategory.IsAddingDish,
+                                NewDishName = subcategory.NewDishName
+                            };
+
+                            var tempList = Subcategories.ToList();
+                            tempList[subcategoryIndex] = updatedSubcategory;
+                            Subcategories = new ObservableCollection<Subcategory>(tempList);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обновлении коллекции: {ex}");
+            }
+        }
 
         [RelayCommand]
         private void CancelAddDish()
@@ -265,24 +470,12 @@ namespace EatTogether.MAUI.ViewModels
             {
                 await _dishService.DeleteDishAsync(dish.Id);
 
-                // Находим и обновляем подкатегорию, содержащую это блюдо
-                var subcategory = Subcategories.FirstOrDefault(s => s.Dishes?.Any(d => d.Id == dish.Id) == true);
-                if (subcategory != null)
+                // Если блюдо было в тарелке, удаляем его
+                if (dish.IsInPlate)
                 {
-                    // Удаляем блюдо из коллекции
-                    var dishToRemove = subcategory.Dishes.FirstOrDefault(d => d.Id == dish.Id);
-                    if (dishToRemove != null)
-                    {
-                        subcategory.Dishes.Remove(dishToRemove);
-
-                        // Обновляем подкатегорию в коллекции для принудительного обновления UI
-                        var index = Subcategories.IndexOf(subcategory);
-                        if (index != -1)
-                        {
-                            Subcategories[index] = subcategory;
-                        }
-                    }
+                    _plateService.RemoveDish(dish.Id);
                 }
+
                 await LoadSubcategoriesAsync();
                 await Application.Current.MainPage.DisplayAlert("Успех", "Блюдо удалено", "OK");
             }
@@ -339,10 +532,10 @@ namespace EatTogether.MAUI.ViewModels
                     Id = DishToEdit.Id,
                     Name = EditDishName.Trim(),
                     FamilyId = DishToEdit.FamilyId,
-                    SubCategoryId = SelectedSubcategoryForEdit.Id
+                    SubCategoryId = SelectedSubcategoryForEdit.Id,
+                    IsInPlate = DishToEdit.IsInPlate
                 };
 
-                // Обновляем блюдо через сервис
                 await _dishService.EditDishAsync(updatedDish);
 
                 IsEditDishDialogVisible = false;
@@ -350,7 +543,6 @@ namespace EatTogether.MAUI.ViewModels
                 SelectedSubcategoryForEdit = null;
                 DishToEdit = null;
 
-                // Обновляем список подкатегорий для отображения изменений
                 await LoadSubcategoriesAsync();
                 await Application.Current.MainPage.DisplayAlert("Успех", "Блюдо обновлено", "OK");
             }
@@ -401,7 +593,6 @@ namespace EatTogether.MAUI.ViewModels
 
             try
             {
-
                 await _subcategoryService.CreateSubcategoryAsync(
                     _categoryId,
                     Preferences.Get("family_id", string.Empty),
@@ -417,10 +608,6 @@ namespace EatTogether.MAUI.ViewModels
             {
                 Console.WriteLine($"Ошибка при создании подкатегории: {ex}");
                 await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось создать подкатегорию", "OK");
-            }
-            finally
-            {
-                IsBusy = false;
             }
         }
 
@@ -448,15 +635,27 @@ namespace EatTogether.MAUI.ViewModels
             {
                 await _subcategoryService.DeleteSubcategoryAsync(subcategory.Id);
 
+                // Удаляем все блюда из тарелки, которые относятся к этой подкатегории
+                foreach (var dish in subcategory.Dishes)
+                {
+                    if (dish.IsInPlate)
+                    {
+                        _plateService.RemoveDish(dish.Id);
+                    }
+                }
+
                 // Удаляем подкатегорию из коллекции
-                var subcategoryToRemove = Subcategories.FirstOrDefault(s => s.Id == subcategory.Id);
+                var tempList = Subcategories.ToList();
+                var subcategoryToRemove = tempList.FirstOrDefault(s => s.Id == subcategory.Id);
                 if (subcategoryToRemove != null)
                 {
-                    Subcategories.Remove(subcategoryToRemove);
+                    tempList.Remove(subcategoryToRemove);
+                    Subcategories = new ObservableCollection<Subcategory>(tempList);
                 }
 
                 await Application.Current.MainPage.DisplayAlert("Успех", "Подкатегория удалена", "OK");
                 UpdateComputedProperties();
+                UpdateDishesInPlateCount();
             }
             catch (Exception ex)
             {
@@ -505,14 +704,12 @@ namespace EatTogether.MAUI.ViewModels
                     SortOrder = SubcategoryToEdit.SortOrder
                 };
 
-                // Обновляем подкатегорию через сервис
                 await _subcategoryService.EditSubcategoryAsync(updatedSubcategory);
 
                 IsEditSubcategoryDialogVisible = false;
                 EditSubcategoryName = string.Empty;
                 SubcategoryToEdit = null;
 
-                // Обновляем список подкатегорий для отображения изменений
                 await LoadSubcategoriesAsync();
                 await Application.Current.MainPage.DisplayAlert("Успех", "Подкатегория обновлена", "OK");
             }
@@ -532,12 +729,62 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         [RelayCommand]
+        private async Task ClearPlate()
+        {
+            if (DishesInPlateCount == 0)
+            {
+                await Application.Current.MainPage.DisplayAlert("Тарелка пуста",
+                    "В тарелке нет блюд",
+                    "OK");
+                return;
+            }
+
+            bool confirm = await Application.Current.MainPage.DisplayAlert(
+                "Очистка тарелки",
+                $"Вы уверены, что хотите очистить всю тарелку? ({DishesInPlateCount} блюд)",
+                "Очистить",
+                "Отмена");
+
+            if (!confirm) return;
+
+            try
+            {
+                _plateService.ClearPlate();
+
+                await LoadSubcategoriesAsync();
+                await Application.Current.MainPage.DisplayAlert("Успех", "Тарелка очищена", "OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при очистке тарелки: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось очистить тарелку", "OK");
+            }
+        }
+
+        [RelayCommand]
         private async Task Settings()
         {
             await Application.Current.MainPage.DisplayAlert(
                 "Настройки",
                 $"Настройки категории: {CategoryName}",
                 "OK");
+        }
+
+        [RelayCommand]
+        private async Task CancelAddingDish(Subcategory subcategory)
+        {
+            if (subcategory == null) return;
+
+            subcategory.IsAddingDish = false;
+            subcategory.NewDishName = string.Empty;
+
+            var index = Subcategories.IndexOf(subcategory);
+            if (index != -1)
+            {
+                var tempList = Subcategories.ToList();
+                tempList[index] = subcategory;
+                Subcategories = new ObservableCollection<Subcategory>(tempList);
+            }
         }
 
         private void UpdateComputedProperties()
@@ -548,6 +795,15 @@ namespace EatTogether.MAUI.ViewModels
             OnPropertyChanged(nameof(SubcategoriesCount));
         }
 
+        private void UpdateDishesInPlateCount()
+        {
+            DishesInPlateCount = _plateService.GetDishCount();
+            ShowPlatePanel = DishesInPlateCount > 0;
+
+            OnPropertyChanged(nameof(DishesInPlateCount));
+            OnPropertyChanged(nameof(ShowPlatePanel));
+        }
+
         partial void OnSubcategoriesChanged(ObservableCollection<Subcategory> value)
         {
             UpdateComputedProperties();
@@ -556,6 +812,12 @@ namespace EatTogether.MAUI.ViewModels
         partial void OnIsBusyChanged(bool value)
         {
             UpdateComputedProperties();
+        }
+
+        partial void OnDishesInPlateCountChanged(int value)
+        {
+            ShowPlatePanel = value > 0;
+            OnPropertyChanged(nameof(ShowPlatePanel));
         }
     }
 }

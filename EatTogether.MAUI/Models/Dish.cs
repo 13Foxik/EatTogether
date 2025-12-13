@@ -16,6 +16,8 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string SubCategoryId { get; set; }
 
+        public bool IsInPlate { get; set; }
+
         public Dish() { }
         public Dish(string name, string familyId, string subcategoryId) 
         {

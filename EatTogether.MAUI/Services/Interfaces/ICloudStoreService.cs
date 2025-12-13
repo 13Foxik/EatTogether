@@ -19,6 +19,7 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task<bool> DeleteSubcategoryFromDBAsync(string subcategoryId);
         Task EditSubcategoryFromDBAsync(Subcategory subcategory);
         Task AddDishToDbAsync(Dish dish);
+        Task<Dish> GetDishAsync(string id);
         Task<List<Dish>> GetDishListFromDbAsync(string subcategoryId);
         Task<bool> DeleteDishFromDBAsync(string id);
         Task EditDishFromDBAsync(Dish dish);
