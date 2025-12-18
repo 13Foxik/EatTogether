@@ -425,6 +425,91 @@ namespace EatTogether.MAUI.Services
             }
         }
 
+        public async Task AddPlateToDB(Plate plate)
+        {
+            await SetupFirestore();
+            string id = await GenerateUniqueIdAsync("Plates");
+
+            plate.Id = id;
+
+            await _db.Collection("Plates").Document(plate.Id).SetAsync(plate);
+            Console.WriteLine($"Тарелка: {plate.UserId}- saved to Firestore");
+        }
+
+        public async Task AddDishOnPlateToDB(DishOnPlate dish)
+        {
+            await SetupFirestore();
+            string id = await GenerateUniqueIdAsync("DishOnPlate");
+
+            dish.Id = id;
+
+            await _db.Collection("DishOnPlate").Document(dish.Id).SetAsync(dish);
+            Console.WriteLine($"Тарелка: {dish.DishId}- saved to Firestore");
+        }
+
+        public async Task<List<Plate>> GetFamilyPlatesFromDB(string familyId)
+        {
+            await SetupFirestore();
+
+            CollectionReference PlateRef = _db.Collection("Plates");
+            QuerySnapshot snapshot = await PlateRef.GetSnapshotAsync();
+
+            List<Plate> Plates = new List<Plate>();
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (document.Exists)
+                {
+                    Plate plate = document.ConvertTo<Plate>();
+                    if (plate.FamilyId == familyId && plate.Status == RequestStatus.Pending)
+                    {
+                        Plates.Add(plate);
+                    }
+                }
+            }
+
+            Console.WriteLine($"Retrieved {Plates.Count} Dishes from Firestore.");
+            return Plates;
+        }
+        public async Task EditPlateStatus(Plate plate)
+        {
+            await SetupFirestore();
+            var document = _db.Collection("Plates").Document(plate.Id);
+            var snapshot = await document.GetSnapshotAsync();
+
+            if (snapshot.Exists)
+            {
+                // Обновляем только поле UserFamilies
+                await document.UpdateAsync("Status", plate.Status);
+                Console.WriteLine($"plate {plate.Id} updated");
+            }
+        }
+
+        public async Task<List<Dish>> GetDishesOnPlateFromDb(string PlateId)
+        {
+            await SetupFirestore();
+
+            CollectionReference DishesRef = _db.Collection("DishOnPlate");
+            QuerySnapshot snapshot = await DishesRef.GetSnapshotAsync();
+
+            List<Dish> Dishes = new List<Dish>();
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (document.Exists)
+                {
+                    DishOnPlate dishOnPlate = document.ConvertTo<DishOnPlate>();
+                    if (dishOnPlate.PlateId == PlateId)
+                    {
+                        Dishes.Add(await GetDishAsync(dishOnPlate.DishId));
+                    }
+                }
+            }
+
+            Console.WriteLine($"Retrieved {Dishes.Count} Dishes from Firestore.");
+            return Dishes;
+        }
+
         public async Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories)
         {
             await SetupFirestore();

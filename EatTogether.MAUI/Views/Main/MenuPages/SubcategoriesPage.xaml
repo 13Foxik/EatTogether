@@ -408,8 +408,8 @@
 
                                             <Frame.GestureRecognizers>
                                                 <TapGestureRecognizer 
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=StartAddingDishCommand}"
-                                                    CommandParameter="{Binding}"/>
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=AddDishCommand}"
+                                                    CommandParameter="{Binding }"/>
                                             </Frame.GestureRecognizers>
 
                                             <Grid Padding="16,12" ColumnDefinitions="*, Auto">

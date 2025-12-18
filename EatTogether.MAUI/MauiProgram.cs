@@ -43,6 +43,7 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<ICategoryService, CategoryService>();
             builder.Services.AddSingleton<ISubcategoryService, SubcategoryService>();
             builder.Services.AddSingleton<IDishService, DishService>();
+            builder.Services.AddSingleton<ICurrentPlateService, CurrentPlateService>();
             builder.Services.AddSingleton<IPlateService, PlateService>();
 
             //ViewModels

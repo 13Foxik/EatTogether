@@ -23,6 +23,11 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task<List<Dish>> GetDishListFromDbAsync(string subcategoryId);
         Task<bool> DeleteDishFromDBAsync(string id);
         Task EditDishFromDBAsync(Dish dish);
+        Task AddPlateToDB(Plate plate);
+        Task AddDishOnPlateToDB(DishOnPlate dish);
+        Task EditPlateStatus(Plate plate);
+        Task<List<Plate>> GetFamilyPlatesFromDB(string familyId);
+        Task<List<Dish>> GetDishesOnPlateFromDb(string plateId);
         Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories);
         Task<string> GenerateUniqueFamilyIdAsync(string collection);
     }

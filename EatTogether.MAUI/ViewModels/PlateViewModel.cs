@@ -11,7 +11,7 @@ namespace EatTogether.MAUI.ViewModels
 {
     public partial class PlateViewModel : ObservableObject
     {
-        private readonly IPlateService _plateService;
+        private readonly ICurrentPlateService _plateService;
         private readonly IDishService _dishService;
 
         [ObservableProperty]
@@ -29,7 +29,7 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private int totalDishesCount;
 
-        public PlateViewModel(IPlateService plateService, IDishService dishService)
+        public PlateViewModel(ICurrentPlateService plateService, IDishService dishService)
         {
             _plateService = plateService;
             _dishService = dishService;
@@ -40,7 +40,7 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         public PlateViewModel() : this(
-            Application.Current.Handler.MauiContext.Services.GetService<IPlateService>(),
+            Application.Current.Handler.MauiContext.Services.GetService<ICurrentPlateService>(),
             Application.Current.Handler.MauiContext.Services.GetService<IDishService>())
         {
         }
@@ -172,9 +172,11 @@ namespace EatTogether.MAUI.ViewModels
             // Собираем список блюд для отображения
             var dishNames = string.Join("\n", DishesInPlate.Select(d => $"• {d.Name}"));
 
-            await Application.Current.MainPage.DisplayAlert("Приготовление начато!",
-                $"Начинаем готовить:\n\n{dishNames}\n\nВсего блюд: {TotalDishesCount}\n\nПриятного аппетита! 🍽️",
-                "Отлично!");
+            await _plateService.WriteToDB();
+            DishesInPlate.Clear();
+            TotalDishesCount = 0;
+            WeakReferenceMessenger.Default.Send(new PlateUpdatedMessage());
+            await GoToMenu();
         }
 
         [RelayCommand]

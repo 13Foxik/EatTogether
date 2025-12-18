@@ -14,7 +14,7 @@ namespace EatTogether.MAUI.ViewModels
     {
         private readonly ISubcategoryService _subcategoryService;
         private readonly IDishService _dishService;
-        private readonly IPlateService _plateService;
+        private readonly ICurrentPlateService _plateService;
         private readonly string _categoryId;
 
         [ObservableProperty]
@@ -77,7 +77,7 @@ namespace EatTogether.MAUI.ViewModels
         public SubcategoriesViewModel(string categoryId, string categoryName,
             ISubcategoryService subcategoryService,
             IDishService dishService,
-            IPlateService plateService)
+            ICurrentPlateService plateService)
         {
             _categoryId = categoryId;
             _subcategoryService = subcategoryService;
@@ -130,7 +130,7 @@ namespace EatTogether.MAUI.ViewModels
             : this(categoryId, categoryName,
                   Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
                   Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
-                  Application.Current.Handler.MauiContext.Services.GetService<IPlateService>())
+                  Application.Current.Handler.MauiContext.Services.GetService<ICurrentPlateService>())
         {
         }
 
@@ -392,7 +392,7 @@ namespace EatTogether.MAUI.ViewModels
         private async Task ShowAddToPlateNotification(string dishName)
         {
             await Application.Current.MainPage.DisplayAlert("Добавлено в тарелку",
-                $"Блюдо \"{dishName}\" добавлено в тарелку\n\nВ тарелке: {DishesInPlateCount} блюд",
+                $"Блюдо \"{dishName}\" добавлено в тарелку\n\nВ тарелке: {DishesInPlateCount + 1} блюд",
                 "OK");
         }
 

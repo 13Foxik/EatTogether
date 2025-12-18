@@ -18,6 +18,8 @@ namespace EatTogether.MAUI.Models
 
         public bool IsInPlate { get; set; }
 
+        public RequestStatus Status { get; set; }
+
         public Dish() { }
         public Dish(string name, string familyId, string subcategoryId) 
         {

@@ -1,73 +1,28 @@
-﻿using EatTogether.MAUI.Models;
-using EatTogether.MAUI.Services.MenuService.Interfaces;
+﻿using EatTogether.MAUI.Services.MenuService.Interfaces;
+using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Services.Interfaces;
 
 namespace EatTogether.MAUI.Services.MenuService.Implementation
 {
     public class PlateService : IPlateService
     {
-        private readonly CurrentUserService _currentUserService;
+        private readonly ICloudStoreService _cloudStoreService;
 
-        // Тарелка должна быть статической или правильно инициализированной
-        public Plate CurrentPlate { get; set; }
-
-        public PlateService(CurrentUserService currentUserService)
+        public PlateService(ICloudStoreService cloudStoreService)
         {
-            _currentUserService = currentUserService;
-
-            // Проверяем, не создана ли уже тарелка
-            if (CurrentPlate == null)
-            {
-                CreatePlate();
-            }
+            _cloudStoreService = cloudStoreService;
         }
-
-        public void CreatePlate()
+        public async Task<List<Plate>> GetFamilyPlates(string familyId)
         {
-            CurrentPlate = new Plate
-            {
-                UserId = _currentUserService.GetCurrentUser()?.Uid ?? "default_user",
-                DishesId = new List<string>()
-            };
+            return await _cloudStoreService.GetFamilyPlatesFromDB(familyId);
         }
-
-        public void ClearPlate()
+        public async Task<List<Dish>> GetDishesOnPlate(string plateId)
         {
-            CurrentPlate.DishesId.Clear();
+            return await _cloudStoreService.GetDishesOnPlateFromDb(plateId);
         }
-
-        public void AddDish(string dishId)
+        public async Task EditPlateStatus(Plate plate)
         {
-            if (CurrentPlate == null)
-            {
-                CreatePlate();
-            }
-
-            if (!CurrentPlate.DishesId.Contains(dishId))
-            {
-                CurrentPlate.DishesId.Add(dishId);
-            }
+            await _cloudStoreService.EditPlateStatus(plate);
         }
-
-        public void RemoveDish(string dishId)
-        {
-            CurrentPlate?.DishesId.Remove(dishId);
-        }
-
-        public int GetDishCount()
-        {
-            return CurrentPlate?.DishesId?.Count ?? 0;
-        }
-
-        public bool HasDish(string dishId)
-        {
-            return CurrentPlate?.DishesId?.Contains(dishId) == true;
-        }
-
-        public List<string> GetDishIds()
-        {
-            return CurrentPlate?.DishesId ?? new List<string>();
-        }
-
     }
-
 }
