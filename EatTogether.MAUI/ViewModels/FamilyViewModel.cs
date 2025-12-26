@@ -9,7 +9,6 @@ using EatTogether.MAUI.Views.Main.FamilyPages;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using EatTogether.MAUI.Messages;
-using System.Numerics;
 
 namespace EatTogether.MAUI.ViewModels;
 
@@ -21,6 +20,7 @@ public partial class FamilyViewModel : ObservableObject
     private readonly IMembershipService _membershipService;
     private readonly IFamilyService _familyService;
     private readonly IPlateService _plateService;
+    private readonly IDishService _dishService;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -46,9 +46,12 @@ public partial class FamilyViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<FamilyMember> _familyMembers = new();
 
-    // Для тарелок
+    // Разделяем тарелки на ожидающие и обработанные
     [ObservableProperty]
-    private ObservableCollection<Plate> _plates = new();
+    private ObservableCollection<Plate> _pendingPlates = new();
+
+    [ObservableProperty]
+    private ObservableCollection<Plate> _processedPlates = new();
 
     [ObservableProperty]
     private bool _hasPlates;
@@ -75,7 +78,7 @@ public partial class FamilyViewModel : ObservableObject
     private bool _isLoading;
 
     [ObservableProperty]
-    private double _currentTabHeight = 400; // НОВОЕ: высота текущей вкладки
+    private double _currentTabHeight = 400;
 
     // Словарь для имен пользователей
     private Dictionary<string, string> _userNames = new();
@@ -94,7 +97,8 @@ public partial class FamilyViewModel : ObservableObject
     ICurrentFamilyService currentFamilyService,
     IMembershipService membershipService,
     IFamilyService familyService,
-    IPlateService plateService)
+    IPlateService plateService,
+    IDishService dishService)
     {
         _currentUserService = currentUserService;
         _createFamilyViewModel = createFamilyViewModel;
@@ -102,24 +106,33 @@ public partial class FamilyViewModel : ObservableObject
         _membershipService = membershipService;
         _familyService = familyService;
         _plateService = plateService;
+        _dishService = dishService;
 
         _currentUserService.UserChanged += OnUserChanged;
         _currentFamilyService.FamilyChanged += OnFamilyChanged;
 
-        // Инициализация вкладок с разной начальной высотой
         InitializeTabs();
-
         CurrentTab = Tabs.FirstOrDefault() ?? Tabs[0];
 
-        // РЕГИСТРАЦИЯ СООБЩЕНИЯ ДЛЯ ОБНОВЛЕНИЯ ТАРЕЛОК
+        // Регистрация сообщений
         WeakReferenceMessenger.Default.Register<PlateUpdatedMessage>(
             this,
             (recipient, message) =>
             {
-                // Обновляем в основном потоке UI
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    LoadPlates(); // Обновляем список тарелок
+                    LoadPlates();
+                });
+            });
+
+        WeakReferenceMessenger.Default.Register<DishStatusUpdatedMessage>(
+            this,
+            (recipient, message) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    // Обновляем статус конкретного блюда
+                    UpdateDishStatus(message.DishId, message.Status);
                 });
             });
 
@@ -133,21 +146,22 @@ public partial class FamilyViewModel : ObservableObject
         Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>(),
         Application.Current.Handler.MauiContext.Services.GetService<IMembershipService>(),
         Application.Current.Handler.MauiContext.Services.GetService<IFamilyService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<IPlateService>())
+        Application.Current.Handler.MauiContext.Services.GetService<IPlateService>(),
+        Application.Current.Handler.MauiContext.Services.GetService<IDishService>())
     {
-    }
-    ~FamilyViewModel()
-    {
-        // Отписываемся от сообщений при уничтожении
-        WeakReferenceMessenger.Default.Unregister<PlateUpdatedMessage>(this);
     }
 
-    // Или добавьте метод для очистки
+    ~FamilyViewModel()
+    {
+        WeakReferenceMessenger.Default.Unregister<PlateUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<DishStatusUpdatedMessage>(this);
+    }
+
     public void Cleanup()
     {
         WeakReferenceMessenger.Default.Unregister<PlateUpdatedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<DishStatusUpdatedMessage>(this);
     }
-
 
     private void InitializeTabs()
     {
@@ -191,7 +205,7 @@ public partial class FamilyViewModel : ObservableObject
             {
                 FamilyName = currentFamily.Name ?? "Моя семья";
                 FamilyDescription = currentFamily.Description ?? "Описание семьи пока не добавлено";
-                MembersCount = $"{currentFamily.CountUsers} учатников";
+                MembersCount = $"{currentFamily.CountUsers} участников";
 
                 if (currentFamily.Members != null && currentFamily.Members.Any())
                 {
@@ -207,11 +221,10 @@ public partial class FamilyViewModel : ObservableObject
                             CurrentUserMember = member;
                         }
 
-                        // Сохраняем имя пользователя
                         _userNames[member.UserId] = member.DisplayName;
                     }
 
-                    MembersCount = $"{FamilyMembers.Count} Участников";
+                    MembersCount = $"{FamilyMembers.Count} участников";
                 }
                 else
                 {
@@ -262,11 +275,11 @@ public partial class FamilyViewModel : ObservableObject
                 _userNames[member.UserId] = member.DisplayName;
             }
 
-            MembersCount = $"{FamilyMembers.Count} Участников";
+            MembersCount = $"{FamilyMembers.Count} участников";
         }
     }
 
-    // ========== МЕТОДЫ ДЛЯ ТАРЕЛОК ==========
+    // ========== МЕТОДЫ ДЛЯ ТАРЕЛОК И БЛЮД ==========
 
     [RelayCommand]
     private async void LoadPlates()
@@ -289,8 +302,12 @@ public partial class FamilyViewModel : ObservableObject
 
             if (plates != null && plates.Any())
             {
-                // Создаем новую коллекцию для избежания проблем с потоками
-                var newPlates = new ObservableCollection<Plate>();
+                // Очищаем коллекции
+                PendingPlates.Clear();
+                ProcessedPlates.Clear();
+
+                // Загружаем данные для каждой тарелки
+                var platesWithDishes = new List<Plate>();
 
                 foreach (var plate in plates)
                 {
@@ -301,26 +318,45 @@ public partial class FamilyViewModel : ObservableObject
                     plate.StatusColor = GetStatusColor(plate.Status);
                     plate.IsExpanded = false;
 
-                    newPlates.Add(plate);
+                    // Загружаем блюда для тарелки
+                    await LoadDishesForPlate(plate);
+
+                    platesWithDishes.Add(plate);
                 }
 
-                // Сортируем по ID (новые первые)
-                var sortedPlates = newPlates.OrderByDescending(p => p.Id).ToList();
-
-                // Обновляем коллекцию
-                Plates.Clear();
-                foreach (var plate in sortedPlates)
+                // Разделяем тарелки на ожидающие и обработанные
+                foreach (var plate in platesWithDishes)
                 {
-                    Plates.Add(plate);
+                    if (IsPlateProcessed(plate))
+                    {
+                        ProcessedPlates.Add(plate);
+                    }
+                    else
+                    {
+                        PendingPlates.Add(plate);
+                    }
+                }
+
+                // Сортируем обработанные тарелки: принятые вверху, отклоненные внизу
+                var sortedProcessedPlates = ProcessedPlates
+                    .OrderByDescending(p => p.HasAnyAcceptedDish) // Сначала с принятыми блюдами
+                    .ThenByDescending(p => p.Status == RequestStatus.Accepted) // Затем принятые тарелки
+                    .ThenByDescending(p => p.Id) // По новизне
+                    .ToList();
+
+                ProcessedPlates.Clear();
+                foreach (var plate in sortedProcessedPlates)
+                {
+                    ProcessedPlates.Add(plate);
                 }
             }
             else
             {
-                // Если тарелок нет, очищаем коллекцию
-                Plates.Clear();
+                PendingPlates.Clear();
+                ProcessedPlates.Clear();
             }
 
-            HasPlates = Plates.Any();
+            HasPlates = PendingPlates.Any() || ProcessedPlates.Any();
         }
         catch (Exception ex)
         {
@@ -331,7 +367,6 @@ public partial class FamilyViewModel : ObservableObject
         {
             IsLoadingPlates = false;
 
-            // Пересчитываем высоту для вкладки Активность
             if (SelectedTabIndex == 0)
             {
                 UpdateTabHeight();
@@ -339,48 +374,334 @@ public partial class FamilyViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private async void TogglePlate(string plateId)
-    {
-        var plate = Plates.FirstOrDefault(p => p.Id == plateId);
-        if (plate != null)
-        {
-            plate.IsExpanded = !plate.IsExpanded;
-
-            // Если раскрыли и еще не загрузили блюда - загружаем
-            if (plate.IsExpanded && (!plate.Dishes.Any() || plate.Dishes == null))
-            {
-                await LoadDishesForPlate(plate);
-            }
-
-            // Пересчитываем высоту вкладки
-            UpdateTabHeight();
-        }
-    }
-
     private async Task LoadDishesForPlate(Plate plate)
     {
         try
         {
-            var dishes = await _plateService.GetDishesOnPlate(plate.Id);
-            if (dishes != null)
+            var dishesOnPlate = await _plateService.GetDishesOnPlate(plate.Id);
+            if (dishesOnPlate != null && dishesOnPlate.Any())
             {
-                plate.Dishes = new List<Dish>(dishes);
+                var dishes = new List<Dish>();
 
-                // Уведомляем об изменении
-                OnPropertyChanged(nameof(Plates));
+                foreach (var dishOnPlate in dishesOnPlate)
+                {
+                    var dish = await _dishService.GetDishAsync(dishOnPlate.Id);
+                    if (dish != null)
+                    {
+                        // Устанавливаем правильные свойства для UI
+                        dish.dishOnPlateId = dishOnPlate.dishOnPlateId;
+                        dish.Status = dishOnPlate.Status;
+                        dish.IsInPlate = true;
 
-                // Пересчитываем высоту
-                UpdateTabHeight();
+                        // Устанавливаем визуальные свойства
+                        UpdateDishUIProperties(dish);
+
+                        dishes.Add(dish);
+                    }
+                }
+
+                plate.Dishes = dishes;
+
+                // Проверяем статус тарелки
+                UpdatePlateStatusBasedOnDishes(plate);
+            }
+            else
+            {
+                plate.Dishes = new List<Dish>();
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке блюд: {ex.Message}");
+            plate.Dishes = new List<Dish>();
         }
     }
 
-    // Вспомогательные методы (только для ViewModel)
+    private bool IsPlateProcessed(Plate plate)
+    {
+        if (plate == null || plate.Dishes == null || !plate.Dishes.Any())
+            return false;
+
+        // Тарелка считается обработанной, если все блюда имеют статус Accepted или Rejected
+        return plate.Dishes.All(d => d.Status == RequestStatus.Accepted || d.Status == RequestStatus.Rejected);
+    }
+
+    private void UpdatePlateStatusBasedOnDishes(Plate plate)
+    {
+        if (plate == null || plate.Dishes == null || !plate.Dishes.Any())
+            return;
+
+        // Проверяем, есть ли хотя бы одно принятое блюдо
+        bool hasAcceptedDish = plate.Dishes.Any(d => d.Status == RequestStatus.Accepted);
+        bool hasRejectedDish = plate.Dishes.Any(d => d.Status == RequestStatus.Rejected);
+        bool allProcessed = plate.Dishes.All(d => d.Status != RequestStatus.Pending);
+
+        if (allProcessed)
+        {
+            // Если все блюда обработаны
+            if (hasAcceptedDish)
+            {
+                plate.Status = RequestStatus.Accepted;
+                plate.HasAnyAcceptedDish = true;
+            }
+            else if (hasRejectedDish)
+            {
+                plate.Status = RequestStatus.Rejected;
+                plate.HasAnyAcceptedDish = false;
+            }
+        }
+        else
+        {
+            // Если есть ожидающие блюда
+            plate.Status = RequestStatus.Pending;
+            plate.HasAnyAcceptedDish = false;
+        }
+
+        // Обновляем UI свойства тарелки
+        plate.StatusText = GetStatusText(plate.Status);
+        plate.StatusColor = GetStatusColor(plate.Status);
+        plate.IsProcessed = allProcessed;
+        plate.CanShowActions = !allProcessed;
+    }
+
+    [RelayCommand]
+    private async void AcceptDish(Dish dish)
+    {
+        if (dish == null || dish.Status != RequestStatus.Pending) return;
+
+        try
+        {
+            // Обновляем статус в UI
+            dish.Status = RequestStatus.Accepted;
+            UpdateDishUIProperties(dish);
+
+            // Отправляем запрос на сервер
+            await _dishService.EditDishStatus(dish.dishOnPlateId, dish.Status);
+
+            // Находим родительскую тарелку
+            var plate = FindPlateForDish(dish);
+            if (plate != null)
+            {
+                UpdatePlateStatusBasedOnDishes(plate);
+
+                // Если тарелка теперь обработана, перемещаем ее
+                if (plate.IsProcessed && PendingPlates.Contains(plate))
+                {
+                    PendingPlates.Remove(plate);
+                    ProcessedPlates.Insert(0, plate); // Добавляем в начало обработанных
+
+                    // Сортируем обработанные тарелки
+                    SortProcessedPlates();
+                }
+            }
+
+            // Отправляем сообщение об обновлении
+            WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.Id, dish.Status));
+
+            System.Diagnostics.Debug.WriteLine($"Блюдо {dish.Name} принято");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при принятии блюда: {ex.Message}");
+
+            // Откатываем изменения в случае ошибки
+            dish.Status = RequestStatus.Pending;
+            UpdateDishUIProperties(dish);
+        }
+    }
+
+    [RelayCommand]
+    private async void RejectDish(Dish dish)
+    {
+        if (dish == null || dish.Status != RequestStatus.Pending) return;
+
+        try
+        {
+            // Обновляем статус в UI
+            dish.Status = RequestStatus.Rejected;
+            UpdateDishUIProperties(dish);
+
+            // Отправляем запрос на сервер
+            await _dishService.EditDishStatus(dish.dishOnPlateId, dish.Status);
+
+            // Находим родительскую тарелку
+            var plate = FindPlateForDish(dish);
+            if (plate != null)
+            {
+                UpdatePlateStatusBasedOnDishes(plate);
+
+                // Если тарелка теперь обработана, перемещаем ее
+                if (plate.IsProcessed && PendingPlates.Contains(plate))
+                {
+                    PendingPlates.Remove(plate);
+                    ProcessedPlates.Add(plate);
+
+                    // Сортируем обработанные тарелки
+                    SortProcessedPlates();
+                }
+            }
+
+            // Отправляем сообщение об обновлении
+            WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.Id, dish.Status));
+
+            System.Diagnostics.Debug.WriteLine($"Блюдо {dish.Name} отклонено");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ошибка при отклонении блюда: {ex.Message}");
+
+            // Откатываем изменения в случае ошибки
+            dish.Status = RequestStatus.Pending;
+            UpdateDishUIProperties(dish);
+        }
+    }
+
+    private Plate FindPlateForDish(Dish dish)
+    {
+        // Ищем в ожидающих тарелках
+        var plate = PendingPlates.FirstOrDefault(p => p.Dishes?.Any(d => d.Id == dish.Id) == true);
+        if (plate != null) return plate;
+
+        // Ищем в обработанных тарелках
+        return ProcessedPlates.FirstOrDefault(p => p.Dishes?.Any(d => d.Id == dish.Id) == true);
+    }
+
+    private void SortProcessedPlates()
+    {
+        var sortedProcessedPlates = ProcessedPlates
+            .OrderByDescending(p => p.HasAnyAcceptedDish) // Сначала с принятыми блюдами
+            .ThenByDescending(p => p.Status == RequestStatus.Accepted) // Затем принятые тарелки
+            .ThenByDescending(p => p.Id) // По новизне
+            .ToList();
+
+        ProcessedPlates.Clear();
+        foreach (var plate in sortedProcessedPlates)
+        {
+            ProcessedPlates.Add(plate);
+        }
+    }
+
+    private void UpdateDishUIProperties(Dish dish)
+    {
+        dish.StatusText = GetStatusText(dish.Status);
+        dish.StatusColor = GetStatusColor(dish.Status);
+        dish.ButtonBackgroundColor = GetButtonBackgroundColor(dish.Status);
+        dish.ButtonTextColor = GetButtonTextColor(dish.Status);
+        dish.IsStatusVisible = true;
+        dish.CanShowActions = dish.Status == RequestStatus.Pending;
+    }
+
+    private void UpdateDishStatus(string dishId, RequestStatus status)
+    {
+        // Ищем блюдо во всех тарелках
+        foreach (var plate in PendingPlates.Concat(ProcessedPlates))
+        {
+            var dish = plate.Dishes?.FirstOrDefault(d => d.Id == dishId);
+            if (dish != null)
+            {
+                dish.Status = status;
+                UpdateDishUIProperties(dish);
+                UpdatePlateStatusBasedOnDishes(plate);
+                break;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async void TogglePlate(string plateId)
+    {
+        // Ищем в ожидающих тарелках
+        var plate = PendingPlates.FirstOrDefault(p => p.Id == plateId);
+        if (plate == null)
+        {
+            // Ищем в обработанных тарелках
+            plate = ProcessedPlates.FirstOrDefault(p => p.Id == plateId);
+        }
+
+        if (plate != null)
+        {
+            plate.IsExpanded = !plate.IsExpanded;
+
+            if (plate.IsExpanded && (!plate.Dishes.Any() || plate.Dishes == null))
+            {
+                await LoadDishesForPlate(plate);
+            }
+
+            UpdateTabHeight();
+        }
+    }
+
+    [RelayCommand]
+    private async void AcceptPlate(string plateId)
+    {
+        var plate = PendingPlates.FirstOrDefault(p => p.Id == plateId);
+        if (plate != null)
+        {
+            try
+            {
+                // Принимаем все блюда в тарелке
+                foreach (var dish in plate.Dishes.Where(d => d.Status == RequestStatus.Pending))
+                {
+                    dish.Status = RequestStatus.Accepted;
+                    UpdateDishUIProperties(dish);
+                    await _dishService.EditDishStatus(dish.dishOnPlateId, dish.Status);
+                }
+
+                UpdatePlateStatusBasedOnDishes(plate);
+
+                // Перемещаем тарелку в обработанные
+                if (plate.IsProcessed)
+                {
+                    PendingPlates.Remove(plate);
+                    ProcessedPlates.Insert(0, plate);
+                    SortProcessedPlates();
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Тарелка {plateId} принята полностью");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при принятии тарелки: {ex.Message}");
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async void RejectPlate(string plateId)
+    {
+        var plate = PendingPlates.FirstOrDefault(p => p.Id == plateId);
+        if (plate != null)
+        {
+            try
+            {
+                // Отклоняем все блюда в тарелке
+                foreach (var dish in plate.Dishes.Where(d => d.Status == RequestStatus.Pending))
+                {
+                    dish.Status = RequestStatus.Rejected;
+                    UpdateDishUIProperties(dish);
+                    await _dishService.EditDishStatus(dish.dishOnPlateId, dish.Status);
+                }
+
+                UpdatePlateStatusBasedOnDishes(plate);
+
+                // Перемещаем тарелку в обработанные
+                if (plate.IsProcessed)
+                {
+                    PendingPlates.Remove(plate);
+                    ProcessedPlates.Add(plate);
+                    SortProcessedPlates();
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Тарелка {plateId} отклонена полностью");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при отклонении тарелки: {ex.Message}");
+            }
+        }
+    }
+
+    // Вспомогательные методы
     private string GetUserName(string userId)
     {
         if (string.IsNullOrEmpty(userId)) return "Участник";
@@ -426,46 +747,26 @@ public partial class FamilyViewModel : ObservableObject
         };
     }
 
-    // Команды для блюд (заглушки)
-    [RelayCommand]
-    private void AcceptDish(string parameters)
+    private Color GetButtonBackgroundColor(RequestStatus status)
     {
-        System.Diagnostics.Debug.WriteLine($"Блюдо принято: {parameters}");
-    }
-
-    [RelayCommand]
-    private void RejectDish(string parameters)
-    {
-        System.Diagnostics.Debug.WriteLine($"Блюдо отклонено: {parameters}");
-    }
-
-    // Команды для тарелок
-    [RelayCommand]
-    private void AcceptPlate(string plateId)
-    {
-        var plate = Plates.FirstOrDefault(p => p.Id == plateId);
-        if (plate != null)
+        return status switch
         {
-            plate.Status = RequestStatus.Accepted;
-            plate.StatusText = "Принята";
-            plate.StatusColor = Color.FromArgb("#4CAF50");
-
-            System.Diagnostics.Debug.WriteLine($"Тарелка {plateId} принята");
-        }
+            RequestStatus.Pending => Colors.Transparent,
+            RequestStatus.Accepted => Color.FromArgb("#E8F5E9"), // Light Green
+            RequestStatus.Rejected => Color.FromArgb("#FFEBEE"), // Light Red
+            _ => Colors.Transparent
+        };
     }
 
-    [RelayCommand]
-    private void RejectPlate(string plateId)
+    private Color GetButtonTextColor(RequestStatus status)
     {
-        var plate = Plates.FirstOrDefault(p => p.Id == plateId);
-        if (plate != null)
+        return status switch
         {
-            plate.Status = RequestStatus.Rejected;
-            plate.StatusText = "Отклонена";
-            plate.StatusColor = Color.FromArgb("#F44336");
-
-            System.Diagnostics.Debug.WriteLine($"Тарелка {plateId} отклонена");
-        }
+            RequestStatus.Pending => Color.FromArgb("#FFA500"), // Orange
+            RequestStatus.Accepted => Color.FromArgb("#2E7D32"), // Dark Green
+            RequestStatus.Rejected => Color.FromArgb("#C62828"), // Dark Red
+            _ => Colors.Gray
+        };
     }
 
     // ========== КОМАНДЫ ДЛЯ ВКЛАДОК С ДИНАМИЧЕСКОЙ ВЫСОТОЙ ==========
@@ -478,10 +779,7 @@ public partial class FamilyViewModel : ObservableObject
             SelectedTabIndex = index;
             CurrentTab = Tabs[index];
 
-            // Загружаем данные для вкладки
             await LoadTabDataAsync(index);
-
-            // Устанавливаем высоту для новой вкладки
             UpdateTabHeight();
         }
     }
@@ -491,7 +789,7 @@ public partial class FamilyViewModel : ObservableObject
         switch (tabIndex)
         {
             case 0: // Активность
-                if (Plates == null || !Plates.Any())
+                if (!PendingPlates.Any() && !ProcessedPlates.Any())
                 {
                     LoadPlates();
                 }
@@ -520,7 +818,6 @@ public partial class FamilyViewModel : ObservableObject
         IsLoading = false;
     }
 
-    // Метод для расчета высоты текущей вкладки
     private void UpdateTabHeight()
     {
         if (CurrentTab == null) return;
@@ -537,21 +834,40 @@ public partial class FamilyViewModel : ObservableObject
             case TabType.Activity:
                 if (!HasPlates) return 300;
 
-                int plateCount = Plates?.Count ?? 0;
-                int expandedCount = Plates?.Count(p => p.IsExpanded) ?? 0;
-                int dishCount = Plates?.Sum(p => p.Dishes?.Count ?? 0) ?? 0;
+                int pendingPlateCount = PendingPlates?.Count ?? 0;
+                int processedPlateCount = ProcessedPlates?.Count ?? 0;
 
-                // Базовая высота: заголовок + подсказка + отступы
-                double height = 200;
+                int expandedPendingCount = PendingPlates?.Count(p => p.IsExpanded) ?? 0;
+                int expandedProcessedCount = ProcessedPlates?.Count(p => p.IsExpanded) ?? 0;
 
-                // Тарелки без раскрытия (~100px)
-                height += (plateCount - expandedCount) * 100;
+                int dishCount = (PendingPlates?.Sum(p => p.Dishes?.Count ?? 0) ?? 0) +
+                              (ProcessedPlates?.Sum(p => p.Dishes?.Count ?? 0) ?? 0);
 
-                // Раскрытые тарелки (~250px + блюда)
-                height += expandedCount * 250;
+                // Базовая высота: заголовки + отступы
+                double height = 300; // Базовый отступ
+
+                // Заголовок для ожидающих тарелок
+                if (pendingPlateCount > 0) height += 50;
+
+                // Ожидающие тарелки без раскрытия (~100px)
+                height += (pendingPlateCount - expandedPendingCount) * 100;
+
+                // Раскрытые ожидающие тарелки (~250px + блюда)
+                height += expandedPendingCount * 250;
+
+                // Заголовок для обработанных тарелок
+                if (processedPlateCount > 0) height += 50;
+
+                // Обработанные тарелки без раскрытия (~80px)
+                height += (processedPlateCount - expandedProcessedCount) * 80;
+
+                // Раскрытые обработанные тарелки (~200px + блюда)
+                height += expandedProcessedCount * 200;
+
+                // Блюда (по 50px)
                 height += dishCount * 50;
 
-                return Math.Min(height, 800); // Максимум 800px
+                return Math.Min(height, 1000); // Максимум 1000px
 
             case TabType.Members:
                 if (FamilyMembers == null || !FamilyMembers.Any()) return 200;
@@ -675,7 +991,7 @@ public partial class FamilyViewModel : ObservableObject
             PendingRequests.Remove(request);
 
             FamilyMembers.Add(newMember);
-            MembersCount = $"{FamilyMembers.Count} Участников";
+            MembersCount = $"{FamilyMembers.Count} участников";
 
             _userNames[request.UserId] = request.UserDisplayName;
         }
@@ -754,7 +1070,6 @@ public partial class FamilyViewModel : ObservableObject
                 LoadPlates();
             }
 
-            // Устанавливаем высоту для новой вкладки
             CurrentTabHeight = value.Height;
         }
     }
@@ -771,18 +1086,26 @@ public partial class FamilyViewModel : ObservableObject
     {
         HasPendingRequests = value?.Any() == true;
 
-        // Пересчитываем высоту если это активная вкладка
         if (CurrentTab?.Type == TabType.Requests)
         {
             UpdateTabHeight();
         }
     }
 
-    partial void OnPlatesChanged(ObservableCollection<Plate> value)
+    partial void OnPendingPlatesChanged(ObservableCollection<Plate> value)
     {
-        HasPlates = value?.Any() == true;
+        HasPlates = (PendingPlates?.Any() == true) || (ProcessedPlates?.Any() == true);
 
-        // Пересчитываем высоту если это активная вкладка
+        if (CurrentTab?.Type == TabType.Activity)
+        {
+            UpdateTabHeight();
+        }
+    }
+
+    partial void OnProcessedPlatesChanged(ObservableCollection<Plate> value)
+    {
+        HasPlates = (PendingPlates?.Any() == true) || (ProcessedPlates?.Any() == true);
+
         if (CurrentTab?.Type == TabType.Activity)
         {
             UpdateTabHeight();
@@ -817,4 +1140,16 @@ public enum TabType
     Activity,
     Members,
     Requests
+}
+
+public class DishStatusUpdatedMessage
+{
+    public string DishId { get; }
+    public RequestStatus Status { get; }
+
+    public DishStatusUpdatedMessage(string dishId, RequestStatus status)
+    {
+        DishId = dishId;
+        Status = status;
+    }
 }

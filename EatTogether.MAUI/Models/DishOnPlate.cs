@@ -13,7 +13,7 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string DishId { get; set; }
         [FirestoreProperty]
-        public RequestStatus Status { get; set; }
+        public RequestStatus Status { get; set; } = RequestStatus.Pending;
 
         public DishOnPlate(string plateId, string dishId)
         {

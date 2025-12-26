@@ -35,5 +35,9 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
         {
             return await _cloudStoreService.GetDishAsync(dishId);
         }
+        public async Task EditDishStatus(string dishOnPlateId, RequestStatus status)
+        {
+            await _cloudStoreService.EditDishStatusFromDB(dishOnPlateId, status);
+        }
     }
 }

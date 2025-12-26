@@ -461,7 +461,7 @@ namespace EatTogether.MAUI.Services
                 if (document.Exists)
                 {
                     Plate plate = document.ConvertTo<Plate>();
-                    if (plate.FamilyId == familyId && plate.Status == RequestStatus.Pending)
+                    if (plate.FamilyId == familyId)
                     {
                         Plates.Add(plate);
                     }
@@ -471,17 +471,16 @@ namespace EatTogether.MAUI.Services
             Console.WriteLine($"Retrieved {Plates.Count} Dishes from Firestore.");
             return Plates;
         }
-        public async Task EditPlateStatus(Plate plate)
+        public async Task EditPlateStatus(string plateId, RequestStatus status)
         {
             await SetupFirestore();
-            var document = _db.Collection("Plates").Document(plate.Id);
+            var document = _db.Collection("Plates").Document(plateId);
             var snapshot = await document.GetSnapshotAsync();
 
             if (snapshot.Exists)
             {
-                // Обновляем только поле UserFamilies
-                await document.UpdateAsync("Status", plate.Status);
-                Console.WriteLine($"plate {plate.Id} updated");
+                await document.UpdateAsync("Status", status);
+                Console.WriteLine($"plate {plateId} updated");
             }
         }
 
@@ -501,13 +500,28 @@ namespace EatTogether.MAUI.Services
                     DishOnPlate dishOnPlate = document.ConvertTo<DishOnPlate>();
                     if (dishOnPlate.PlateId == PlateId)
                     {
-                        Dishes.Add(await GetDishAsync(dishOnPlate.DishId));
+                        Dish dish = await GetDishAsync(dishOnPlate.DishId);
+                        dish.Status = dishOnPlate.Status;
+                        dish.dishOnPlateId = dishOnPlate.Id;
+                        Dishes.Add(dish);
                     }
                 }
             }
 
             Console.WriteLine($"Retrieved {Dishes.Count} Dishes from Firestore.");
             return Dishes;
+        }
+        public async Task EditDishStatusFromDB(string dishOnPlateId, RequestStatus status)
+        {
+            await SetupFirestore();
+            var document = _db.Collection("DishOnPlate").Document(dishOnPlateId);
+            var snapshot = await document.GetSnapshotAsync();
+
+            if (snapshot.Exists)
+            {
+                await document.UpdateAsync("Status", status);
+                Console.WriteLine($"dishOnPlate {dishOnPlateId} updated");
+            }
         }
 
         public async Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories)

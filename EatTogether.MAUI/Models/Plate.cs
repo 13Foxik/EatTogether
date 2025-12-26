@@ -40,6 +40,10 @@ namespace EatTogether.MAUI.Models
         [ObservableProperty]
         private List<Dish> _dishes = new();
 
+        public bool IsProcessed { get; set; }
+        public bool CanShowActions { get; set; } = true;
+        public bool HasAnyAcceptedDish { get; set; }
+
         public Plate()
         {
         }

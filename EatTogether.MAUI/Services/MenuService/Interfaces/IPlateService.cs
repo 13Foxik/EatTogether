@@ -7,6 +7,6 @@ namespace EatTogether.MAUI.Services.MenuService.Interfaces
         Task<List<Plate>> GetFamilyPlates(string familyId);
         Task<List<Dish>> GetDishesOnPlate(string plateId);
 
-        Task EditPlateStatus(Plate plate);
+        Task EditPlateStatus(string plateId, RequestStatus status);
     }
 }

@@ -9,5 +9,6 @@ namespace EatTogether.MAUI.Services.MenuService.Interfaces
         Task DeleteDishAsync(string Id);
         Task EditDishAsync(Dish dish);
         Task<Dish> GetDishAsync(string id);
+        Task EditDishStatus(string dishOnPlateId, RequestStatus status);
     }
 }
