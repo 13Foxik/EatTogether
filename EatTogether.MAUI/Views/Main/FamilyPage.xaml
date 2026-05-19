@@ -20,6 +20,7 @@
             <converters:FirstCharacterConverter x:Key="FirstCharacterConverter"/>
             <converters:ExpandedIconConverter x:Key="ExpandedIconConverter"/>
             <converters:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter"/>
+            <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -200,7 +201,7 @@
                                     CommandParameter="2"/>
                         </Grid>
 
-                        <!-- Индикатор активной вкладки -->
+                        <!-- Индикатор активной вкладка -->
                         <BoxView HeightRequest="3"
                                  WidthRequest="80"
                                  BackgroundColor="{StaticResource PrimaryColor}"
@@ -319,7 +320,7 @@
 
                                                                             <!-- Информация о пользователе -->
                                                                             <VerticalStackLayout Grid.Column="1" 
-                                                                                                 Spacing="4" 
+                                                                                                 Spacing="2" 
                                                                                                  VerticalOptions="Center">
                                                                                 <Label Text="{Binding UserName}"
                                                                                        FontSize="14"
@@ -327,7 +328,12 @@
                                                                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
                                                                                 <Label Text="Заявка на приготовление"
-                                                                                       FontSize="12"
+                                                                                       FontSize="11"
+                                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+
+                                                                                <!-- ДОБАВЛЕНА ДАТА -->
+                                                                                <Label Text="{Binding CreatedDateText}"
+                                                                                       FontSize="10"
                                                                                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                                                                             </VerticalStackLayout>
 
@@ -336,12 +342,12 @@
                                                                                                    Spacing="8" 
                                                                                                    VerticalOptions="Center">
 
-                                                                                <!-- Статус тарелки -->
+                                                                                <!-- Статус тарелки с прогрессом -->
                                                                                 <Frame BackgroundColor="{Binding StatusColor}"
                                                                                        CornerRadius="6"
                                                                                        Padding="6,2"
                                                                                        HeightRequest="24"
-                                                                                       MinimumWidthRequest="60">
+                                                                                       MinimumWidthRequest="70">
                                                                                     <Label Text="{Binding StatusText}"
                                                                                            FontSize="10"
                                                                                            TextColor="White"
@@ -560,6 +566,11 @@
                                                                                 <Label Text="Заявка обработана"
                                                                                        FontSize="11"
                                                                                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+
+                                                                                <!-- ДОБАВЛЕНА ДАТА -->
+                                                                                <Label Text="{Binding CreatedDateText}"
+                                                                                       FontSize="10"
+                                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                                                                             </VerticalStackLayout>
 
                                                                             <!-- Статус и кнопка раскрытия -->
@@ -686,11 +697,11 @@
                                                                    FontSize="12"
                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
 
-                                                            <Label Text="• Вы можете принимать/отклонять блюда"
+                                                            <Label Text="• Вы можете принимать/отклонять блюда по одному или все сразу"
                                                                    FontSize="12"
                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
 
-                                                            <Label Text="• После обработки заявки перемещаются в раздел 'Обработанные'"
+                                                            <Label Text="• После обработки всех блюд заявка перемещается в раздел 'Обработанные'"
                                                                    FontSize="12"
                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                                                         </VerticalStackLayout>
@@ -702,78 +713,202 @@
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
 
-                                        <!-- УЧАСТНИКИ -->
+                                        <!-- УЧАСТНИКИ - ИСПРАВЛЕННЫЙ ВАРИАНТ -->
                                         <VerticalStackLayout IsVisible="{Binding IsMembers}" 
                                                              Spacing="12"
                                                              Padding="20,16,20,40">
 
-                                            <!-- Индикатор загрузки -->
+                                            <!-- Индикатор загрузки участников -->
                                             <ActivityIndicator IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                   Path=BindingContext.IsLoading}"
+                                                                                   Path=BindingContext.IsLoadingMembers}"
                                                                IsRunning="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                   Path=BindingContext.IsLoading}"
+                                                                                   Path=BindingContext.IsLoadingMembers}"
                                                                Color="{StaticResource PrimaryColor}"
                                                                HorizontalOptions="Center"
                                                                VerticalOptions="Center"/>
 
-                                            <CollectionView ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                  Path=BindingContext.FamilyMembers}"
-                                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                Path=BindingContext.IsLoading, 
-                                                                                Converter={StaticResource InvertedBoolConverter}}"
-                                                            VerticalOptions="FillAndExpand">
-                                                <CollectionView.ItemTemplate>
-                                                    <DataTemplate x:DataType="models:FamilyMember">
-                                                        <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                               CornerRadius="12"
-                                                               Padding="16"
-                                                               Margin="0,0,0,12">
-                                                            <Grid ColumnDefinitions="Auto,1*,Auto" ColumnSpacing="12">
-                                                                <!-- Аватар участника -->
-                                                                <Frame WidthRequest="44"
-                                                                       HeightRequest="44"
-                                                                       CornerRadius="22"
-                                                                       BackgroundColor="{StaticResource PrimaryColor}"
-                                                                       Padding="0">
-                                                                    <Label Text="{Binding DisplayName, Converter={StaticResource FirstCharacterConverter}}"
-                                                                           TextColor="White"
-                                                                           FontSize="16"
-                                                                           FontAttributes="Bold"
-                                                                           HorizontalOptions="Center"
-                                                                           VerticalOptions="Center"/>
-                                                                </Frame>
+                                            <!-- Сообщение когда нет участников -->
+                                            <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                       Path=BindingContext.FamilyMembers.Count, 
+                                                                       Converter={StaticResource InvertedBoolConverter}}"
+                                                   BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                   CornerRadius="12"
+                                                   Padding="20">
+                                                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                                                    <Label Text="👥"
+                                                           FontSize="32"
+                                                           HorizontalOptions="Center"/>
 
-                                                                <!-- Информация об участнике -->
-                                                                <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                                    <Label Text="{Binding DisplayName}"
-                                                                           FontSize="16"
-                                                                           FontAttributes="Bold"
-                                                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                                    <Label Text="Участник"
-                                                                           FontSize="12"
-                                                                           TextColor="{StaticResource PrimaryColor}"/>
-                                                                    <Label Text="{Binding JoinedAt, StringFormat='Участник с {0:dd.MM.yyyy}'}"
-                                                                           FontSize="10"
-                                                                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                                </VerticalStackLayout>
+                                                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                                                        <Label Text="Нет участников"
+                                                               FontSize="16"
+                                                               FontAttributes="Bold"    
+                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                               HorizontalOptions="Center"/>
 
-                                                                <!-- Блок с действиями -->
-                                                                <Grid Grid.Column="2" 
-                                                                      ColumnDefinitions="Auto,Auto" 
-                                                                      ColumnSpacing="8"
-                                                                      VerticalOptions="Center">
+                                                        <Label Text="Участники семьи будут отображаться здесь"
+                                                               FontSize="14"
+                                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                                               HorizontalOptions="Center"
+                                                               HorizontalTextAlignment="Center"/>
+                                                    </VerticalStackLayout>
+                                                </VerticalStackLayout>
+                                            </Frame>
 
-                                                                    <!-- Метка "Вы" для текущего пользователя -->
-                                                                    <Label Text="Вы"
-                                                                           Grid.Column="0"
-                                                                           FontSize="12"
-                                                                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                                                                           VerticalOptions="Center"
-                                                                           IsVisible="{Binding IsCurrentUser}"/>
+                                            <!-- Список участников - ИСПРАВЛЕННАЯ СТРУКТУРА -->
+                                            <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                                     Path=BindingContext.FamilyMembers.Count, 
+                                                                                     Converter={StaticResource CollectionCountToVisibilityConverter}}"
+                                                                 Spacing="12"
+                                                                 VerticalOptions="FillAndExpand">
 
-                                                                    <!-- Кнопка профиля для других участников -->
-                                                                    <Button Text="Профиль"
-                                                                            Grid.Column="1"
+                                                <CollectionView ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                                      Path=BindingContext.FamilyMembers}"
+                                                                SelectionMode="None"
+                                                                VerticalOptions="Start">
+
+                                                    <CollectionView.ItemTemplate>
+                                                        <DataTemplate x:DataType="models:FamilyMember">
+                                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                                                                   BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                                                   CornerRadius="12"
+                                                                   Padding="16"
+                                                                   Margin="0,0,0,12"
+                                                                   HasShadow="True"
+                                                                   HeightRequest="120">
+
+                                                                <Grid ColumnDefinitions="Auto,*,Auto" 
+                                                                      ColumnSpacing="12"
+                                                                      RowDefinitions="Auto,Auto"
+                                                                      VerticalOptions="FillAndExpand">
+
+                                                                    <!-- Аватар участника -->
+                                                                    <Frame Grid.RowSpan="2"
+                                                                           WidthRequest="44"
+                                                                           HeightRequest="44"
+                                                                           CornerRadius="22"
+                                                                           BackgroundColor="{StaticResource PrimaryColor}"
+                                                                           Padding="0"
+                                                                           VerticalOptions="Start">
+                                                                        <Label Text="{Binding DisplayName, Converter={StaticResource FirstCharacterConverter}}"
+                                                                               TextColor="White"
+                                                                               FontSize="16"
+                                                                               FontAttributes="Bold"
+                                                                               HorizontalOptions="Center"
+                                                                               VerticalOptions="Center"/>
+                                                                    </Frame>
+
+                                                                    <!-- Информация об участнике -->
+                                                                    <VerticalStackLayout Grid.Column="1" 
+                                                                                         Spacing="4"
+                                                                                         VerticalOptions="Center">
+                                                                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                                                            <Label Text="{Binding DisplayName}"
+                                                                                   FontSize="16"
+                                                                                   FontAttributes="Bold"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                                   VerticalOptions="Center"/>
+
+                                                                            <!-- Метка роли -->
+                                                                            <Frame BackgroundColor="{Binding RoleColor}"
+                                                                                   CornerRadius="4"
+                                                                                   Padding="6,2"
+                                                                                   HeightRequest="20"
+                                                                                   VerticalOptions="Center">
+                                                                                <Label Text="{Binding RoleText}"
+                                                                                       FontSize="9"
+                                                                                       TextColor="White"
+                                                                                       FontAttributes="Bold"/>
+                                                                            </Frame>
+                                                                        </HorizontalStackLayout>
+
+                                                                        <Label Text="{Binding JoinedAt, StringFormat='В семье с {0:dd.MM.yyyy}'}"
+                                                                               FontSize="11"
+                                                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                                                    </VerticalStackLayout>
+
+                                                                    <!-- Блок с действиями -->
+                                                                    <VerticalStackLayout Grid.Column="2" 
+                                                                                         Grid.RowSpan="2"
+                                                                                         Spacing="4"
+                                                                                         HorizontalOptions="End"
+                                                                                         VerticalOptions="Center">
+
+                                                                        <!-- Кнопки управления для не текущего пользователя -->
+                                                                        <HorizontalStackLayout IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"
+                                                                                               Spacing="4">
+
+                                                                            <!-- Кнопка Повысить -->
+                                                                            <Button Text="↑"
+                                                                                    BackgroundColor="#4CAF50"
+                                                                                    TextColor="White"
+                                                                                    FontSize="12"
+                                                                                    FontAttributes="Bold"
+                                                                                    WidthRequest="30"
+                                                                                    HeightRequest="30"
+                                                                                    CornerRadius="4"
+                                                                                    Padding="0"
+                                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                                                      Path=BindingContext.PromoteMemberCommand}"
+                                                                                    CommandParameter="{Binding}"
+                                                                                    IsVisible="{Binding CanPromote}"/>
+
+                                                                            <!-- Кнопка Понизить -->
+                                                                            <Button Text="↓"
+                                                                                    BackgroundColor="#2196F3"
+                                                                                    TextColor="White"
+                                                                                    FontSize="12"
+                                                                                    FontAttributes="Bold"
+                                                                                    WidthRequest="30"
+                                                                                    HeightRequest="30"
+                                                                                    CornerRadius="4"
+                                                                                    Padding="0"
+                                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                                                      Path=BindingContext.DemoteMemberCommand}"
+                                                                                    CommandParameter="{Binding}"
+                                                                                    IsVisible="{Binding CanDemote}"/>
+
+                                                                            <!-- Кнопка Исключить -->
+                                                                            <Button Text="✕"
+                                                                                    BackgroundColor="#F44336"
+                                                                                    TextColor="White"
+                                                                                    FontSize="12"
+                                                                                    FontAttributes="Bold"
+                                                                                    WidthRequest="30"
+                                                                                    HeightRequest="30"
+                                                                                    CornerRadius="4"
+                                                                                    Padding="0"
+                                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                                                      Path=BindingContext.KickMemberCommand}"
+                                                                                    CommandParameter="{Binding}"
+                                                                                    IsVisible="{Binding CanKick}"/>
+                                                                        </HorizontalStackLayout>
+
+                                                                        <!-- Метка "Вы" для текущего пользователя -->
+                                                                        <Frame IsVisible="{Binding IsCurrentUser}"
+                                                                               BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                                                                               CornerRadius="4"
+                                                                               Padding="6,2"
+                                                                               HeightRequest="20">
+                                                                            <Label Text="Вы"
+                                                                                   FontSize="10"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                                   FontAttributes="Bold"/>
+                                                                        </Frame>
+                                                                    </VerticalStackLayout>
+
+                                                                    <!-- Разделитель для кнопок действий -->
+                                                                    <BoxView Grid.ColumnSpan="3"
+                                                                             Grid.Row="1"
+                                                                             HeightRequest="1"
+                                                                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                                                                             Margin="0,8,0,8"
+                                                                             IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
+
+                                                                    <!-- Кнопка профиля -->
+                                                                    <Button Grid.Column="1"
+                                                                            Grid.Row="1"
+                                                                            Text="Профиль"
                                                                             BackgroundColor="Transparent"
                                                                             TextColor="{StaticResource PrimaryColor}"
                                                                             FontSize="12"
@@ -782,24 +917,96 @@
                                                                             CornerRadius="6"
                                                                             Padding="12,4"
                                                                             HeightRequest="28"
+                                                                            HorizontalOptions="Start"
                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                               Path=BindingContext.ViewMemberProfileCommand}"
                                                                             CommandParameter="{Binding}"
                                                                             IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
                                                                 </Grid>
-                                                            </Grid>
-                                                        </Frame>
-                                                    </DataTemplate>
-                                                </CollectionView.ItemTemplate>
+                                                            </Frame>
+                                                        </DataTemplate>
+                                                    </CollectionView.ItemTemplate>
 
-                                                <!-- Пустое пространство после списка участников -->
-                                                <CollectionView.Footer>
-                                                    <StackLayout HeightRequest="40"/>
-                                                </CollectionView.Footer>
-                                            </CollectionView>
+                                                    <!-- Пустое пространство после списка участников -->
+                                                    <CollectionView.Footer>
+                                                        <StackLayout HeightRequest="40"/>
+                                                    </CollectionView.Footer>
+                                                </CollectionView>
 
-                                            <!-- Дополнительное пространство в конце -->
-                                            <BoxView HeightRequest="30" Color="Transparent"/>
+                                                <!-- Подсказка по функционалу управления -->
+                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                       CornerRadius="12"
+                                                       Padding="16"
+                                                       Margin="0,10,0,0">
+                                                    <VerticalStackLayout Spacing="8">
+                                                        <Label Text="👑 Управление участниками"
+                                                               FontSize="14"
+                                                               FontAttributes="Bold"
+                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                                        <VerticalStackLayout Spacing="4">
+                                                            <HorizontalStackLayout Spacing="8">
+                                                                <Frame BackgroundColor="#4CAF50"
+                                                                       CornerRadius="4"
+                                                                       Padding="4,2"
+                                                                       HeightRequest="20"
+                                                                       WidthRequest="20">
+                                                                    <Label Text="↑"
+                                                                           FontSize="10"
+                                                                           TextColor="White"
+                                                                           FontAttributes="Bold"
+                                                                           HorizontalOptions="Center"/>
+                                                                </Frame>
+                                                                <Label Text="Повысить - повысить роль участника (Может: Админ или Глава)"
+                                                                       FontSize="11"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                                            </HorizontalStackLayout>
+
+                                                            <HorizontalStackLayout Spacing="8">
+                                                                <Frame BackgroundColor="#2196F3"
+                                                                       CornerRadius="4"
+                                                                       Padding="4,2"
+                                                                       HeightRequest="20"
+                                                                       WidthRequest="20">
+                                                                    <Label Text="↓"
+                                                                           FontSize="10"
+                                                                           TextColor="White"
+                                                                           FontAttributes="Bold"
+                                                                           HorizontalOptions="Center"/>
+                                                                </Frame>
+                                                                <Label Text="Понизить - понизить роль участника (Может: Админ или Глава)"
+                                                                       FontSize="11"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                                            </HorizontalStackLayout>
+
+                                                            <HorizontalStackLayout Spacing="8">
+                                                                <Frame BackgroundColor="#F44336"
+                                                                       CornerRadius="4"
+                                                                       Padding="4,2"
+                                                                       HeightRequest="20"
+                                                                       WidthRequest="20">
+                                                                    <Label Text="✕"
+                                                                           FontSize="10"
+                                                                           TextColor="White"
+                                                                           FontAttributes="Bold"
+                                                                           HorizontalOptions="Center"/>
+                                                                </Frame>
+                                                                <Label Text="Исключить - удалить участника из семьи (Может: Админ или Глава)"
+                                                                       FontSize="11"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                                            </HorizontalStackLayout>
+
+                                                            <Label Text="* Глава может управлять всеми участниками, включая Админов"
+                                                                   FontSize="10"
+                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                                                   FontAttributes="Italic"/>
+                                                        </VerticalStackLayout>
+                                                    </VerticalStackLayout>
+                                                </Frame>
+
+                                                <!-- Дополнительное пространство в конце -->
+                                                <BoxView HeightRequest="30" Color="Transparent"/>
+                                            </VerticalStackLayout>
                                         </VerticalStackLayout>
 
                                         <!-- ЗАПРОСЫ НА ВСТУПЛЕНИЕ -->

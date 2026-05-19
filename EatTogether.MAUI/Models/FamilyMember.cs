@@ -1,7 +1,6 @@
 ﻿
 
 using Google.Cloud.Firestore;
-
 namespace EatTogether.MAUI.Models
 {
     [FirestoreData]
@@ -24,8 +23,14 @@ namespace EatTogether.MAUI.Models
 
         [FirestoreProperty]
         public DateTime JoinedAt { get; set; }
-        public bool IsCurrentUser { get; set; }
 
+        // Дополнительные свойства для UI
+        public bool IsCurrentUser { get; set; }
+        public string RoleText { get; set; }
+        public Color RoleColor { get; set; }
+        public bool CanPromote { get; set; }
+        public bool CanDemote { get; set; }
+        public bool CanKick { get; set; }
 
         public FamilyMember() { }
 
@@ -40,9 +45,10 @@ namespace EatTogether.MAUI.Models
     }
     public enum FamilyRole
     {
-       Member = 0,
-       Admin = 1,
-       Owner = 2
+        Member = 0,
+        Owner = 1,
+        Admin = 2,
+        Editor = 3
     }
-
 }
+

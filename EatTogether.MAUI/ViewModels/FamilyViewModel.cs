@@ -21,6 +21,7 @@ public partial class FamilyViewModel : ObservableObject
     private readonly IFamilyService _familyService;
     private readonly IPlateService _plateService;
     private readonly IDishService _dishService;
+    private readonly IFamilyMemberControlService _memberControlService;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -78,6 +79,9 @@ public partial class FamilyViewModel : ObservableObject
     private bool _isLoading;
 
     [ObservableProperty]
+    private bool _isLoadingMembers;
+
+    [ObservableProperty]
     private double _currentTabHeight = 400;
 
     // Словарь для имен пользователей
@@ -92,13 +96,14 @@ public partial class FamilyViewModel : ObservableObject
     }
 
     public FamilyViewModel(
-    CurrentUserService currentUserService,
-    CreateFamilyViewModel createFamilyViewModel,
-    ICurrentFamilyService currentFamilyService,
-    IMembershipService membershipService,
-    IFamilyService familyService,
-    IPlateService plateService,
-    IDishService dishService)
+        CurrentUserService currentUserService,
+        CreateFamilyViewModel createFamilyViewModel,
+        ICurrentFamilyService currentFamilyService,
+        IMembershipService membershipService,
+        IFamilyService familyService,
+        IPlateService plateService,
+        IDishService dishService,
+        IFamilyMemberControlService memberControlService)
     {
         _currentUserService = currentUserService;
         _createFamilyViewModel = createFamilyViewModel;
@@ -107,6 +112,7 @@ public partial class FamilyViewModel : ObservableObject
         _familyService = familyService;
         _plateService = plateService;
         _dishService = dishService;
+        _memberControlService = memberControlService;
 
         _currentUserService.UserChanged += OnUserChanged;
         _currentFamilyService.FamilyChanged += OnFamilyChanged;
@@ -131,8 +137,7 @@ public partial class FamilyViewModel : ObservableObject
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    // Обновляем статус конкретного блюда
-                    UpdateDishStatus(message.DishId, message.Status);
+                    UpdateDishStatus(message.DishOnPlateId, message.Status);
                 });
             });
 
@@ -147,7 +152,8 @@ public partial class FamilyViewModel : ObservableObject
         Application.Current.Handler.MauiContext.Services.GetService<IMembershipService>(),
         Application.Current.Handler.MauiContext.Services.GetService<IFamilyService>(),
         Application.Current.Handler.MauiContext.Services.GetService<IPlateService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<IDishService>())
+        Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
+        Application.Current.Handler.MauiContext.Services.GetService<IFamilyMemberControlService>())
     {
     }
 
@@ -214,6 +220,11 @@ public partial class FamilyViewModel : ObservableObject
                     foreach (var member in currentFamily.Members)
                     {
                         member.IsCurrentUser = member.UserId == currentUserId;
+
+                        // Устанавливаем текст роли
+                        member.RoleText = _memberControlService.GetRoleText(member.Role);
+                        member.RoleColor = _memberControlService.GetRoleColor(member.Role);
+
                         FamilyMembers.Add(member);
 
                         if (member.IsCurrentUser)
@@ -225,6 +236,9 @@ public partial class FamilyViewModel : ObservableObject
                     }
 
                     MembersCount = $"{FamilyMembers.Count} участников";
+
+                    // Загружаем права для каждого участника
+                    await LoadMemberPermissions();
                 }
                 else
                 {
@@ -239,6 +253,12 @@ public partial class FamilyViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+
+            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ПОСЛЕ ЗАГРУЗКИ ДАННЫХ
+            if (CurrentTab?.Type == TabType.Members)
+            {
+                UpdateTabHeight();
+            }
         }
     }
 
@@ -261,6 +281,8 @@ public partial class FamilyViewModel : ObservableObject
                     Email = "",
                     AvatarUrl = membership.UserAvatarUrl,
                     Role = FamilyRole.Member,
+                    RoleText = _memberControlService.GetRoleText(FamilyRole.Member),
+                    RoleColor = _memberControlService.GetRoleColor(FamilyRole.Member),
                     JoinedAt = membership.CreatedAt,
                     IsCurrentUser = membership.UserId == currentUserId
                 };
@@ -276,6 +298,172 @@ public partial class FamilyViewModel : ObservableObject
             }
 
             MembersCount = $"{FamilyMembers.Count} участников";
+
+            // Загружаем права для каждого участника
+            await LoadMemberPermissions();
+        }
+    }
+
+    private async Task LoadMemberPermissions()
+    {
+        if (FamilyMembers == null || !FamilyMembers.Any())
+            return;
+
+        foreach (var member in FamilyMembers)
+        {
+            try
+            {
+                member.CanPromote = await _memberControlService.CanPromote(member);
+                member.CanDemote = await _memberControlService.CanDemote(member);
+                member.CanKick = await _memberControlService.CanKick(member);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке прав для участника {member.UserId}: {ex.Message}");
+                member.CanPromote = false;
+                member.CanDemote = false;
+                member.CanKick = false;
+            }
+        }
+
+        // ОБНОВЛЯЕМ ВЫСОТУ ПОСЛЕ ЗАГРУЗКИ ПРАВ
+        if (CurrentTab?.Type == TabType.Members)
+        {
+            UpdateTabHeight();
+        }
+    }
+
+    [RelayCommand]
+    private async Task PromoteMember(FamilyMember member)
+    {
+        if (member == null) return;
+
+        try
+        {
+            var currentFamily = _currentFamilyService?.GetCurrentFamily();
+            if (currentFamily == null) return;
+
+            bool result = await _memberControlService.Promote(member.UserId, currentFamily.Id);
+
+            if (result)
+            {
+                // Обновляем роль в локальных данных
+                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
+                if (updatedMember != null && updatedMember.Role < FamilyRole.Admin)
+                {
+                    updatedMember.Role = updatedMember.Role + 1;
+                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
+                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
+
+                    // Обновляем права для всех участников
+                    await LoadMemberPermissions();
+
+                    await Shell.Current.DisplayAlert("Успех",
+                        $"{member.DisplayName} повышен в роли", "OK");
+                }
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Ошибка",
+                    "Не удалось повысить участника. Проверьте ваши права.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка",
+                $"Ошибка при повышении участника: {ex.Message}", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task DemoteMember(FamilyMember member)
+    {
+        if (member == null) return;
+
+        try
+        {
+            var currentFamily = _currentFamilyService?.GetCurrentFamily();
+            if (currentFamily == null) return;
+
+            bool result = await _memberControlService.Demote(member.UserId, currentFamily.Id);
+
+            if (result)
+            {
+                // Обновляем роль в локальных данных
+                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
+                if (updatedMember != null && updatedMember.Role > FamilyRole.Member)
+                {
+                    updatedMember.Role = updatedMember.Role - 1;
+                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
+                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
+
+                    // Обновляем права для всех участников
+                    await LoadMemberPermissions();
+
+                    await Shell.Current.DisplayAlert("Успех",
+                        $"{member.DisplayName} понижен в роли", "OK");
+                }
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Ошибка",
+                    "Не удалось понизить участника. Проверьте ваши права.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка",
+                $"Ошибка при понижении участника: {ex.Message}", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task KickMember(FamilyMember member)
+    {
+        if (member == null) return;
+
+        try
+        {
+            bool confirm = await Shell.Current.DisplayAlert("Подтверждение",
+                $"Вы уверены, что хотите исключить {member.DisplayName} из семьи?",
+                "Исключить", "Отмена");
+
+            if (!confirm) return;
+
+            var currentFamily = _currentFamilyService?.GetCurrentFamily();
+            if (currentFamily == null) return;
+
+            bool result = await _memberControlService.Kick(member.UserId, currentFamily.Id);
+
+            if (result)
+            {
+                // Удаляем из локальных данных
+                var memberToRemove = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
+                if (memberToRemove != null)
+                {
+                    FamilyMembers.Remove(memberToRemove);
+                    MembersCount = $"{FamilyMembers.Count} участников";
+
+                    // ОБНОВЛЯЕМ ВЫСОТУ ПОСЛЕ УДАЛЕНИЯ УЧАСТНИКА
+                    if (CurrentTab?.Type == TabType.Members)
+                    {
+                        UpdateTabHeight();
+                    }
+                }
+
+                await Shell.Current.DisplayAlert("Успех",
+                    $"{member.DisplayName} исключен из семьи", "OK");
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Ошибка",
+                    "Не удалось исключить участника. Проверьте ваши права.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка",
+                $"Ошибка при исключении участника: {ex.Message}", "OK");
         }
     }
 
@@ -318,11 +506,26 @@ public partial class FamilyViewModel : ObservableObject
                     plate.StatusColor = GetStatusColor(plate.Status);
                     plate.IsExpanded = false;
 
+                    // Устанавливаем текст даты создания
+                    if (plate.CreatedAt != DateTime.MinValue)
+                    {
+                        plate.CreatedDateText = GetFormattedDate(plate.CreatedAt);
+                    }
+                    else
+                    {
+                        plate.CreatedDateText = "Сегодня";
+                    }
+
                     // Загружаем блюда для тарелки
                     await LoadDishesForPlate(plate);
 
                     platesWithDishes.Add(plate);
                 }
+
+                // СОРТИРУЕМ ТАРЕЛКИ ПО ДАТЕ (самые старые сверху)
+                platesWithDishes = platesWithDishes
+                    .OrderBy(p => p.CreatedAt)
+                    .ToList();
 
                 // Разделяем тарелки на ожидающие и обработанные
                 foreach (var plate in platesWithDishes)
@@ -337,17 +540,28 @@ public partial class FamilyViewModel : ObservableObject
                     }
                 }
 
-                // Сортируем обработанные тарелки: принятые вверху, отклоненные внизу
+                // Сортируем обработанные тарелки: сначала по дате (старые сверху), потом по статусу
                 var sortedProcessedPlates = ProcessedPlates
-                    .OrderByDescending(p => p.HasAnyAcceptedDish) // Сначала с принятыми блюдами
+                    .OrderBy(p => p.CreatedAt) // Сначала старые
+                    .ThenByDescending(p => p.HasAnyAcceptedDish) // Затем с принятыми блюдами
                     .ThenByDescending(p => p.Status == RequestStatus.Accepted) // Затем принятые тарелки
-                    .ThenByDescending(p => p.Id) // По новизне
                     .ToList();
 
                 ProcessedPlates.Clear();
                 foreach (var plate in sortedProcessedPlates)
                 {
                     ProcessedPlates.Add(plate);
+                }
+
+                // Сортируем ожидающие тарелки по дате (старые сверху)
+                var sortedPendingPlates = PendingPlates
+                    .OrderBy(p => p.CreatedAt)
+                    .ToList();
+
+                PendingPlates.Clear();
+                foreach (var plate in sortedPendingPlates)
+                {
+                    PendingPlates.Add(plate);
                 }
             }
             else
@@ -367,7 +581,8 @@ public partial class FamilyViewModel : ObservableObject
         {
             IsLoadingPlates = false;
 
-            if (SelectedTabIndex == 0)
+            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ПОСЛЕ ЗАГРУЗКИ ТАРЕЛОК
+            if (SelectedTabIndex == 0 || CurrentTab?.Type == TabType.Activity)
             {
                 UpdateTabHeight();
             }
@@ -388,7 +603,7 @@ public partial class FamilyViewModel : ObservableObject
                     var dish = await _dishService.GetDishAsync(dishOnPlate.Id);
                     if (dish != null)
                     {
-                        // Устанавливаем правильные свойства для UI
+                        // ВАЖНО: Сохраняем dishOnPlateId из связи между тарелкой и блюдом
                         dish.dishOnPlateId = dishOnPlate.dishOnPlateId;
                         dish.Status = dishOnPlate.Status;
                         dish.IsInPlate = true;
@@ -431,36 +646,59 @@ public partial class FamilyViewModel : ObservableObject
         if (plate == null || plate.Dishes == null || !plate.Dishes.Any())
             return;
 
-        // Проверяем, есть ли хотя бы одно принятое блюдо
-        bool hasAcceptedDish = plate.Dishes.Any(d => d.Status == RequestStatus.Accepted);
-        bool hasRejectedDish = plate.Dishes.Any(d => d.Status == RequestStatus.Rejected);
-        bool allProcessed = plate.Dishes.All(d => d.Status != RequestStatus.Pending);
+        // Рассчитываем статистику блюд
+        int totalDishes = plate.Dishes.Count;
+        int acceptedCount = plate.Dishes.Count(d => d.Status == RequestStatus.Accepted);
+        int rejectedCount = plate.Dishes.Count(d => d.Status == RequestStatus.Rejected);
+        int pendingCount = plate.Dishes.Count(d => d.Status == RequestStatus.Pending);
+
+        bool allProcessed = pendingCount == 0;
+        bool hasAcceptedDish = acceptedCount > 0;
+        bool hasRejectedDish = rejectedCount > 0;
+
+        // Обновляем флаги
+        plate.HasAnyAcceptedDish = hasAcceptedDish;
+        plate.IsProcessed = allProcessed;
+        plate.ProcessedCount = acceptedCount + rejectedCount;
+        plate.TotalCount = totalDishes;
 
         if (allProcessed)
         {
-            // Если все блюда обработаны
+            // ВСЕ блюда обработаны - определяем финальный статус тарелки
             if (hasAcceptedDish)
             {
+                // Есть хотя бы одно принятое блюдо - тарелка считается принятой
                 plate.Status = RequestStatus.Accepted;
-                plate.HasAnyAcceptedDish = true;
+                plate.StatusText = "Принята";
+                plate.StatusColor = GetStatusColor(RequestStatus.Accepted); // Зеленый
             }
             else if (hasRejectedDish)
             {
+                // Все блюда отклонены
                 plate.Status = RequestStatus.Rejected;
-                plate.HasAnyAcceptedDish = false;
+                plate.StatusText = "Отклонена";
+                plate.StatusColor = GetStatusColor(RequestStatus.Rejected); // Красный
             }
         }
         else
         {
-            // Если есть ожидающие блюда
+            // Есть ожидающие блюда
             plate.Status = RequestStatus.Pending;
-            plate.HasAnyAcceptedDish = false;
+
+            if (acceptedCount > 0 || rejectedCount > 0)
+            {
+                // Частично обработано
+                plate.StatusText = $"Обработка ({acceptedCount + rejectedCount}/{totalDishes})";
+                plate.StatusColor = Color.FromArgb("#2196F3"); // Синий для обработки
+            }
+            else
+            {
+                // Все еще ожидают
+                plate.StatusText = "Ожидает";
+                plate.StatusColor = GetStatusColor(RequestStatus.Pending); // Оранжевый
+            }
         }
 
-        // Обновляем UI свойства тарелки
-        plate.StatusText = GetStatusText(plate.Status);
-        plate.StatusColor = GetStatusColor(plate.Status);
-        plate.IsProcessed = allProcessed;
         plate.CanShowActions = !allProcessed;
     }
 
@@ -484,29 +722,45 @@ public partial class FamilyViewModel : ObservableObject
             {
                 UpdatePlateStatusBasedOnDishes(plate);
 
-                // Если тарелка теперь обработана, перемещаем ее
-                if (plate.IsProcessed && PendingPlates.Contains(plate))
-                {
-                    PendingPlates.Remove(plate);
-                    ProcessedPlates.Insert(0, plate); // Добавляем в начало обработанных
+                // Проверяем, если тарелка теперь полностью обработана
+                bool allProcessed = plate.Dishes?.All(d =>
+                    d.Status == RequestStatus.Accepted || d.Status == RequestStatus.Rejected) == true;
 
-                    // Сортируем обработанные тарелки
+                if (allProcessed && PendingPlates.Contains(plate))
+                {
+                    // Перемещаем в обработанные и ОБНОВЛЯЕМ статус
+                    PendingPlates.Remove(plate);
+
+                    // Важно: нужно пересчитать статус после перемещения
+                    UpdatePlateStatusBasedOnDishes(plate);
+
+                    ProcessedPlates.Insert(0, plate);
                     SortProcessedPlates();
+                }
+                else
+                {
+                    // Если не все блюда обработаны, обновляем в текущем списке
+                    var index = PendingPlates.IndexOf(plate);
+                    if (index >= 0)
+                    {
+                        PendingPlates[index] = plate;
+                    }
                 }
             }
 
-            // Отправляем сообщение об обновлении
-            WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.Id, dish.Status));
-
-            System.Diagnostics.Debug.WriteLine($"Блюдо {dish.Name} принято");
+            WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.dishOnPlateId, dish.Status));
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Ошибка при принятии блюда: {ex.Message}");
-
-            // Откатываем изменения в случае ошибки
             dish.Status = RequestStatus.Pending;
             UpdateDishUIProperties(dish);
+        }
+
+        // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ
+        if (CurrentTab?.Type == TabType.Activity)
+        {
+            UpdateTabHeight();
         }
     }
 
@@ -517,61 +771,74 @@ public partial class FamilyViewModel : ObservableObject
 
         try
         {
-            // Обновляем статус в UI
             dish.Status = RequestStatus.Rejected;
             UpdateDishUIProperties(dish);
-
-            // Отправляем запрос на сервер
             await _dishService.EditDishStatus(dish.dishOnPlateId, dish.Status);
 
-            // Находим родительскую тарелку
             var plate = FindPlateForDish(dish);
             if (plate != null)
             {
                 UpdatePlateStatusBasedOnDishes(plate);
 
-                // Если тарелка теперь обработана, перемещаем ее
-                if (plate.IsProcessed && PendingPlates.Contains(plate))
+                bool allProcessed = plate.Dishes?.All(d =>
+                    d.Status == RequestStatus.Accepted || d.Status == RequestStatus.Rejected) == true;
+
+                if (allProcessed && PendingPlates.Contains(plate))
                 {
                     PendingPlates.Remove(plate);
-                    ProcessedPlates.Add(plate);
 
-                    // Сортируем обработанные тарелки
+                    // Важно: нужно пересчитать статус после перемещения
+                    UpdatePlateStatusBasedOnDishes(plate);
+
+                    ProcessedPlates.Add(plate);
                     SortProcessedPlates();
+                }
+                else
+                {
+                    var index = PendingPlates.IndexOf(plate);
+                    if (index >= 0)
+                    {
+                        PendingPlates[index] = plate;
+                    }
                 }
             }
 
-            // Отправляем сообщение об обновлении
-            WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.Id, dish.Status));
-
-            System.Diagnostics.Debug.WriteLine($"Блюдо {dish.Name} отклонено");
+            WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.dishOnPlateId, dish.Status));
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Ошибка при отклонении блюда: {ex.Message}");
-
-            // Откатываем изменения в случае ошибки
             dish.Status = RequestStatus.Pending;
             UpdateDishUIProperties(dish);
+        }
+
+        // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ
+        if (CurrentTab?.Type == TabType.Activity)
+        {
+            UpdateTabHeight();
         }
     }
 
     private Plate FindPlateForDish(Dish dish)
     {
-        // Ищем в ожидающих тарелках
-        var plate = PendingPlates.FirstOrDefault(p => p.Dishes?.Any(d => d.Id == dish.Id) == true);
+        if (string.IsNullOrEmpty(dish.dishOnPlateId)) return null;
+
+        // Ищем в ожидающих тарелках по dishOnPlateId
+        var plate = PendingPlates.FirstOrDefault(p =>
+            p.Dishes?.Any(d => d.dishOnPlateId == dish.dishOnPlateId) == true);
         if (plate != null) return plate;
 
-        // Ищем в обработанных тарелках
-        return ProcessedPlates.FirstOrDefault(p => p.Dishes?.Any(d => d.Id == dish.Id) == true);
+        // Ищем в обработанных тарелках по dishOnPlateId
+        return ProcessedPlates.FirstOrDefault(p =>
+            p.Dishes?.Any(d => d.dishOnPlateId == dish.dishOnPlateId) == true);
     }
 
     private void SortProcessedPlates()
     {
         var sortedProcessedPlates = ProcessedPlates
-            .OrderByDescending(p => p.HasAnyAcceptedDish) // Сначала с принятыми блюдами
-            .ThenByDescending(p => p.Status == RequestStatus.Accepted) // Затем принятые тарелки
-            .ThenByDescending(p => p.Id) // По новизне
+            .OrderBy(p => p.CreatedAt) // Старые сверху
+            .ThenByDescending(p => p.HasAnyAcceptedDish) // С принятыми блюдами
+            .ThenByDescending(p => p.Status == RequestStatus.Accepted) // Принятые тарелки
             .ToList();
 
         ProcessedPlates.Clear();
@@ -591,19 +858,28 @@ public partial class FamilyViewModel : ObservableObject
         dish.CanShowActions = dish.Status == RequestStatus.Pending;
     }
 
-    private void UpdateDishStatus(string dishId, RequestStatus status)
+    private void UpdateDishStatus(string dishOnPlateId, RequestStatus status)
     {
-        // Ищем блюдо во всех тарелках
+        if (string.IsNullOrEmpty(dishOnPlateId)) return;
+
+        // Ищем блюдо во всех тарелках по dishOnPlateId
         foreach (var plate in PendingPlates.Concat(ProcessedPlates))
         {
-            var dish = plate.Dishes?.FirstOrDefault(d => d.Id == dishId);
+            var dish = plate.Dishes?.FirstOrDefault(d => d.dishOnPlateId == dishOnPlateId);
             if (dish != null)
             {
                 dish.Status = status;
                 UpdateDishUIProperties(dish);
                 UpdatePlateStatusBasedOnDishes(plate);
-                break;
+
+                // Не выходим из цикла, так как dishOnPlateId уникален и найден только в одной тарелке
             }
+        }
+
+        // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ
+        if (CurrentTab?.Type == TabType.Activity)
+        {
+            UpdateTabHeight();
         }
     }
 
@@ -645,14 +921,21 @@ public partial class FamilyViewModel : ObservableObject
                     dish.Status = RequestStatus.Accepted;
                     UpdateDishUIProperties(dish);
                     await _dishService.EditDishStatus(dish.dishOnPlateId, dish.Status);
+
+                    WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.dishOnPlateId, dish.Status));
                 }
 
+                // Обновляем статус тарелки
                 UpdatePlateStatusBasedOnDishes(plate);
 
-                // Перемещаем тарелку в обработанные
-                if (plate.IsProcessed)
+                // Перемещаем в обработанные
+                if (plate.IsProcessed && PendingPlates.Contains(plate))
                 {
                     PendingPlates.Remove(plate);
+
+                    // Еще раз обновляем статус для правильного цвета и текста
+                    UpdatePlateStatusBasedOnDishes(plate);
+
                     ProcessedPlates.Insert(0, plate);
                     SortProcessedPlates();
                 }
@@ -662,6 +945,12 @@ public partial class FamilyViewModel : ObservableObject
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка при принятии тарелки: {ex.Message}");
+            }
+
+            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ
+            if (CurrentTab?.Type == TabType.Activity)
+            {
+                UpdateTabHeight();
             }
         }
     }
@@ -680,14 +969,19 @@ public partial class FamilyViewModel : ObservableObject
                     dish.Status = RequestStatus.Rejected;
                     UpdateDishUIProperties(dish);
                     await _dishService.EditDishStatus(dish.dishOnPlateId, dish.Status);
+
+                    WeakReferenceMessenger.Default.Send(new DishStatusUpdatedMessage(dish.dishOnPlateId, dish.Status));
                 }
 
                 UpdatePlateStatusBasedOnDishes(plate);
 
-                // Перемещаем тарелку в обработанные
-                if (plate.IsProcessed)
+                if (plate.IsProcessed && PendingPlates.Contains(plate))
                 {
                     PendingPlates.Remove(plate);
+
+                    // Еще раз обновляем статус для правильного цвета и текста
+                    UpdatePlateStatusBasedOnDishes(plate);
+
                     ProcessedPlates.Add(plate);
                     SortProcessedPlates();
                 }
@@ -697,6 +991,12 @@ public partial class FamilyViewModel : ObservableObject
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка при отклонении тарелки: {ex.Message}");
+            }
+
+            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ
+            if (CurrentTab?.Type == TabType.Activity)
+            {
+                UpdateTabHeight();
             }
         }
     }
@@ -813,9 +1113,15 @@ public partial class FamilyViewModel : ObservableObject
 
     private async Task LoadFamilyMembersAsync()
     {
-        IsLoading = true;
+        IsLoadingMembers = true;
         await Task.Delay(800);
-        IsLoading = false;
+        IsLoadingMembers = false;
+
+        // ОБНОВЛЯЕМ ВЫСОТУ ПОСЛЕ ЗАГРУЗКИ УЧАСТНИКОВ
+        if (CurrentTab?.Type == TabType.Members)
+        {
+            UpdateTabHeight();
+        }
     }
 
     private void UpdateTabHeight()
@@ -870,18 +1176,34 @@ public partial class FamilyViewModel : ObservableObject
                 return Math.Min(height, 1000); // Максимум 1000px
 
             case TabType.Members:
-                if (FamilyMembers == null || !FamilyMembers.Any()) return 200;
+                if (FamilyMembers == null || !FamilyMembers.Any()) return 250;
 
-                // ~80px на участника + заголовок
-                double membersHeight = 100 + (FamilyMembers.Count * 80);
-                return Math.Min(membersHeight, 500);
+                // Учитываем высоту для каждого участника
+                // Каждый участник: ~120px (высота карточки) + отступы
+                double membersHeight = 100; // Базовый отступ + заголовок
+
+                foreach (var member in FamilyMembers)
+                {
+                    membersHeight += 120; // Высота карточки участника
+
+                    // Если есть подсказка управления, добавляем высоту
+                    if (!member.IsCurrentUser)
+                    {
+                        membersHeight += 10; // Дополнительный отступ для кнопок
+                    }
+                }
+
+                // Добавляем высоту подсказки по управлению
+                membersHeight += 120; // Высота блока с подсказкой
+
+                return Math.Min(membersHeight, 800); // Максимум 800px
 
             case TabType.Requests:
                 if (!HasPendingRequests) return 250;
 
                 // ~140px на запрос + история
-                double requestsHeight = 100 + (PendingRequests.Count * 140);
-                return Math.Min(requestsHeight, 500);
+                double requestsHeight = 100 + (PendingRequests.Count * 140) + 100; // +100 для истории
+                return Math.Min(requestsHeight, 600);
 
             default:
                 return 400;
@@ -954,7 +1276,8 @@ public partial class FamilyViewModel : ObservableObject
         try
         {
             await Shell.Current.DisplayAlert("Профиль",
-                $"Профиль участника: {member.DisplayName}", "OK");
+                $"Профиль участника: {member.DisplayName}\n" +
+                $"Роль: {member.RoleText}", "OK");
         }
         catch (Exception ex)
         {
@@ -978,6 +1301,8 @@ public partial class FamilyViewModel : ObservableObject
                 Email = "",
                 AvatarUrl = request.UserAvatarUrl,
                 Role = FamilyRole.Member,
+                RoleText = _memberControlService.GetRoleText(FamilyRole.Member),
+                RoleColor = _memberControlService.GetRoleColor(FamilyRole.Member),
                 JoinedAt = DateTime.UtcNow
             };
 
@@ -990,10 +1315,27 @@ public partial class FamilyViewModel : ObservableObject
 
             PendingRequests.Remove(request);
 
+            // Загружаем права для нового участника
+            newMember.CanPromote = await _memberControlService.CanPromote(newMember);
+            newMember.CanDemote = await _memberControlService.CanDemote(newMember);
+            newMember.CanKick = await _memberControlService.CanKick(newMember);
+
             FamilyMembers.Add(newMember);
             MembersCount = $"{FamilyMembers.Count} участников";
 
             _userNames[request.UserId] = request.UserDisplayName;
+
+            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ПОСЛЕ ДОБАВЛЕНИЯ УЧАСТНИКА
+            if (CurrentTab?.Type == TabType.Members)
+            {
+                UpdateTabHeight();
+            }
+
+            // Обновляем высоту вкладки запросов
+            if (CurrentTab?.Type == TabType.Requests)
+            {
+                UpdateTabHeight();
+            }
         }
         catch (Exception ex)
         {
@@ -1015,6 +1357,12 @@ public partial class FamilyViewModel : ObservableObject
             request.RespondedBy = _currentUserService.CurrentUser?.Uid;
 
             PendingRequests.Remove(request);
+
+            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ЗАПРОСОВ
+            if (CurrentTab?.Type == TabType.Requests)
+            {
+                UpdateTabHeight();
+            }
         }
         catch (Exception ex)
         {
@@ -1043,6 +1391,12 @@ public partial class FamilyViewModel : ObservableObject
             }
 
             HasPendingRequests = PendingRequests.Any();
+
+            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ЗАПРОСОВ
+            if (CurrentTab?.Type == TabType.Requests)
+            {
+                UpdateTabHeight();
+            }
         }
         catch (Exception ex)
         {
@@ -1112,11 +1466,69 @@ public partial class FamilyViewModel : ObservableObject
         }
     }
 
+    partial void OnFamilyMembersChanged(ObservableCollection<FamilyMember> value)
+    {
+        // ОБНОВЛЯЕМ ВЫСОТУ ПРИ ИЗМЕНЕНИИ СПИСКА УЧАСТНИКОВ
+        if (CurrentTab?.Type == TabType.Members)
+        {
+            UpdateTabHeight();
+        }
+    }
+
     public void RefreshFamilyData()
     {
         LoadFamilyData();
         LoadPendingRequests();
         LoadPlates();
+    }
+
+    private string GetFormattedDate(DateTime dateTime)
+    {
+        var dateUtc = dateTime.Kind == DateTimeKind.Local ? dateTime.ToUniversalTime() : dateTime;
+        var now = DateTime.UtcNow;
+
+        if (dateUtc > now)
+        {
+            return "Только что";
+        }
+
+        var timeSpan = now - dateUtc;
+
+        if (timeSpan.TotalDays < 1)
+        {
+            if (timeSpan.TotalHours < 1)
+            {
+                if (timeSpan.TotalMinutes < 1)
+                {
+                    return "Только что";
+                }
+                var minutes = (int)timeSpan.TotalMinutes;
+                return minutes == 1 ? "1 минуту назад" : $"{minutes} минут назад";
+            }
+            var hours = (int)timeSpan.TotalHours;
+            return hours == 1 ? "1 час назад" : $"{hours} часов назад";
+        }
+        else if (timeSpan.TotalDays < 2)
+        {
+            return "Вчера в " + dateUtc.ToLocalTime().ToString("HH:mm");
+        }
+        else if (timeSpan.TotalDays < 7)
+        {
+            var days = (int)timeSpan.TotalDays;
+            var localDate = dateUtc.ToLocalTime();
+            return $"{days} дня назад в {localDate:HH:mm}";
+        }
+        else if (timeSpan.TotalDays < 30)
+        {
+            var weeks = (int)(timeSpan.TotalDays / 7);
+            var localDate = dateUtc.ToLocalTime();
+            return $"{weeks} недель назад, {localDate:dd MMM в HH:mm}";
+        }
+        else
+        {
+            var localDate = dateUtc.ToLocalTime();
+            return localDate.ToString("dd MMM yyyy в HH:mm");
+        }
     }
 }
 
@@ -1140,16 +1552,4 @@ public enum TabType
     Activity,
     Members,
     Requests
-}
-
-public class DishStatusUpdatedMessage
-{
-    public string DishId { get; }
-    public RequestStatus Status { get; }
-
-    public DishStatusUpdatedMessage(string dishId, RequestStatus status)
-    {
-        DishId = dishId;
-        Status = status;
-    }
 }

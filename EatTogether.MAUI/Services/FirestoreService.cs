@@ -4,6 +4,7 @@ using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.ViewModels;
 using Firebase.Auth;
 using Google.Cloud.Firestore;
+using System.Data;
 using System.Reflection;
 using System.Xml.Linq;
 using User = EatTogether.MAUI.Models.User;
@@ -122,6 +123,181 @@ namespace EatTogether.MAUI.Services
             catch(Exception ex)
             {
                 Console.WriteLine($"Ошибка добавления:{ex}");
+            }
+        }
+
+        public async Task PermissionUpToDB(string userId, string familyId)
+        {
+            await SetupFirestore();
+
+            var documentFamily = _db.Collection("Families").Document(familyId);
+
+            try
+            {
+                // Получаем текущие данные семьи
+                var snapshot = await documentFamily.GetSnapshotAsync();
+
+                if (!snapshot.Exists)
+                {
+                    Console.WriteLine("Семья не найдена");
+                    return;
+                }
+
+                var family = snapshot.ConvertTo<Family>();
+
+                // Находим и обновляем роль пользователя
+                bool userFound = false;
+                foreach (var member in family.Members)
+                {
+                    if (member.UserId == userId && member.Role != FamilyRole.Admin)
+                    {
+                        member.Role = member.Role + 1;
+                        userFound = true;
+                        break;
+                    }
+                }
+
+                if (!userFound)
+                {
+                    Console.WriteLine($"Пользователь {userId} не найден в семье");
+                    return;
+                }
+
+                // Обновляем документ в Firestore
+                await documentFamily.SetAsync(family, SetOptions.MergeAll);
+
+                Console.WriteLine($"Роль пользователя {userId} успешно обновлена");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обновлении роли: {ex.Message}");
+            }
+        }
+        public async Task PermissionDownToDB(string userId, string familyId)
+        {
+            await SetupFirestore();
+
+            var documentFamily = _db.Collection("Families").Document(familyId);
+
+            try
+            {
+                // Получаем текущие данные семьи
+                var snapshot = await documentFamily.GetSnapshotAsync();
+
+                if (!snapshot.Exists)
+                {
+                    Console.WriteLine("Семья не найдена");
+                    return;
+                }
+
+                var family = snapshot.ConvertTo<Family>();
+
+                // Находим и обновляем роль пользователя
+                bool userFound = false;
+                foreach (var member in family.Members)
+                {
+                    if (member.UserId == userId && member.Role != FamilyRole.Member)
+                    {
+                        member.Role = member.Role - 1;
+                        userFound = true;
+                        break;
+                    }
+                }
+
+                if (!userFound)
+                {
+                    Console.WriteLine($"Пользователь {userId} не найден в семье");
+                    return;
+                }
+
+                // Обновляем документ в Firestore
+                await documentFamily.SetAsync(family, SetOptions.MergeAll);
+
+                Console.WriteLine($"Роль пользователя {userId} успешно обновлена");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обновлении роли: {ex.Message}");
+            }
+        }
+
+        public async Task<bool> KickMemberFromDB(string userId, string familyId)
+        {
+            await SetupFirestore();
+
+            var documentFamily = _db.Collection("Families").Document(familyId);
+            var documentUser = _db.Collection("Users").Document(userId);
+
+            string currentUserId = _currentUserService.GetCurrentUser().Uid;
+
+            try
+            {
+                return await _db.RunTransactionAsync(async transaction =>
+                {
+                    // Получаем данные семьи в транзакции
+                    var familySnapshot = await transaction.GetSnapshotAsync(documentFamily);
+
+                    if (!familySnapshot.Exists)
+                        throw new Exception("Семья не найдена");
+
+                    var family = familySnapshot.ConvertTo<Family>();
+
+                    // Находим пользователя для удаления
+                    var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
+                    if (memberToRemove == null)
+                        throw new Exception("Пользователь не найден в семье");
+
+                    // Проверка: нельзя кикнуть владельца
+                    if (memberToRemove.Role == FamilyRole.Owner)
+                        throw new Exception("Нельзя удалить владельца семьи");
+
+                    // Проверка: текущий пользователь должен быть владельцем или админом
+                    var currentMember = family.Members.FirstOrDefault(m => m.UserId == currentUserId);
+                    if (currentMember == null || (currentMember.Role != FamilyRole.Owner && currentMember.Role != FamilyRole.Admin))
+                        throw new Exception("Недостаточно прав для удаления пользователя");
+
+                    // Проверка: нельзя кикнуть самого себя (опционально, по желанию)
+                    if (userId == currentUserId && currentMember.Role != FamilyRole.Owner)
+                        throw new Exception("Вы не можете удалить сами себя");
+
+                    // Проверяем, существует ли пользователь в Users
+                    var userSnapshot = await transaction.GetSnapshotAsync(documentUser);
+                    if (!userSnapshot.Exists)
+                        throw new Exception("Пользователь не найден");
+
+                    // Удаляем пользователя из семьи
+                    family.Members.RemoveAll(m => m.UserId == userId);
+                    family.CountUsers = family.Members.Count;
+
+                    // Подготавливаем обновления для семьи
+                    Dictionary<string, object> familyUpdates = new()
+            {
+                { "Members", family.Members },
+                { "CountUsers", family.CountUsers }
+            };
+
+                    // Обновляем семью в транзакции
+                    transaction.Update(documentFamily, familyUpdates);
+
+                    // Удаляем familyId из массива UserFamilies пользователя
+                    transaction.Update(documentUser, "UserFamilies", FieldValue.ArrayRemove(familyId));
+
+                    // Optional: Можно также добавить поле с информацией о последней оставленной семье
+                    Dictionary<string, object> userAdditionalUpdates = new()
+            {
+                { "LastFamilyLeftAt", DateTime.UtcNow },
+                { "LastFamilyId", familyId }
+            };
+
+                    transaction.Update(documentUser, userAdditionalUpdates);
+
+                    return true;
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при удалении пользователя: {ex.Message}");
+                return false;
             }
         }
 
@@ -431,6 +607,11 @@ namespace EatTogether.MAUI.Services
             string id = await GenerateUniqueIdAsync("Plates");
 
             plate.Id = id;
+
+            if (plate.CreatedAt == DateTime.MinValue)
+            {
+                plate.CreatedAt = DateTime.UtcNow;
+            }
 
             await _db.Collection("Plates").Document(plate.Id).SetAsync(plate);
             Console.WriteLine($"Тарелка: {plate.UserId}- saved to Firestore");

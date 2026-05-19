@@ -9,6 +9,9 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task UpdateRequestStatus(MembershipRequest request, RequestStatus status);
         Task InsertFamilyModel(Family family);
         Task AddMemberToFamily(string familyId, FamilyMember member);
+        Task PermissionUpToDB(string userId, string familyId);
+        Task PermissionDownToDB(string userId, string familyId);
+        Task<bool> KickMemberFromDB(string userId, string familyId);
         Task InsertMembership(MembershipRequest request);
         Task<User> GetUserModel(string documentId);
         Task<Family> GetFamilyModel(string documentId);
