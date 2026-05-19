@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:EatTogether.MAUI.ViewModels"
              xmlns:converters="clr-namespace:EatTogether.MAUI.Converters"
              x:Class="EatTogether.MAUI.Views.Main.ProfilePages.AvatarPickerPage"
+             x:Name="AvatarPickerRoot"
              x:DataType="vm:AvatarPickerViewModel"
              Title="Выбор аватара"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
@@ -11,7 +12,18 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:AvatarKeyToImageSourceConverter x:Key="AvatarImage"/>
-            <converters:BoolToCornerRadiusConverter x:Key="BoolToCornerRadius"/>
+
+            <Style x:Key="AvatarTileBorder" TargetType="Border">
+                <Setter Property="StrokeThickness" Value="2"/>
+                <Setter Property="Stroke" Value="Transparent"/>
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"/>
+                <Style.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="Stroke" Value="{StaticResource PrimaryColor}"/>
+                        <Setter Property="StrokeThickness" Value="3"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -38,22 +50,16 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:AvatarChoice">
-                        <Frame Padding="8"
-                               HasShadow="False"
-                               CornerRadius="16"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
-                               BorderColor="{Binding IsSelected, Converter={StaticResource BoolToCornerRadius}, ConverterParameter='border'}">
-                            <Frame.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AvatarPickerViewModel}}, Path=SelectAvatarCommand}"
+                        <Grid Padding="4">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding BindingContext.SelectAvatarCommand, Source={x:Reference AvatarPickerRoot}}"
                                                       CommandParameter="{Binding .}"/>
-                            </Frame.GestureRecognizers>
+                            </Grid.GestureRecognizers>
 
                             <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
                                 <Border WidthRequest="80"
                                         HeightRequest="80"
-                                        StrokeThickness="3"
-                                        Stroke="{Binding IsSelected, Converter={StaticResource BoolToCornerRadius}, ConverterParameter='stroke'}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+                                        Style="{StaticResource AvatarTileBorder}">
                                     <Border.StrokeShape>
                                         <Ellipse/>
                                     </Border.StrokeShape>
@@ -69,7 +75,7 @@
                                        HorizontalOptions="Center"
                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
                             </VerticalStackLayout>
-                        </Frame>
+                        </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
