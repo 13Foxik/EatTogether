@@ -38,7 +38,7 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<ICloudStoreService, FirestoreService>();
             builder.Services.AddSingleton<ICurrentFamilyService, CurrentFamilyService>();
             builder.Services.AddSingleton<IFamilyService, FamilyService>();
-            builder.Services.AddSingleton<IUserService, UserSerivce>();
+            builder.Services.AddSingleton<IUserService, UserService>();
             builder.Services.AddSingleton<IMembershipService, MembershipService>();
             builder.Services.AddSingleton<ICategoryService, CategoryService>();
             builder.Services.AddSingleton<ISubcategoryService, SubcategoryService>();

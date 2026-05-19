@@ -58,8 +58,6 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private string _lastName;
 
-        [ObservableProperty]
-        private bool _stateOfSubscribe;
         public ProfileViewModel(CurrentUserService currentUserService, IAuthService authService)
         {
             _currentUserService = currentUserService;
@@ -94,8 +92,7 @@ namespace EatTogether.MAUI.ViewModels
         {
             CheckFirstLastName();
             CreatedAt = _currentUserService.CurrentUser?.CreatedAt ?? DateTime.MinValue;
-            DateOfBirth = _currentUserService.CurrentUser?.DateOfBitrhDay ?? DateTime.MinValue;
-            StateOfSubscribe = _currentUserService.CurrentUser?.stateOfSubscribe ?? false;
+            DateOfBirth = _currentUserService.CurrentUser?.DateOfBirthday ?? DateTime.MinValue;
         }
         private void CheckFirstLastName()
         {

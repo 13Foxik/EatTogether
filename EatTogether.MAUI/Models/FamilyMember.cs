@@ -46,9 +46,8 @@ namespace EatTogether.MAUI.Models
     public enum FamilyRole
     {
         Member = 0,
-        Owner = 1,
+        Editor = 1,
         Admin = 2,
-        Editor = 3
+        Owner = 3
     }
 }
-
