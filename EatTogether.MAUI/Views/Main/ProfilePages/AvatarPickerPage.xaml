@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:EatTogether.MAUI.ViewModels"
+             xmlns:converters="clr-namespace:EatTogether.MAUI.Converters"
+             x:Class="EatTogether.MAUI.Views.Main.ProfilePages.AvatarPickerPage"
+             x:DataType="vm:AvatarPickerViewModel"
+             Title="Выбор аватара"
+             BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:AvatarKeyToImageSourceConverter x:Key="AvatarImage"/>
+            <converters:BoolToCornerRadiusConverter x:Key="BoolToCornerRadius"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label Text="Выбери аватар"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+            <Label Text="Аватар будет виден другим участникам семьи."
+                   FontSize="14"
+                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+
+            <CollectionView ItemsSource="{Binding Avatars}"
+                            SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                                     Span="3"
+                                     HorizontalItemSpacing="12"
+                                     VerticalItemSpacing="12"/>
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AvatarChoice">
+                        <Frame Padding="8"
+                               HasShadow="False"
+                               CornerRadius="16"
+                               BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                               BorderColor="{Binding IsSelected, Converter={StaticResource BoolToCornerRadius}, ConverterParameter='border'}">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AvatarPickerViewModel}}, Path=SelectAvatarCommand}"
+                                                      CommandParameter="{Binding .}"/>
+                            </Frame.GestureRecognizers>
+
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                <Border WidthRequest="80"
+                                        HeightRequest="80"
+                                        StrokeThickness="3"
+                                        Stroke="{Binding IsSelected, Converter={StaticResource BoolToCornerRadius}, ConverterParameter='stroke'}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+                                    <Border.StrokeShape>
+                                        <Ellipse/>
+                                    </Border.StrokeShape>
+                                    <Image Source="{Binding Key, Converter={StaticResource AvatarImage}}"
+                                           Aspect="AspectFit"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
+                                </Border>
+
+                                <Label Text="{Binding DisplayName}"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Button Text="Сбросить аватар"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}"
+                    BorderColor="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray500}}"
+                    BorderWidth="1"
+                    CornerRadius="8"
+                    HorizontalOptions="Fill"
+                    Command="{Binding ClearAvatarCommand}"/>
+
+            <ActivityIndicator IsVisible="{Binding IsBusy}"
+                               IsRunning="{Binding IsBusy}"
+                               Color="{StaticResource PrimaryColor}"
+                               HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

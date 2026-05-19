@@ -5,6 +5,7 @@ using EatTogether.MAUI.ViewModels;
 using EatTogether.MAUI.Views.Auth;
 using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Views.Main.FamilyPages;
+using EatTogether.MAUI.Views.Main.ProfilePages;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.FamilyService.Implementation;
 using Microsoft.Extensions.Logging;
@@ -56,6 +57,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<SubcategoriesViewModel>();
             builder.Services.AddTransient<MenuViewModel>();
             builder.Services.AddTransient<PlateViewModel>();
+            builder.Services.AddTransient<AvatarPickerViewModel>();
 
             //Pages
             builder.Services.AddTransient<SignInPage>();
@@ -66,6 +68,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<CreateFamilyPage>();
             builder.Services.AddTransient<SubcategoriesPage>();
             builder.Services.AddTransient<PlatePage>();
+            builder.Services.AddTransient<AvatarPickerPage>();
 
             builder.Services.AddSingleton<AppShell>();
 

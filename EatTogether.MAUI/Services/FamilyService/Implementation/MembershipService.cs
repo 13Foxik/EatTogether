@@ -18,6 +18,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 Id = Guid.NewGuid().ToString(),
                 UserId = user.Uid,
                 UserDisplayName = user.DisplayName,
+                UserAvatarUrl = user.Avatar ?? string.Empty,
                 FamilyId = familyId,
                 Status = RequestStatus.Pending
             };
