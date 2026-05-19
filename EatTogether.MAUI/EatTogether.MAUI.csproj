@@ -121,12 +121,10 @@
 	  </MauiXaml>
 	</ItemGroup>
 
-	<!-- ДОБАВЬТЕ ЭТИ НАСТРОЙКИ -->
+	<!-- Release-сборка: линкер выключен, чтобы Firebase/MAUI reflection не отрезался; JIT-оптимизации включены для производительности -->
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<AndroidLinkMode>None</AndroidLinkMode>
-		<Optimize>false</Optimize>
-		<DebugType>portable</DebugType>
-		<DebugSymbols>true</DebugSymbols>
+		<Optimize>true</Optimize>
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 	</PropertyGroup>
 

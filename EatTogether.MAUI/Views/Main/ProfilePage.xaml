@@ -2,18 +2,10 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:behaviors="clr-namespace:EatTogether.MAUI.Behaviors"
-             xmlns:converters="clr-namespace:EatTogether.MAUI.Converters"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="EatTogether.MAUI.Views.Main.ProfilePage"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
-
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <converters:SubscribeStateToColorConverter x:Key="SubscribeColorConverter"/>
-            <converters:SubscribeStateToTextConverter x:Key="SubscribeTextConverter"/>
-        </ResourceDictionary>
-    </ContentPage.Resources>
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="24">
@@ -62,7 +54,7 @@
                        FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
-                <Grid ColumnDefinitions="Auto,1*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="16">
+                <Grid ColumnDefinitions="Auto,1*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="16">
                     <Label Text="Дата регистрации:"
                            Grid.Row="0" Grid.Column="0"
                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
@@ -77,15 +69,6 @@
                     <Label Text="{Binding FormattedDateOfBirth}"
                             Grid.Row="1" Grid.Column="1"
                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                           HorizontalOptions="End"/>
-
-                    <Label Text="Подписка:"
-                           Grid.Row="2" Grid.Column="0"
-                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                    <Label Text="{Binding StateOfSubscribe, Converter={StaticResource SubscribeTextConverter}}"
-                           Grid.Row="2" Grid.Column="1"
-                           TextColor="{Binding StateOfSubscribe, Converter={StaticResource SubscribeColorConverter}}"
-                           FontAttributes="Bold"
                            HorizontalOptions="End"/>
                 </Grid>
             </VerticalStackLayout>
@@ -126,27 +109,6 @@
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>
-
-            <!-- PRO подписка -->
-            <Frame Padding="16"
-                   BackgroundColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource Tertiary}}"
-                   BorderColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                   CornerRadius="12">
-
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Устали от рекламы?"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                           HorizontalOptions="Center"/>
-
-                    <Button Text="Перейти на PRO"
-                            BackgroundColor="{StaticResource PrimaryColor}"
-                            TextColor="{StaticResource White}"
-                            CornerRadius="8"
-                            HorizontalOptions="Fill"/>
-                </VerticalStackLayout>
-            </Frame>
 
             <!-- Настройки -->
             <Button Text="Настройки"

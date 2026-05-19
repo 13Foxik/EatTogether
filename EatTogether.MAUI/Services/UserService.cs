@@ -4,12 +4,12 @@ using EatTogether.MAUI.Services.FamilyService.Interfaces;
 
 namespace EatTogether.MAUI.Services
 {
-    public class UserSerivce : IUserService
+    public class UserService : IUserService
     {
         private readonly ICloudStoreService _cloudStoreService;
         private readonly IFamilyService _familyService;
         private readonly CurrentUserService _currentUserService;
-        public UserSerivce(ICloudStoreService cloudStoreService, CurrentUserService currentUserService, IFamilyService familyService)
+        public UserService(ICloudStoreService cloudStoreService, CurrentUserService currentUserService, IFamilyService familyService)
         {
             _cloudStoreService = cloudStoreService;
             _currentUserService = currentUserService;
