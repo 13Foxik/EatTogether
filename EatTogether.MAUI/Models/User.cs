@@ -25,6 +25,12 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string Avatar { get; set; }
 
+        [FirestoreProperty]
+        public string AvatarColor { get; set; }
+
+        // Возвращает цвет или дефолтный зелёный если не задан
+        public string DisplayColor => string.IsNullOrEmpty(AvatarColor) ? "#1F744D" : AvatarColor;
+
         public User() { }
 
         public User(string uid, string email, string displayName)

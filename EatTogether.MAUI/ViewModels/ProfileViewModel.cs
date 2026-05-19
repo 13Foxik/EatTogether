@@ -63,6 +63,9 @@ namespace EatTogether.MAUI.ViewModels
         [NotifyPropertyChangedFor(nameof(HasNoAvatar))]
         private string _avatar;
 
+        [ObservableProperty]
+        private string _avatarColor = "#1F744D";
+
         public bool HasAvatar => !string.IsNullOrEmpty(Avatar);
         public bool HasNoAvatar => string.IsNullOrEmpty(Avatar);
 
@@ -104,6 +107,7 @@ namespace EatTogether.MAUI.ViewModels
             CreatedAt = _currentUserService.CurrentUser?.CreatedAt ?? DateTime.MinValue;
             DateOfBirth = _currentUserService.CurrentUser?.DateOfBirthday ?? DateTime.MinValue;
             Avatar = _currentUserService.CurrentUser?.Avatar ?? string.Empty;
+            AvatarColor = _currentUserService.CurrentUser?.DisplayColor ?? "#1F744D";
         }
         private void CheckFirstLastName()
         {

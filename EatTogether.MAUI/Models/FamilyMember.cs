@@ -19,6 +19,9 @@ namespace EatTogether.MAUI.Models
         public string AvatarUrl { get; set; }
 
         [FirestoreProperty]
+        public string AvatarColor { get; set; }
+
+        [FirestoreProperty]
         public FamilyRole Role { get; set; } = FamilyRole.Member;
 
         [FirestoreProperty]
@@ -33,6 +36,9 @@ namespace EatTogether.MAUI.Models
         public bool CanKick { get; set; }
 
         public bool HasAvatar => !string.IsNullOrEmpty(AvatarUrl);
+
+        // Возвращает цвет или дефолтный зелёный если не задан
+        public string DisplayColor => string.IsNullOrEmpty(AvatarColor) ? "#1F744D" : AvatarColor;
 
         public FamilyMember() { }
 

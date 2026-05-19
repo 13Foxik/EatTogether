@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Models;
 
 namespace EatTogether.MAUI.Services.Interfaces
 {
@@ -6,7 +6,5 @@ namespace EatTogether.MAUI.Services.Interfaces
     {
         Task<User> SignInWithEmailAsync(string email, string password);
         Task SignOutAsync();
-        Task SignInWithGoogleAsync();
-        Task SignInWithAppleAsync();
     }
 }

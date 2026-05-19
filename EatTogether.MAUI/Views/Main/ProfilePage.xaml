@@ -12,6 +12,7 @@
         <ResourceDictionary>
             <converters:AvatarKeyToImageSourceConverter x:Key="AvatarImage"/>
             <converters:FirstCharacterConverter x:Key="FirstCharacterConverter"/>
+            <converters:StringToColorConverter x:Key="StringToColor"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -34,13 +35,15 @@
                                 HeightRequest="60"
                                 StrokeThickness="0"
                                 Stroke="Transparent"
-                                BackgroundColor="{StaticResource PrimaryColor}"
-                                HorizontalOptions="Start">
+                                BackgroundColor="{Binding AvatarColor, Converter={StaticResource StringToColor}}"
+                                HorizontalOptions="Start"
+                                x:Name="AvatarBorder">
                             <Border.StrokeShape>
                                 <Ellipse/>
                             </Border.StrokeShape>
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding OpenAvatarPickerCommand}"/>
+                                <TapGestureRecognizer Command="{Binding OpenAvatarPickerCommand}"
+                                                      Tapped="OnAvatarTapped"/>
                             </Border.GestureRecognizers>
                             <Grid>
                                 <Label Text="{Binding FirstName, Converter={StaticResource FirstCharacterConverter}}"
@@ -53,9 +56,31 @@
                                 <Image Source="{Binding Avatar, Converter={StaticResource AvatarImage}}"
                                        IsVisible="{Binding HasAvatar}"
                                        Aspect="AspectFit"
+                                       Margin="8"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center"/>
                             </Grid>
+                        </Border>
+
+                        <!-- Иконка редактирования поверх аватара -->
+                        <Border WidthRequest="20"
+                                HeightRequest="20"
+                                BackgroundColor="{StaticResource PrimaryColor}"
+                                StrokeThickness="0"
+                                Margin="-24,30,0,0"
+                                VerticalOptions="End"
+                                ZIndex="10">
+                            <Border.StrokeShape>
+                                <Ellipse/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenAvatarPickerCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="✎"
+                                   FontSize="10"
+                                   TextColor="White"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
                         </Border>
 
                         <VerticalStackLayout Spacing="4" VerticalOptions="Center">

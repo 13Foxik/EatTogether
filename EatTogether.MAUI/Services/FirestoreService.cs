@@ -82,8 +82,12 @@ namespace EatTogether.MAUI.Services
             await SetupFirestore();
 
             var userDoc = _db.Collection("Users").Document(user.Uid);
-            await userDoc.UpdateAsync("Avatar", user.Avatar ?? string.Empty);
-            Console.WriteLine($"User {user.Uid} avatar updated to '{user.Avatar}'");
+            await userDoc.UpdateAsync(new Dictionary<string, object>
+            {
+                { "Avatar", user.Avatar ?? string.Empty },
+                { "AvatarColor", user.AvatarColor ?? "#1F744D" }
+            });
+            Console.WriteLine($"User {user.Uid} avatar updated to '{user.Avatar}', color '{user.AvatarColor}'");
 
             // Распространяем аватар на FamilyMember-записи во всех семьях, где состоит пользователь
             var familyIds = user.UserFamilies ?? new List<string>();
@@ -103,6 +107,7 @@ namespace EatTogether.MAUI.Services
                         if (member.UserId == user.Uid)
                         {
                             member.AvatarUrl = user.Avatar ?? string.Empty;
+                            member.AvatarColor = user.AvatarColor ?? "#1F744D";
                             changed = true;
                         }
                     }
