@@ -10,8 +10,8 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <converters:SubscribeStateToColorConverter x:Key="SubscribeColorConverter"/>
-            <converters:SubscribeStateToTextConverter x:Key="SubscribeTextConverter"/>
+            <converters:AvatarKeyToImageSourceConverter x:Key="AvatarImage"/>
+            <converters:FirstCharacterConverter x:Key="FirstCharacterConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -30,11 +30,33 @@
                        HasShadow="True">
 
                     <HorizontalStackLayout Spacing="16">
-                        <BoxView WidthRequest="60"
-                                 HeightRequest="60"
-                                 CornerRadius="30"
-                                 BackgroundColor="{StaticResource PrimaryColor}"
-                                 HorizontalOptions="Start"/>
+                        <Border WidthRequest="60"
+                                HeightRequest="60"
+                                StrokeThickness="0"
+                                Stroke="Transparent"
+                                BackgroundColor="{StaticResource PrimaryColor}"
+                                HorizontalOptions="Start">
+                            <Border.StrokeShape>
+                                <Ellipse/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenAvatarPickerCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Grid>
+                                <Label Text="{Binding FirstName, Converter={StaticResource FirstCharacterConverter}}"
+                                       IsVisible="{Binding HasNoAvatar}"
+                                       TextColor="White"
+                                       FontSize="24"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                                <Image Source="{Binding Avatar, Converter={StaticResource AvatarImage}}"
+                                       IsVisible="{Binding HasAvatar}"
+                                       Aspect="AspectFit"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+                        </Border>
 
                         <VerticalStackLayout Spacing="4" VerticalOptions="Center">
                             <HorizontalStackLayout Spacing="4">
@@ -62,7 +84,7 @@
                        FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
-                <Grid ColumnDefinitions="Auto,1*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="16">
+                <Grid ColumnDefinitions="Auto,1*" RowDefinitions="Auto,Auto" RowSpacing="12" ColumnSpacing="16">
                     <Label Text="Дата регистрации:"
                            Grid.Row="0" Grid.Column="0"
                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
@@ -77,15 +99,6 @@
                     <Label Text="{Binding FormattedDateOfBirth}"
                             Grid.Row="1" Grid.Column="1"
                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                           HorizontalOptions="End"/>
-
-                    <Label Text="Подписка:"
-                           Grid.Row="2" Grid.Column="0"
-                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                    <Label Text="{Binding StateOfSubscribe, Converter={StaticResource SubscribeTextConverter}}"
-                           Grid.Row="2" Grid.Column="1"
-                           TextColor="{Binding StateOfSubscribe, Converter={StaticResource SubscribeColorConverter}}"
-                           FontAttributes="Bold"
                            HorizontalOptions="End"/>
                 </Grid>
             </VerticalStackLayout>
@@ -126,27 +139,6 @@
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>
-
-            <!-- PRO подписка -->
-            <Frame Padding="16"
-                   BackgroundColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource Tertiary}}"
-                   BorderColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                   CornerRadius="12">
-
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Устали от рекламы?"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                           HorizontalOptions="Center"/>
-
-                    <Button Text="Перейти на PRO"
-                            BackgroundColor="{StaticResource PrimaryColor}"
-                            TextColor="{StaticResource White}"
-                            CornerRadius="8"
-                            HorizontalOptions="Fill"/>
-                </VerticalStackLayout>
-            </Frame>
 
             <!-- Настройки -->
             <Button Text="Настройки"

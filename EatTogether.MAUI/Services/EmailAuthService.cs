@@ -83,7 +83,7 @@ namespace EatTogether.MAUI.Services
                     FirstName = firstName,
                     LastName = lastName,
                     CreatedAt = DateTime.UtcNow,
-                    DateOfBitrhDay = dateOfBirth,
+                    DateOfBirthday = dateOfBirth,
                 };
 
                 await _cloudStoreService.InsertUserModel(user);

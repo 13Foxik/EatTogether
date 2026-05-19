@@ -57,6 +57,14 @@
 		<MauiImage Include="Resources\Images\show_pass.png" />
 		<MauiImage Include="Resources\Images\usa_flag.png" BaseSize="20,20" />
 
+		<!-- Аватары пользователей -->
+		<MauiImage Include="Resources\Images\avatar_alpaka.png" />
+		<MauiImage Include="Resources\Images\avatar_fox.png" />
+		<MauiImage Include="Resources\Images\avatar_koala.png" />
+		<MauiImage Include="Resources\Images\avatar_monkey.png" />
+		<MauiImage Include="Resources\Images\avatar_pig.png" />
+		<MauiImage Include="Resources\Images\avatar_slon.png" />
+
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
@@ -119,14 +127,15 @@
 	  <MauiXaml Update="Views\Main\ProfilePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\Main\ProfilePages\AvatarPickerPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
-	<!-- ДОБАВЬТЕ ЭТИ НАСТРОЙКИ -->
+	<!-- Release-сборка: линкер выключен, чтобы Firebase/MAUI reflection не отрезался; JIT-оптимизации включены для производительности -->
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<AndroidLinkMode>None</AndroidLinkMode>
-		<Optimize>false</Optimize>
-		<DebugType>portable</DebugType>
-		<DebugSymbols>true</DebugSymbols>
+		<Optimize>true</Optimize>
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 	</PropertyGroup>
 

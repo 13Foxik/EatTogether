@@ -76,6 +76,49 @@ namespace EatTogether.MAUI.Services
                 Console.WriteLine($"User {user.Uid} updated - UserFamilies changed");
             }
         }
+
+        public async Task UpdateUserAvatar(User user)
+        {
+            await SetupFirestore();
+
+            var userDoc = _db.Collection("Users").Document(user.Uid);
+            await userDoc.UpdateAsync("Avatar", user.Avatar ?? string.Empty);
+            Console.WriteLine($"User {user.Uid} avatar updated to '{user.Avatar}'");
+
+            // Распространяем аватар на FamilyMember-записи во всех семьях, где состоит пользователь
+            var familyIds = user.UserFamilies ?? new List<string>();
+            foreach (var familyId in familyIds.ToList())
+            {
+                try
+                {
+                    var familyDoc = _db.Collection("Families").Document(familyId);
+                    var snapshot = await familyDoc.GetSnapshotAsync();
+                    if (!snapshot.Exists)
+                        continue;
+
+                    var family = snapshot.ConvertTo<Family>();
+                    bool changed = false;
+                    foreach (var member in family.Members)
+                    {
+                        if (member.UserId == user.Uid)
+                        {
+                            member.AvatarUrl = user.Avatar ?? string.Empty;
+                            changed = true;
+                        }
+                    }
+
+                    if (changed)
+                    {
+                        await familyDoc.UpdateAsync("Members", family.Members);
+                        Console.WriteLine($"Family {familyId}: avatar synced for {user.Uid}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка синхронизации аватара в семье {familyId}: {ex.Message}");
+                }
+            }
+        }
         public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
         {
             await SetupFirestore();

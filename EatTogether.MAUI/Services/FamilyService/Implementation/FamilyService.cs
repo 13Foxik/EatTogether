@@ -20,12 +20,15 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
         public async Task CreateFamily(Family family)
         {
             family.Id = await _cloudStoreService.GenerateUniqueFamilyIdAsync("Families");
+            var currentUser = _currentUserService.GetCurrentUser();
             var member = new FamilyMember
             {
-                UserId = _currentUserService.GetCurrentUser().Uid,
-                DisplayName = _currentUserService.GetCurrentUser().DisplayName,
-                Email = _currentUserService.GetCurrentUser().Email,
-                Role = FamilyRole.Admin
+                UserId = currentUser.Uid,
+                DisplayName = currentUser.DisplayName,
+                Email = currentUser.Email,
+                AvatarUrl = currentUser.Avatar ?? string.Empty,
+                Role = FamilyRole.Admin,
+                JoinedAt = DateTime.UtcNow
             };
             family.AddMember(member);
             try
@@ -66,6 +69,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 UserId = user.Uid,
                 DisplayName = user.DisplayName,
                 Email = user.Email,
+                AvatarUrl = user.Avatar ?? string.Empty,
                 JoinedAt = DateTime.UtcNow,
                 Role = FamilyRole.Member
             };

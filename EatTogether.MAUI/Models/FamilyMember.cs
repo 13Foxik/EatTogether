@@ -32,6 +32,8 @@ namespace EatTogether.MAUI.Models
         public bool CanDemote { get; set; }
         public bool CanKick { get; set; }
 
+        public bool HasAvatar => !string.IsNullOrEmpty(AvatarUrl);
+
         public FamilyMember() { }
 
         public FamilyMember(string userId, string displayName, string email, FamilyRole role = FamilyRole.Member)
@@ -46,9 +48,8 @@ namespace EatTogether.MAUI.Models
     public enum FamilyRole
     {
         Member = 0,
-        Owner = 1,
+        Editor = 1,
         Admin = 2,
-        Editor = 3
+        Owner = 3
     }
 }
-

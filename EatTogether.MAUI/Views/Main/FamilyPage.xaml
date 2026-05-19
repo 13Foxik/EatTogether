@@ -18,6 +18,7 @@
             <converters:TabIndicatorMarginConverter x:Key="TabIndicatorMarginConverter"/>
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
             <converters:FirstCharacterConverter x:Key="FirstCharacterConverter"/>
+            <converters:AvatarKeyToImageSourceConverter x:Key="AvatarImage"/>
             <converters:ExpandedIconConverter x:Key="ExpandedIconConverter"/>
             <converters:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter"/>
             <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
@@ -67,14 +68,14 @@
 
                         <!-- Основная информация -->
                         <HorizontalStackLayout Spacing="16">
-                            <!-- Аватар -->
+                            <!-- Аватар семьи: первая буква названия семьи -->
                             <Frame WidthRequest="80"
                                    HeightRequest="80"
                                    CornerRadius="40"
                                    BackgroundColor="{StaticResource PrimaryColor}"
                                    Padding="0"
                                    HasShadow="True">
-                                <Label Text="И"
+                                <Label Text="{Binding FamilyName, Converter={StaticResource FirstCharacterConverter}}"
                                        TextColor="White"
                                        FontSize="32"
                                        FontAttributes="Bold"
@@ -782,21 +783,32 @@
                                                                       RowDefinitions="Auto,Auto"
                                                                       VerticalOptions="FillAndExpand">
 
-                                                                    <!-- Аватар участника -->
-                                                                    <Frame Grid.RowSpan="2"
-                                                                           WidthRequest="44"
-                                                                           HeightRequest="44"
-                                                                           CornerRadius="22"
-                                                                           BackgroundColor="{StaticResource PrimaryColor}"
-                                                                           Padding="0"
-                                                                           VerticalOptions="Start">
-                                                                        <Label Text="{Binding DisplayName, Converter={StaticResource FirstCharacterConverter}}"
-                                                                               TextColor="White"
-                                                                               FontSize="16"
-                                                                               FontAttributes="Bold"
-                                                                               HorizontalOptions="Center"
-                                                                               VerticalOptions="Center"/>
-                                                                    </Frame>
+                                                                    <!-- Аватар участника: пресет или первая буква имени -->
+                                                                    <Border Grid.RowSpan="2"
+                                                                            WidthRequest="44"
+                                                                            HeightRequest="44"
+                                                                            StrokeThickness="0"
+                                                                            Stroke="Transparent"
+                                                                            BackgroundColor="{StaticResource PrimaryColor}"
+                                                                            VerticalOptions="Start">
+                                                                        <Border.StrokeShape>
+                                                                            <Ellipse/>
+                                                                        </Border.StrokeShape>
+                                                                        <Grid>
+                                                                            <Label Text="{Binding DisplayName, Converter={StaticResource FirstCharacterConverter}}"
+                                                                                   IsVisible="{Binding HasAvatar, Converter={StaticResource InvertedBoolConverter}}"
+                                                                                   TextColor="White"
+                                                                                   FontSize="16"
+                                                                                   FontAttributes="Bold"
+                                                                                   HorizontalOptions="Center"
+                                                                                   VerticalOptions="Center"/>
+                                                                            <Image Source="{Binding AvatarUrl, Converter={StaticResource AvatarImage}}"
+                                                                                   IsVisible="{Binding HasAvatar}"
+                                                                                   Aspect="AspectFit"
+                                                                                   HorizontalOptions="Center"
+                                                                                   VerticalOptions="Center"/>
+                                                                        </Grid>
+                                                                    </Border>
 
                                                                     <!-- Информация об участнике -->
                                                                     <VerticalStackLayout Grid.Column="1" 

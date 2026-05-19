@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.Views.Auth;
+using EatTogether.MAUI.Views.Main;
+using EatTogether.MAUI.Views.Main.ProfilePages;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -12,8 +14,6 @@ namespace EatTogether.MAUI.ViewModels
     {
         private readonly CurrentUserService _currentUserService;
         private readonly IAuthService _authService;
-
-        private bool _firstSignIn = true;
 
         [ObservableProperty]
         private string _displayName;
@@ -59,20 +59,19 @@ namespace EatTogether.MAUI.ViewModels
         private string _lastName;
 
         [ObservableProperty]
-        private bool _stateOfSubscribe;
+        [NotifyPropertyChangedFor(nameof(HasAvatar))]
+        [NotifyPropertyChangedFor(nameof(HasNoAvatar))]
+        private string _avatar;
+
+        public bool HasAvatar => !string.IsNullOrEmpty(Avatar);
+        public bool HasNoAvatar => string.IsNullOrEmpty(Avatar);
+
         public ProfileViewModel(CurrentUserService currentUserService, IAuthService authService)
         {
             _currentUserService = currentUserService;
             _authService = authService;
 
-            if (_firstSignIn)
-            {
-                _currentUserService.UserChanged += OnUserChanged;
-                _firstSignIn = false;
-            }
-            else
-            {
-            }
+            _currentUserService.UserChanged += OnUserChanged;
             UpadateUserInfo();
         }
 
@@ -84,18 +83,27 @@ namespace EatTogether.MAUI.ViewModels
             await Shell.Current.GoToAsync("//SignInPage");
         }
 
+        [RelayCommand]
+        private async Task OpenAvatarPicker()
+        {
+            if (Application.Current?.MainPage is MainPage mainPage &&
+                mainPage.CurrentPage is NavigationPage navPage)
+            {
+                await navPage.Navigation.PushAsync(new AvatarPickerPage());
+            }
+        }
+
         private void OnUserChanged(object sender, UserChangedEventArgs e)
         {
             UpadateUserInfo();
-            _currentUserService.UserChanged -= OnUserChanged;
         }
 
         private void UpadateUserInfo()
         {
             CheckFirstLastName();
             CreatedAt = _currentUserService.CurrentUser?.CreatedAt ?? DateTime.MinValue;
-            DateOfBirth = _currentUserService.CurrentUser?.DateOfBitrhDay ?? DateTime.MinValue;
-            StateOfSubscribe = _currentUserService.CurrentUser?.stateOfSubscribe ?? false;
+            DateOfBirth = _currentUserService.CurrentUser?.DateOfBirthday ?? DateTime.MinValue;
+            Avatar = _currentUserService.CurrentUser?.Avatar ?? string.Empty;
         }
         private void CheckFirstLastName()
         {

@@ -19,11 +19,9 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; }
         [FirestoreProperty]
-        public DateTime DateOfBitrhDay { get; set; }
+        public DateTime DateOfBirthday { get; set; }
         [FirestoreProperty]
         public List<string> UserFamilies { get; set; }
-        [FirestoreProperty]
-        public bool stateOfSubscribe { get; set; }
         [FirestoreProperty]
         public string Avatar { get; set; }
 
