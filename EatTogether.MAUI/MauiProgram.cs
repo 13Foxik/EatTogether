@@ -35,7 +35,7 @@ namespace EatTogether.MAUI
             builder.Services.AddSingleton<ICloudStoreService, FirestoreService>();
             builder.Services.AddSingleton<ICurrentFamilyService, CurrentFamilyService>();
             builder.Services.AddSingleton<IFamilyService, FamilyService>();
-            builder.Services.AddSingleton<IUserService, UserSerivce>();
+            builder.Services.AddSingleton<IUserService, UserService>();
             builder.Services.AddSingleton<IMembershipService, MembershipService>();
 
             //ViewModels
@@ -44,6 +44,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<ProfileViewModel>();
             builder.Services.AddTransient<FamilyViewModel>();
             builder.Services.AddTransient<CreateFamilyViewModel>();
+            builder.Services.AddTransient<JoinFamilyViewModel>();
 
             //Pages
             builder.Services.AddTransient<SignInPage>();
@@ -52,6 +53,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<ProfilePage>();
             builder.Services.AddTransient<FamilyPage>();
             builder.Services.AddTransient<CreateFamilyPage>();
+            builder.Services.AddTransient<JoinFamilyPage>();
 
             builder.Services.AddSingleton<AppShell>();
 
