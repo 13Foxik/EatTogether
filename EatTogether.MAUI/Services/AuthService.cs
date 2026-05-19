@@ -23,5 +23,17 @@ namespace EatTogether.MAUI.Services
         {
             return _firebaseAuthService.SignOutAsync();
         }
+
+        public Task SignInWithGoogleAsync()
+        {
+            // TODO: реализовать через Google OAuth
+            throw new NotImplementedException();
+        }
+
+        public Task SignInWithAppleAsync()
+        {
+            // TODO: реализовать через Apple Sign In
+            throw new NotImplementedException();
+        }
     }
 }
