@@ -22,6 +22,20 @@
 
     <Color x:Key="DarkRed">#8F1D1D</Color>
 
+    <!-- Цвета статусов -->
+    <Color x:Key="ErrorColor">#FFD32F2F</Color>
+    <Color x:Key="SuccessColor">#FF388E3C</Color>
+
+    <!-- Вариации основного цвета -->
+    <Color x:Key="PrimaryColorLight">#FF4CAF82</Color>
+    <Color x:Key="PrimaryColorDark">#FF155235</Color>
+
+    <!-- Серые оттенки -->
+    <Color x:Key="Gray50">#FFFAFAFA</Color>
+    <Color x:Key="Gray800">#FF424242</Color>
+    <Color x:Key="Gray900">#FF212121</Color>
+    <Color x:Key="Gray300">#FFE0E0E0</Color>
+
     <!-- Конвертеры -->
     <!--<local:InverseBoolConverter x:Key="InverseBoolConverter"/>-->
 

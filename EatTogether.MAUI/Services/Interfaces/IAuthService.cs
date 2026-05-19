@@ -6,5 +6,7 @@ namespace EatTogether.MAUI.Services.Interfaces
     {
         Task<User> SignInWithEmailAsync(string email, string password);
         Task SignOutAsync();
+        Task SignInWithGoogleAsync();
+        Task SignInWithAppleAsync();
     }
 }

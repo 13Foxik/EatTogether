@@ -4,7 +4,6 @@ using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
-using EatTogether.MAUI.Views.Main;
 
 namespace EatTogether.MAUI.ViewModels
 {
@@ -45,7 +44,7 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    await currentNavigation.Navigation.PushAsync(new FamilyPage());
+                    await currentNavigation.Navigation.PopAsync();
                 }
             }
         }
@@ -88,7 +87,7 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    await currentNavigation.Navigation.PushAsync(new FamilyPage());
+                    await currentNavigation.Navigation.PopAsync();
                 }
             }
         }

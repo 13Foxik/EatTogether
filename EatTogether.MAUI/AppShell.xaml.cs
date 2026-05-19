@@ -26,10 +26,10 @@ namespace EatTogether.MAUI
                 {
                     Application.Current.MainPage = new MainPage();
                 }
-                //else
-                //{
-                //    await GoToAsync("//SignInPage");
-                //}
+                else
+                {
+                    await GoToAsync("//SignInPage");
+                }
             });
         }
     }
