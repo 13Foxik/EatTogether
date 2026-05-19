@@ -189,6 +189,27 @@ public partial class FamilyViewModel : ObservableObject
     {
         UpdateUserInfo();
         LoadPendingRequests();
+        // Обновляем аватар текущего пользователя в списке участников
+        RefreshCurrentUserAvatar();
+    }
+
+    private void RefreshCurrentUserAvatar()
+    {
+        var currentUser = _currentUserService.CurrentUser;
+        if (currentUser == null) return;
+
+        var member = FamilyMembers.FirstOrDefault(m => m.UserId == currentUser.Uid);
+        if (member != null)
+        {
+            member.AvatarUrl = currentUser.Avatar ?? string.Empty;
+            member.AvatarColor = currentUser.AvatarColor ?? "#1F744D";
+            // Обновляем ссылку чтобы триггернуть UI
+            var idx = FamilyMembers.IndexOf(member);
+            if (idx >= 0)
+            {
+                FamilyMembers[idx] = member;
+            }
+        }
     }
 
     private void UpdateUserInfo()

@@ -9,7 +9,6 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <!-- Конвертер для инвертирования bool -->
             <converters:InvertedBoolConverter x:Key="InverseBoolConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
@@ -18,267 +17,147 @@
         <toolkit:StatusBarBehavior StatusBarColor="{StaticResource PrimaryColor}" StatusBarStyle="LightContent" />
     </ContentPage.Behaviors>
 
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="5">
 
-    <VerticalStackLayout Padding="20" Spacing="5">
+            <!-- Логотип -->
+            <Image Source="logo.png"
+                   BackgroundColor="Gray"
+                   HeightRequest="120"
+                   WidthRequest="200"
+                   HorizontalOptions="Center"
+                   Margin="0,20,0,10"/>
 
-        <!--Переключатель языка в правом верхнем углу-->
-        <Button Command="{Binding ChangeLanguageCommand}"
-            Text="Русский"
-            TextColor="Black"
-            FontAttributes="Bold"
-            BackgroundColor="White"
-            WidthRequest="95"
-            HeightRequest="40"
-            HorizontalOptions="End"
-            Margin="0,-10,-10,20"
-            Padding="8,0" 
-            ContentLayout="Left,5">
-            <!-- Выравнивание иконки и текста -->
+            <!-- Заголовок -->
+            <Label Text="Авторизация"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"/>
+            <Label Text="Войдите в свой аккаунт"
+                   FontSize="16"
+                   HorizontalOptions="Center"
+                   TextColor="{StaticResource PrimaryTextColor}"
+                   Margin="0,0,0,20"/>
 
-            <!-- Иконка -->
-            <Button.ImageSource>
-                <FileImageSource File="russia_flag.png"/>
-            </Button.ImageSource>
-
-            <!-- Добавляем бордер через стиль -->
-            <Button.Style>
-                <Style TargetType="Button">
-                    <Setter Property="BorderColor" Value="#CCCCCC"/>
-                    <Setter Property="BorderWidth" Value="1"/>
-                    <Setter Property="CornerRadius" Value="5"/>
-                </Style>
-            </Button.Style>
-
-            <Button.Behaviors>
-                <behaviors:RippleBehavior/>
-            </Button.Behaviors>
-
-            <Button.Shadow>
-                <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
-            </Button.Shadow>
-
-        </Button>
-
-        <!-- Логотип -->
-        <Image Source="logo.png" 
-            BackgroundColor="Gray"
-            HeightRequest="120"
-            WidthRequest="200"
-            HorizontalOptions="Center"
-            Margin="0,0,0,10"/>
-
-        <!-- Заголовок -->
-        <Label Text="Авторизация"
-                FontSize="18"
-                FontAttributes="Bold"
-                HorizontalOptions="Center"/>
-        <Label Text="Войдите в свой аккаунт"
-                FontSize="16"
-                HorizontalOptions="Center"
-                TextColor="{StaticResource PrimaryTextColor}"
-                Margin="0,0,0,20"/>
-
-        <!-- Поля ввода -->
-        <VerticalStackLayout Spacing="15">
-            <!-- Email -->
-            <Border Stroke="{StaticResource BorderColor}"
-                    StrokeShape="RoundRectangle 10"
-                    BackgroundColor="{StaticResource InputBackgroundColor}"
-                    Padding="10, 0">
-                <Entry Text="{Binding Email}"
-                        Placeholder="email@domain.com"
-                        Keyboard="Email"
-                        ClearButtonVisibility="WhileEditing"
-                        TextColor="{StaticResource PrimaryTextColor}"
-                        PlaceholderColor="{StaticResource SecondaryTextColor}">
-                    <Entry.Behaviors>
-                        <behaviors:FocusScaleBehavior />
-                    </Entry.Behaviors>
-
-                </Entry>
-            </Border>
-
-            <!-- Password -->
-            <Border Stroke="{StaticResource BorderColor}"
-                    StrokeShape="RoundRectangle 10"
-                    BackgroundColor="{StaticResource InputBackgroundColor}"
-                    Padding="10, 0">
-                <Grid ColumnDefinitions="*,Auto,Auto">
-                    <Entry Grid.Column="0"
-                        Text="{Binding Password}"
-                        IsPassword="{Binding IsPasswordVisible}"
-                        Placeholder="Пароль"
-                        ClearButtonVisibility="WhileEditing"
-                        TextColor="{StaticResource PrimaryTextColor}"
-                        PlaceholderColor="{StaticResource SecondaryTextColor}">
-
+            <!-- Поля ввода -->
+            <VerticalStackLayout Spacing="15">
+                <!-- Email -->
+                <Border Stroke="{StaticResource BorderColor}"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{StaticResource InputBackgroundColor}"
+                        Padding="10, 0">
+                    <Entry Text="{Binding Email}"
+                           Placeholder="email@domain.com"
+                           Keyboard="Email"
+                           ClearButtonVisibility="WhileEditing"
+                           TextColor="{StaticResource PrimaryTextColor}"
+                           PlaceholderColor="{StaticResource SecondaryTextColor}">
                         <Entry.Behaviors>
                             <behaviors:FocusScaleBehavior />
                         </Entry.Behaviors>
-
                     </Entry>
+                </Border>
 
-                    <ImageButton Grid.Column="2"
-                         Source="{Binding IsPasswordVisible, Converter={StaticResource BoolToImageConverter}}"
-                         Command="{Binding TogglePasswordCommand}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="24"
-                         HeightRequest="24"
-                         VerticalOptions="Center"/>
-                </Grid>
-            </Border>
+                <!-- Password -->
+                <Border Stroke="{StaticResource BorderColor}"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{StaticResource InputBackgroundColor}"
+                        Padding="10, 0">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Entry Grid.Column="0"
+                               Text="{Binding Password}"
+                               IsPassword="{Binding IsPasswordVisible}"
+                               Placeholder="Пароль"
+                               ClearButtonVisibility="WhileEditing"
+                               TextColor="{StaticResource PrimaryTextColor}"
+                               PlaceholderColor="{StaticResource SecondaryTextColor}">
+                            <Entry.Behaviors>
+                                <behaviors:FocusScaleBehavior />
+                            </Entry.Behaviors>
+                        </Entry>
 
-            <!-- Кнопка входа -->
-            <Button Text="Продолжить"
-                    Command="{Binding SignInWithEmailCommand}"
-                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
-                    BackgroundColor="{StaticResource PrimaryColor}"
-                    TextColor="White"
-                    FontAttributes="Bold"
-                    CornerRadius="10"
-                    HeightRequest="45">
+                        <ImageButton Grid.Column="1"
+                                     Source="{Binding IsPasswordVisible, Converter={StaticResource BoolToImageConverter}}"
+                                     Command="{Binding TogglePasswordCommand}"
+                                     BackgroundColor="Transparent"
+                                     WidthRequest="24"
+                                     HeightRequest="24"
+                                     VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
 
-                <Button.Behaviors>
-                    <behaviors:RippleBehavior 
-                        RippleColor="LightGreen"
-                        RippleOpacity="0.5"
-                        ScaleFactor="0.92"
-                        AnimationDuration="150"/>
-                </Button.Behaviors>
+                <!-- Кнопка входа -->
+                <Button Text="Войти"
+                        Command="{Binding SignInWithEmailCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                        BackgroundColor="{StaticResource PrimaryColor}"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="45">
+                    <Button.Behaviors>
+                        <behaviors:RippleBehavior
+                            RippleColor="LightGreen"
+                            RippleOpacity="0.5"
+                            ScaleFactor="0.92"
+                            AnimationDuration="150"/>
+                    </Button.Behaviors>
+                </Button>
+            </VerticalStackLayout>
 
-            </Button>
+            <!-- Ссылка на регистрацию -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="5" Margin="0,16,0,0">
+                <Label Text="Нет аккаунта?"
+                       TextColor="{StaticResource SecondaryTextColor}"
+                       VerticalOptions="Center"/>
+                <Button Text="Регистрация"
+                        Command="{Binding GoToSignUpCommand}"
+                        TextColor="{StaticResource LinkColor}"
+                        BackgroundColor="Transparent"
+                        Padding="0"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="VisualStateManager.VisualStateGroups">
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="Transparent"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Property="TextColor" Value="#0023AB"/>
+                                                <Setter Property="BackgroundColor" Value="Transparent"/>
+                                                <Setter Property="Scale" Value="0.98"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </HorizontalStackLayout>
+
+            <!-- Условия использования -->
+            <Label Text="Нажимая 'Войти', вы соглашаетесь с нашими Условиями обслуживания и Политикой конфиденциальности"
+                   FontSize="12"
+                   TextColor="{StaticResource SecondaryTextColor}"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"
+                   LineBreakMode="WordWrap"
+                   Margin="0,8,0,0"/>
+
+            <!-- Индикатор загрузки -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource PrimaryColor}"
+                               HorizontalOptions="Center"/>
+
         </VerticalStackLayout>
-
-        <!-- Разделитель -->
-        <Grid HorizontalOptions="FillAndExpand" Margin="0,10,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Левая линия -->
-            <BoxView Grid.Column="0"
-                 HeightRequest="1"
-                 BackgroundColor="{StaticResource SecondaryTextColor}"
-                 Opacity="0.5"
-                 VerticalOptions="Center"
-                 Margin="0,0,10,0"/>
-
-            <!-- Текст "или" -->
-            <Label Grid.Column="1"
-                Text="или"
-                TextColor="{StaticResource SecondaryTextColor}"
-                VerticalOptions="Center"
-                HorizontalOptions="Center"/>
-
-            <!-- Правая линия -->
-            <BoxView Grid.Column="2"
-                HeightRequest="1"
-                BackgroundColor="{StaticResource SecondaryTextColor}"
-                Opacity="0.5"
-                VerticalOptions="Center"
-                Margin="10,0,0,0"/>
-        </Grid>
-
-        <!-- Социальные кнопки -->
-        <VerticalStackLayout Spacing="10">
-            <!-- Google -->
-            <Button Text="Продолжить с Google"
-                Command="{Binding SignInWithGoogleAsyncCommand}"
-                BackgroundColor="White"
-                TextColor="Black"
-                CornerRadius="10"
-                HeightRequest="45"
-                BorderColor="#CCCCCC"
-                BorderWidth="1">
-
-                <Button.Behaviors>
-                    <behaviors:RippleBehavior/>
-                </Button.Behaviors>
-
-                <Button.Shadow>
-                    <Shadow Brush="#10000000" Offset="0,1" Radius="2"/>
-                </Button.Shadow>
-
-                <Button.ImageSource>
-                    <FileImageSource File="google_icon.png"/>
-                </Button.ImageSource>
-            </Button>
-
-            <!-- Apple -->
-            <Button Text="Продолжить с Apple"
-                    Command="{Binding SignInWithAppleAsyncCommand}"
-                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
-                    BackgroundColor="{StaticResource AppleButtonColor}"
-                    TextColor="{StaticResource AppleTextColor}"
-                    CornerRadius="10"
-                    HeightRequest="45">
-                <Button.ImageSource>
-                    <FileImageSource File="apple_icon.png"/>
-                </Button.ImageSource>
-                <Button.Behaviors>
-                    <behaviors:RippleBehavior RippleColor="#1A73E8" RippleOpacity="0.2"/>
-                </Button.Behaviors>
-
-            </Button>
-        </VerticalStackLayout>
-
-        <!-- Ссылка на регистрацию -->
-        <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
-            <Label Text="Нет аккаунта?" 
-                    TextColor="{StaticResource SecondaryTextColor}"
-                    VerticalOptions="Center"/>
-            <Button Text="Регистрация через email"
-                    Command="{Binding GoToSignUpCommand}"
-                    TextColor="{StaticResource LinkColor}"
-                    BackgroundColor="Transparent"
-                    Padding="0"
-                    FontAttributes="Bold"
-                    VerticalOptions="Center">
-
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="VisualStateManager.VisualStateGroups">
-                            <VisualStateGroupList>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="Transparent"/>
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                    <VisualState x:Name="Pressed">
-                                        <VisualState.Setters>
-                                            <Setter Property="TextColor" Value="#0023AB"/>
-                                            <Setter Property="BackgroundColor" Value="Transparent"/>
-                                            <Setter Property="Opacity" Value="1"/>
-                                            <Setter Property="Scale" Value="0.98"/>
-                                        </VisualState.Setters>
-
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateGroupList>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-
-            </Button>
-        </HorizontalStackLayout>
-
-        <!-- Условия использования -->
-        <Label Text="Нажимая 'Продолжить', вы соглашаетесь с нашими Условиями обслуживания и Политикой конфиденциальности"
-                FontSize="12"
-                TextColor="{StaticResource SecondaryTextColor}"
-                HorizontalOptions="Center"
-                HorizontalTextAlignment="Center"
-                LineBreakMode="WordWrap"/>
-
-        <!-- Индикатор загрузки -->
-        <ActivityIndicator IsRunning="{Binding IsBusy}"
-                            IsVisible="{Binding IsBusy}"
-                            Color="{StaticResource PrimaryColor}"
-                            HorizontalOptions="Center"/>
-
-    </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

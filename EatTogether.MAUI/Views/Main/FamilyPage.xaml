@@ -22,6 +22,7 @@
             <converters:ExpandedIconConverter x:Key="ExpandedIconConverter"/>
             <converters:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter"/>
             <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
+            <converters:StringToColorConverter x:Key="StringToColor"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -789,7 +790,7 @@
                                                                             HeightRequest="44"
                                                                             StrokeThickness="0"
                                                                             Stroke="Transparent"
-                                                                            BackgroundColor="{StaticResource PrimaryColor}"
+                                                                            BackgroundColor="{Binding DisplayColor, Converter={StaticResource StringToColor}}"
                                                                             VerticalOptions="Start">
                                                                         <Border.StrokeShape>
                                                                             <Ellipse/>
@@ -805,6 +806,7 @@
                                                                             <Image Source="{Binding AvatarUrl, Converter={StaticResource AvatarImage}}"
                                                                                    IsVisible="{Binding HasAvatar}"
                                                                                    Aspect="AspectFit"
+                                                                                   Margin="6"
                                                                                    HorizontalOptions="Center"
                                                                                    VerticalOptions="Center"/>
                                                                         </Grid>
