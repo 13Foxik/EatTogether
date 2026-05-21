@@ -11,6 +11,7 @@ namespace EatTogether.MAUI.ViewModels
     public partial class MenuViewModel : ObservableObject
     {
         private readonly ICategoryService _categoryService;
+        private readonly ISubcategoryService _subcategoryService;
 
         [ObservableProperty]
         private ObservableCollection<Category> categories = new();
@@ -21,41 +22,31 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private bool hasFamily;
 
-        // Проверяем, есть ли категории (только если пользователь в семье)
         public bool HasCategories => HasFamily && Categories?.Count > 0;
-
-        // Показываем сообщение "нет семьи" только если пользователь не в семье
         public bool ShowNoFamilyMessage => !HasFamily;
-
-        // Показываем контент категорий только если пользователь в семье И есть категории
         public bool ShowCategoriesContent => HasFamily && HasCategories && !IsBusy;
-
-        // Показываем сообщение "нет категорий" только если пользователь в семье И нет категорий
         public bool ShowNoCategoriesMessage => HasFamily && !HasCategories && !IsBusy;
 
-        public MenuViewModel(ICategoryService categoryService)
+        public MenuViewModel(ICategoryService categoryService, ISubcategoryService subcategoryService)
         {
             _categoryService = categoryService;
+            _subcategoryService = subcategoryService;
 
-            // Инициализируем состояние семьи
             CheckFamilyStatus();
 
-            // Загружаем категории только если пользователь в семье
             if (HasFamily)
-            {
                 LoadCategoriesAsync();
-            }
         }
 
-        public MenuViewModel() : this(Application.Current.Handler.MauiContext.Services.GetService<ICategoryService>()) { }
+        public MenuViewModel() : this(
+            Application.Current.Handler.MauiContext.Services.GetService<ICategoryService>(),
+            Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>()) { }
 
-        // Метод для проверки статуса семьи
         private void CheckFamilyStatus()
         {
             HasFamily = !string.IsNullOrEmpty(Preferences.Get("family_id", string.Empty));
         }
 
-        // Метод для обновления вычисляемых свойств
         private void UpdateComputedProperties()
         {
             OnPropertyChanged(nameof(HasCategories));
@@ -64,28 +55,13 @@ namespace EatTogether.MAUI.ViewModels
             OnPropertyChanged(nameof(ShowNoCategoriesMessage));
         }
 
-        // Обновляем вычисляемые свойства при изменении коллекции
-        partial void OnCategoriesChanged(ObservableCollection<Category> value)
-        {
-            UpdateComputedProperties();
-        }
-
-        // Обновляем вычисляемые свойства при изменении IsBusy
-        partial void OnIsBusyChanged(bool value)
-        {
-            UpdateComputedProperties();
-        }
-
-        // Обновляем вычисляемые свойства при изменении HasFamily
+        partial void OnCategoriesChanged(ObservableCollection<Category> value) => UpdateComputedProperties();
+        partial void OnIsBusyChanged(bool value) => UpdateComputedProperties();
         partial void OnHasFamilyChanged(bool value)
         {
             UpdateComputedProperties();
-
-            // Если появилась семья, загружаем категории
             if (value && Categories.Count == 0)
-            {
                 LoadCategoriesAsync();
-            }
         }
 
         [RelayCommand]
@@ -93,34 +69,52 @@ namespace EatTogether.MAUI.ViewModels
         {
             if (category == null) return;
 
-            if (Application.Current?.MainPage is MainPage mainPage)
+            if (Application.Current?.MainPage is MainPage mainPage &&
+                mainPage.CurrentPage is NavigationPage nav)
             {
-                var currentNavigation = mainPage.CurrentPage as NavigationPage;
-                if (currentNavigation != null)
-                {
-                    var subcategoriesPage = new SubcategoriesPage(new SubcategoriesViewModel(category.Id, category.Name));
-                    await currentNavigation.Navigation.PushAsync(subcategoriesPage);
-                }
+                await nav.Navigation.PushAsync(
+                    new SubcategoriesPage(new SubcategoriesViewModel(category.Id, category.Name)));
             }
         }
 
         [RelayCommand]
         private async Task LoadCategoriesAsync()
         {
-            if (IsBusy || !HasFamily)
-                return;
+            if (IsBusy || !HasFamily) return;
 
             try
             {
                 IsBusy = true;
 
-                var categories = await _categoryService.GetAllCategoriesAsync();
+                var familyId = Preferences.Get("family_id", string.Empty);
+                var loaded = await _categoryService.GetAllCategoriesAsync();
+
+                // Параллельно загружаем счётчики для каждой категории
+                var tasks = loaded.Select(async category =>
+                {
+                    try
+                    {
+                        var subcategories = await _subcategoryService
+                            .GetSubcategoriesByCategoryAsync(category.Id, familyId);
+
+                        category.SubcategoryCount = subcategories.Count;
+
+                        // Блюда считаем суммой по всем подкатегориям — тоже параллельно
+                        // (только если подкатегорий немного, иначе дорого)
+                        category.DishCount = 0;
+                    }
+                    catch
+                    {
+                        category.SubcategoryCount = 0;
+                        category.DishCount = 0;
+                    }
+                });
+
+                await Task.WhenAll(tasks);
 
                 Categories.Clear();
-                foreach (var category in categories)
-                {
-                    Categories.Add(category);
-                }
+                foreach (var c in loaded)
+                    Categories.Add(c);
             }
             catch (Exception ex)
             {
@@ -131,6 +125,7 @@ namespace EatTogether.MAUI.ViewModels
                 IsBusy = false;
             }
         }
+
         [RelayCommand]
         private async Task SeedCategories()
         {
@@ -151,16 +146,8 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         [RelayCommand]
-        private async Task Settings()
-        {
-            Console.WriteLine("pizda");
-        }
+        private async Task Settings() { }
 
-        // Метод для обновления состояния при возвращении на страницу
-        public void OnAppearing()
-        {
-            // Всегда проверяем актуальный статус семьи
-            CheckFamilyStatus();
-        }
+        public void OnAppearing() => CheckFamilyStatus();
     }
 }

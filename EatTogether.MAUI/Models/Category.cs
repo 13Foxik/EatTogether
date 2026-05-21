@@ -21,6 +21,13 @@ namespace EatTogether.MAUI.Models
         public bool HasImage => !string.IsNullOrEmpty(ImageFile);
         public bool HasNoImage => string.IsNullOrEmpty(ImageFile);
 
+        // Счётчики — заполняются при загрузке, не хранятся в Firestore
+        public int SubcategoryCount { get; set; }
+        public int DishCount { get; set; }
+
+        public string SubcategoryCountText => SubcategoryCount.ToString();
+        public string DishCountText => DishCount.ToString();
+
         public Category () { }
     }
 }
