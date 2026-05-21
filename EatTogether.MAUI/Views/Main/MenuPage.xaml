@@ -12,7 +12,9 @@
         <vm:MenuViewModel />
     </ContentPage.BindingContext>
 
-    <Grid RowDefinitions="Auto, *">
+    <Grid RowDefinitions="Auto, *"
+          VerticalOptions="FillAndExpand"
+          HorizontalOptions="FillAndExpand">
 
         <!-- ШАПКА - С закругленными нижними краями, без полосы и с тонкой линией сверху -->
         <Border Grid.Row="0"
@@ -118,7 +120,8 @@
         </Border>
 
         <!-- ОСНОВНОЙ КОНТЕНТ -->
-        <ScrollView Grid.Row="1">
+        <ScrollView Grid.Row="1"
+                    VerticalOptions="FillAndExpand">
             <VerticalStackLayout Padding="20" Spacing="32">
 
                 <!-- Заголовок когда нет семьи -->
