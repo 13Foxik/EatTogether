@@ -345,7 +345,7 @@
                                                        VerticalOptions="Center"/>
                                             </Grid>
 
-                                            <!-- Бейдж количества рецептов -->
+                                            <!-- Бейдж количества блюд (зелёный, сверху справа) -->
                                             <Frame BackgroundColor="{StaticResource PrimaryColor}"
                                                  CornerRadius="10"
                                                  Padding="8,4"
@@ -360,7 +360,7 @@
                                                           Radius="4"
                                                           Opacity="0.3"/>
                                                 </Frame.Shadow>
-                                                <Label Text="13"
+                                                <Label Text="{Binding DishCountText}"
                                                      FontSize="11"
                                                      TextColor="White"
                                                      FontAttributes="Bold"/>
@@ -391,7 +391,7 @@
                                                CornerRadius="1"
                                                Opacity="0.7"/>
 
-                                        <Label Text="13"
+                                        <Label Text="{Binding SubcategoryCountText}"
                                              FontSize="12"
                                              TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
                                              HorizontalOptions="Center"/>
