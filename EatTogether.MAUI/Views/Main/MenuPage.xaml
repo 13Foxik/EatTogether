@@ -62,17 +62,10 @@
                          TranslationY="50"/>
 
                 <!-- Контент шапки -->
-                <VerticalStackLayout Spacing="8"
+                <VerticalStackLayout Spacing="6"
                     HorizontalOptions="Center"
-                    VerticalOptions="Center">
-
-                    <!-- Декоративная линия -->
-                    <BoxView HeightRequest="3"
-                           WidthRequest="40"
-                           BackgroundColor="White"
-                           HorizontalOptions="Center"
-                           CornerRadius="2"
-                           Opacity="0.8"/>
+                    VerticalOptions="Center"
+                    Padding="20,0">
 
                     <!-- Заголовок -->
                     <Label Text="Меню семьи"
@@ -84,19 +77,43 @@
 
                     <!-- Подзаголовок -->
                     <Label Text="Кулинарная коллекция вашей семьи"
-                         FontSize="14"
+                         FontSize="13"
                          TextColor="White"
-                         Opacity="0.9"
+                         Opacity="0.85"
                          HorizontalOptions="Center"
                          HorizontalTextAlignment="Center"/>
 
-                    <!-- Декоративная линия -->
-                    <BoxView HeightRequest="2"
-                           WidthRequest="60"
-                           BackgroundColor="White"
-                           HorizontalOptions="Center"
-                           CornerRadius="1"
-                           Opacity="0.6"/>
+                    <!-- Счётчик блюд — pill badge -->
+                    <Border BackgroundColor="#22FFFFFF"
+                            StrokeThickness="1"
+                            Stroke="#44FFFFFF"
+                            HorizontalOptions="Center"
+                            Padding="16,6"
+                            Margin="0,6,0,0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="20"/>
+                        </Border.StrokeShape>
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <Label Text="🍽️" FontSize="14" VerticalOptions="Center"/>
+                            <Label FontSize="13"
+                                   TextColor="White"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding TotalDishCountText}"
+                                              FontAttributes="Bold"
+                                              FontSize="15"
+                                              TextColor="White"/>
+                                        <Span Text=" блюд в меню"
+                                              FontSize="13"
+                                              TextColor="White"
+                                              Opacity="0.9"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </HorizontalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
             </Grid>
         </Border>
@@ -370,12 +387,12 @@
 
                                     <!-- Название категории -->
                                     <VerticalStackLayout Grid.Row="1"
-                                                       Padding="16,14"
-                                                       Spacing="8"
+                                                       Padding="12,10"
+                                                       Spacing="4"
                                                        VerticalOptions="Center">
 
                                         <Label Text="{Binding Name}"
-                                             FontSize="16"
+                                             FontSize="15"
                                              FontAttributes="Bold"
                                              TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                              HorizontalOptions="Center"
@@ -383,18 +400,20 @@
                                              MaxLines="2"
                                              LineBreakMode="TailTruncation"/>
 
-                                        <!-- Декоративный разделитель с акцентом -->
-                                        <BoxView HeightRequest="2"
-                                               WidthRequest="32"
-                                               BackgroundColor="{StaticResource PrimaryColor}"
-                                               HorizontalOptions="Center"
-                                               CornerRadius="1"
-                                               Opacity="0.7"/>
-
-                                        <Label Text="{Binding SubcategoryCountText}"
-                                             FontSize="12"
-                                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
-                                             HorizontalOptions="Center"/>
+                                        <!-- Подкатегории -->
+                                        <Label FontSize="11"
+                                             HorizontalOptions="Center"
+                                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding SubcategoryCountText}"
+                                                          FontAttributes="Bold"
+                                                          TextColor="{StaticResource PrimaryColor}"/>
+                                                    <Span Text=" подкатегорий"
+                                                          TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
                                     </VerticalStackLayout>
                                 </Grid>
                             </Frame>
@@ -402,26 +421,7 @@
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
 
-                <!-- СТАТИСТИКА - только общее количество блюд -->
-                <Frame IsVisible="{Binding ShowCategoriesContent}"
-                       BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                       CornerRadius="12"
-                       Padding="20"
-                       Margin="0,20"
-                       HasShadow="False">
-                    <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
-                        <Label Text="🍽️" FontSize="28" VerticalOptions="Center"/>
-                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
-                            <Label Text="Всего блюд в меню"
-                                   FontSize="13"
-                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
-                            <Label Text="{Binding TotalDishCountText}"
-                                   FontSize="26"
-                                   FontAttributes="Bold"
-                                   TextColor="{StaticResource PrimaryColor}"/>
-                        </VerticalStackLayout>
-                    </HorizontalStackLayout>
-                </Frame>
+
 
             </VerticalStackLayout>
         </ScrollView>
