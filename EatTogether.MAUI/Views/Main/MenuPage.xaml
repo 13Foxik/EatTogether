@@ -101,14 +101,13 @@
                                    VerticalOptions="Center">
                                 <Label.FormattedText>
                                     <FormattedString>
-                                        <Span Text="{Binding TotalDishCountText}"
+                        <Span Text="{Binding TotalDishCountText}"
                                               FontAttributes="Bold"
                                               FontSize="15"
                                               TextColor="White"/>
                                         <Span Text=" блюд в меню"
                                               FontSize="13"
-                                              TextColor="White"
-                                              Opacity="0.9"/>
+                                              TextColor="#CCFFFFFF"/>
                                     </FormattedString>
                                 </Label.FormattedText>
                             </Label>
@@ -299,7 +298,7 @@
                           AlignItems="Start">
 
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:Category">
+                        <DataTemplate>
                             <!-- КЛИКАБЕЛЬНАЯ КАРТОЧКА КАТЕГОРИИ -->
                             <Frame WidthRequest="175"
                                  HeightRequest="220"
@@ -401,19 +400,10 @@
                                              LineBreakMode="TailTruncation"/>
 
                                         <!-- Подкатегории -->
-                                        <Label FontSize="11"
+                                        <Label Text="{Binding SubcategoryCountText, StringFormat='{0} подкатегорий'}"
+                                             FontSize="11"
                                              HorizontalOptions="Center"
-                                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="{Binding SubcategoryCountText}"
-                                                          FontAttributes="Bold"
-                                                          TextColor="{StaticResource PrimaryColor}"/>
-                                                    <Span Text=" подкатегорий"
-                                                          TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
+                                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
                                     </VerticalStackLayout>
                                 </Grid>
                             </Frame>
