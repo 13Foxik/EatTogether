@@ -12,20 +12,218 @@
         <vm:MenuViewModel />
     </ContentPage.BindingContext>
 
-    <Grid RowDefinitions="Auto, *"
-          VerticalOptions="FillAndExpand"
-          HorizontalOptions="FillAndExpand">
+    <!-- Grid: Row 0 = фиксированная шапка, Row 1 = скролл -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- ШАПКА - С закругленными нижними краями, без полосы и с тонкой линией сверху -->
+        <!-- СКРОЛЛ КОНТЕНТ (Row 1) -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="32">
+
+                <!-- Заголовок когда нет семьи -->
+                <VerticalStackLayout IsVisible="{Binding ShowNoFamilyMessage}" Spacing="8">
+                    <Label Text="Меню" Style="{StaticResource Headline}" HorizontalOptions="Start"/>
+                    <Label Text="Ваше семейное меню будет доступно после присоединения к семье"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                </VerticalStackLayout>
+
+                <!-- Сообщение НЕТ СЕМЬИ -->
+                <VerticalStackLayout IsVisible="{Binding ShowNoFamilyMessage}"
+                                    Spacing="32"
+                                    HorizontalOptions="Center"
+                                    Padding="40,60">
+                    <Label Text="🍽️" FontSize="80" HorizontalOptions="Center"/>
+                    <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                        <Label Text="Сначала присоединитесь к семье!"
+                             FontSize="24"
+                             FontAttributes="Bold"
+                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                             HorizontalOptions="Center"
+                             HorizontalTextAlignment="Center"/>
+                        <Label Text="Вы сможете просматривать рецепты, планировать обеды и делиться своими кулинарными шедеврами с близкими!"
+                             FontSize="16"
+                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                             HorizontalOptions="Center"
+                             HorizontalTextAlignment="Center"
+                             MaxLines="5"/>
+                    </VerticalStackLayout>
+                    <Button Text="Перейти к семье"
+                          BackgroundColor="{StaticResource PrimaryColor}"
+                          TextColor="White"
+                          FontSize="16"
+                          FontAttributes="Bold"
+                          CornerRadius="12"
+                          HeightRequest="54"
+                          HorizontalOptions="FillAndExpand"
+                          Clicked="OnGoToFamilyClicked"/>
+                </VerticalStackLayout>
+
+                <!-- Индикатор загрузки -->
+                <ActivityIndicator IsVisible="{Binding IsBusy}"
+                                 IsRunning="{Binding IsBusy}"
+                                 Color="{StaticResource PrimaryColor}"
+                                 HorizontalOptions="Center"
+                                 HeightRequest="50"/>
+
+                <!-- НЕТ КАТЕГОРИЙ -->
+                <Frame IsVisible="{Binding ShowNoCategoriesMessage}"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                     CornerRadius="16"
+                     Padding="40"
+                     HorizontalOptions="FillAndExpand">
+                    <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+                        <Label Text="📋" FontSize="48" HorizontalOptions="Center"/>
+                        <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                            <Label Text="Меню пока пустое"
+                                 FontSize="20"
+                                 FontAttributes="Bold"
+                                 TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                 HorizontalOptions="Center"/>
+                            <Label Text="Добавьте первые рецепты, чтобы создать ваше семейное меню"
+                                 FontSize="14"
+                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
+                                 HorizontalOptions="Center"
+                                 HorizontalTextAlignment="Center"/>
+                        </VerticalStackLayout>
+                        <Button Text="Добавить стандартные категории"
+                              Command="{Binding SeedCategoriesCommand}"
+                              BackgroundColor="{StaticResource PrimaryColor}"
+                              TextColor="White"
+                              CornerRadius="8"
+                              Padding="32,14"
+                              FontSize="14"
+                              HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- ЗАГОЛОВОК КАТЕГОРИЙ -->
+                <Grid IsVisible="{Binding ShowCategoriesContent}"
+                      HorizontalOptions="FillAndExpand">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0"
+                           Text="Категории блюд"
+                           FontSize="22"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                           VerticalOptions="Center"/>
+                    <Label Grid.Column="1"
+                           Text="⚙️"
+                           FontSize="20"
+                           VerticalOptions="Center"/>
+                </Grid>
+
+                <!-- СЕТКА КАТЕГОРИЙ -->
+                <FlexLayout BindableLayout.ItemsSource="{Binding Categories}"
+                          IsVisible="{Binding ShowCategoriesContent}"
+                          Direction="Row"
+                          Wrap="Wrap"
+                          JustifyContent="SpaceBetween"
+                          AlignItems="Start">
+
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="{x:Type models:Category}">
+                            <Frame WidthRequest="175"
+                                 HeightRequest="220"
+                                 Padding="0"
+                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                                 BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                 CornerRadius="16"
+                                 HasShadow="True"
+                                 Margin="0,0,0,24">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MenuViewModel}}, Path=CategoryTappedCommand}"
+                                        CommandParameter="{Binding}"/>
+                                </Frame.GestureRecognizers>
+                                <Grid RowDefinitions="140,80" RowSpacing="0">
+                                    <!-- Картинка -->
+                                    <Frame Grid.Row="0"
+                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                         CornerRadius="16"
+                                         Padding="0"
+                                         HorizontalOptions="Fill"
+                                         VerticalOptions="Fill"
+                                         InputTransparent="True">
+                                        <Grid>
+                                            <BoxView BackgroundColor="{StaticResource PrimaryColor}"
+                                                   Opacity="0.03"
+                                                   HorizontalOptions="Fill"
+                                                   VerticalOptions="Fill"
+                                                   InputTransparent="True"/>
+                                            <Grid HorizontalOptions="Center"
+                                                  VerticalOptions="Center"
+                                                  InputTransparent="True">
+                                                <Image Source="{Binding ImageFile}"
+                                                       IsVisible="{Binding HasImage}"
+                                                       Aspect="AspectFit"
+                                                       WidthRequest="90"
+                                                       HeightRequest="90"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"
+                                                       Margin="10"/>
+                                                <Label Text="{Binding Icon}"
+                                                       IsVisible="{Binding HasNoImage}"
+                                                       FontSize="48"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"/>
+                                            </Grid>
+                                            <!-- Бейдж блюд -->
+                                            <Frame BackgroundColor="{StaticResource PrimaryColor}"
+                                                 CornerRadius="10"
+                                                 Padding="8,4"
+                                                 HorizontalOptions="End"
+                                                 VerticalOptions="Start"
+                                                 Margin="8"
+                                                 HeightRequest="24">
+                                                <Label Text="{Binding DishCountText}"
+                                                     FontSize="11"
+                                                     TextColor="White"
+                                                     FontAttributes="Bold"/>
+                                            </Frame>
+                                        </Grid>
+                                    </Frame>
+                                    <!-- Название + подкатегории -->
+                                    <VerticalStackLayout Grid.Row="1"
+                                                       Padding="12,10"
+                                                       Spacing="4"
+                                                       VerticalOptions="Center">
+                                        <Label Text="{Binding Name}"
+                                             FontSize="15"
+                                             FontAttributes="Bold"
+                                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                             HorizontalOptions="Center"
+                                             HorizontalTextAlignment="Center"
+                                             MaxLines="2"
+                                             LineBreakMode="TailTruncation"/>
+                                        <Label Text="{Binding SubcategoryCountText, StringFormat='{0} подкатегорий'}"
+                                             FontSize="11"
+                                             HorizontalOptions="Center"
+                                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ШАПКА (Row 0) — ВСЕГДА СВЕРХУ, не скроллится -->
         <Border Grid.Row="0"
                 IsVisible="{Binding HasFamily}"
                 BackgroundColor="{StaticResource PrimaryColor}"
                 StrokeShape="RoundRectangle 0,0,25,25"
-                Padding="0"
                 HeightRequest="160"
                 StrokeThickness="0"
-                HorizontalOptions="FillAndExpand"
-                VerticalOptions="Start">
+                HorizontalOptions="FillAndExpand">
             <Border.Shadow>
                 <Shadow Brush="{StaticResource PrimaryColor}"
                         Offset="0,10"
@@ -33,16 +231,6 @@
                         Opacity="0.3"/>
             </Border.Shadow>
             <Grid>
-                <!-- НОВАЯ: Тонкая белая линия перед шапкой -->
-                <BoxView BackgroundColor="White"
-                         HeightRequest="1"
-                         VerticalOptions="Start"
-                         HorizontalOptions="FillAndExpand"
-                         Opacity="0.4"
-                         Margin="0,0,0,0"/>
-                <!-- Убедимся, что она прямо сверху -->
-
-                <!-- Декоративный узор в углу -->
                 <BoxView BackgroundColor="{StaticResource PrimaryDarkColor}"
                          Opacity="0.2"
                          HorizontalOptions="Start"
@@ -52,7 +240,6 @@
                          CornerRadius="60"
                          TranslationX="-60"
                          TranslationY="-60"/>
-
                 <BoxView BackgroundColor="{StaticResource PrimaryDarkColor}"
                          Opacity="0.1"
                          HorizontalOptions="End"
@@ -62,30 +249,23 @@
                          CornerRadius="50"
                          TranslationX="50"
                          TranslationY="50"/>
-
-                <!-- Контент шапки -->
                 <VerticalStackLayout Spacing="6"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Padding="20,0">
-
-                    <!-- Заголовок -->
                     <Label Text="Меню семьи"
                          FontSize="28"
                          FontAttributes="Bold"
                          TextColor="White"
                          HorizontalOptions="Center"
                          HorizontalTextAlignment="Center"/>
-
-                    <!-- Подзаголовок -->
                     <Label Text="Кулинарная коллекция вашей семьи"
                          FontSize="13"
                          TextColor="White"
                          Opacity="0.85"
                          HorizontalOptions="Center"
                          HorizontalTextAlignment="Center"/>
-
-                    <!-- Счётчик блюд — pill badge -->
+                    <!-- Счётчик блюд -->
                     <Border BackgroundColor="#22FFFFFF"
                             StrokeThickness="1"
                             Stroke="#44FFFFFF"
@@ -103,7 +283,7 @@
                                    VerticalOptions="Center">
                                 <Label.FormattedText>
                                     <FormattedString>
-                        <Span Text="{Binding TotalDishCountText}"
+                                        <Span Text="{Binding TotalDishCountText}"
                                               FontAttributes="Bold"
                                               FontSize="15"
                                               TextColor="White"/>
@@ -118,306 +298,6 @@
                 </VerticalStackLayout>
             </Grid>
         </Border>
-
-        <!-- ОСНОВНОЙ КОНТЕНТ -->
-        <ScrollView Grid.Row="1"
-                    VerticalOptions="FillAndExpand">
-            <VerticalStackLayout Padding="20" Spacing="32">
-
-                <!-- Заголовок когда нет семьи -->
-                <VerticalStackLayout IsVisible="{Binding ShowNoFamilyMessage}"
-                                    Spacing="8">
-                    <Label Text="Меню"
-                           Style="{StaticResource Headline}"
-                           HorizontalOptions="Start"/>
-
-                    <Label Text="Ваше семейное меню будет доступно после присоединения к семье"
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                </VerticalStackLayout>
-
-                <!-- Сообщение "НЕТ СЕМЬИ" -->
-                <VerticalStackLayout IsVisible="{Binding ShowNoFamilyMessage}"
-                                    Margin="0, -50, 0, 0"
-                                    Spacing="32"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center"
-                                    Padding="40,60">
-
-                    <!-- Иконка -->
-                    <Label Text="🍽️"
-                         FontSize="80"
-                         HorizontalOptions="Center"/>
-
-                    <!-- Сообщение -->
-                    <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
-                        <Label Text="Сначала присоединитесь к семье!"
-                             FontSize="24"
-                             FontAttributes="Bold"
-                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                             HorizontalOptions="Center"
-                             HorizontalTextAlignment="Center"/>
-
-                        <Label Text="Вы сможете просматривать рецепты, планировать обеды и делиться своими кулинарными шедеврами с близкими!"
-                             FontSize="16"
-                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                             HorizontalOptions="Center"
-                             HorizontalTextAlignment="Center"
-                             MaxLines="5"/>
-                    </VerticalStackLayout>
-
-                    <!-- Кнопка перехода к семье -->
-                    <Button Text="Перейти к семье"
-                          BackgroundColor="{StaticResource PrimaryColor}"
-                          TextColor="White"
-                          FontSize="16"
-                          FontAttributes="Bold"
-                          CornerRadius="12"
-                          HeightRequest="54"
-                          HorizontalOptions="FillAndExpand"
-                          Clicked="OnGoToFamilyClicked"/>
-
-                </VerticalStackLayout>
-
-                <!-- Индикатор загрузки (только когда есть семья) -->
-                <ActivityIndicator IsVisible="{Binding IsBusy}"
-                                 IsRunning="{Binding IsBusy}"
-                                 Color="{StaticResource PrimaryColor}"
-                                 HorizontalOptions="Center"
-                                 VerticalOptions="Center"
-                                 HeightRequest="50"/>
-
-                <!-- Сообщение "НЕТ КАТЕГОРИЙ" (только когда есть семья) -->
-                <Frame IsVisible="{Binding ShowNoCategoriesMessage}"
-                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                     CornerRadius="16"
-                     Padding="40"
-                     Margin="0,20"
-                     HorizontalOptions="FillAndExpand">
-
-                    <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
-                        <Label Text="📋"
-                             FontSize="48"
-                             HorizontalOptions="Center"/>
-
-                        <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
-                            <Label Text="Меню пока пустое"
-                                 FontSize="20"
-                                 FontAttributes="Bold"
-                                 TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                 HorizontalOptions="Center"/>
-
-                            <Label Text="Добавьте первые рецепты, чтобы создать ваше семейное меню"
-                                 FontSize="14"
-                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                                 HorizontalOptions="Center"
-                                 HorizontalTextAlignment="Center"/>
-                        </VerticalStackLayout>
-
-                        <Button Text="Создать первое блюдо"
-                              Command="{Binding LoadCategoriesCommand}"
-                              BackgroundColor="{StaticResource PrimaryColor}"
-                              TextColor="White"
-                              CornerRadius="8"
-                              Padding="32,14"
-                              FontSize="14"
-                              FontAttributes="Bold"
-                              HorizontalOptions="Center"/>
-
-                        <Button Text="Добавить стандартные категории"
-                              Command="{Binding SeedCategoriesCommand}"
-                              BackgroundColor="Transparent"
-                              TextColor="{StaticResource PrimaryColor}"
-                              BorderColor="{StaticResource PrimaryColor}"
-                              BorderWidth="1"
-                              CornerRadius="8"
-                              Padding="32,14"
-                              FontSize="14"
-                              HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                </Frame>
-
-                <!-- ЗАГОЛОВОК КАТЕГОРИЙ С КНОПКОЙ НАСТРОЕК -->
-                <Grid IsVisible="{Binding ShowCategoriesContent}"
-                      HorizontalOptions="FillAndExpand"
-                      Margin="0,0,0,16">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Заголовок категорий с декоративными элементами -->
-                    <VerticalStackLayout Grid.Column="0" Spacing="12" HorizontalOptions="Start">
-                        <BoxView HeightRequest="1"
-                               WidthRequest="80"
-                               BackgroundColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
-                               HorizontalOptions="Start"/>
-
-                        <Label Text="Категории блюд"
-                             FontSize="24"
-                             FontAttributes="Bold"
-                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                             HorizontalOptions="Start"/>
-                    </VerticalStackLayout>
-
-                    <!-- КНОПКА НАСТРОЕК В СТИЛЕ ПРЕМИУМ -->
-                    <Frame Grid.Column="1"
-                           BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
-                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
-                           CornerRadius="12"
-                           Padding="0"
-                           WidthRequest="44"
-                           HeightRequest="44"
-                           HorizontalOptions="End"
-                           VerticalOptions="Center"
-                           HasShadow="True">
-
-                        <Frame.GestureRecognizers>
-                            <!--<TapGestureRecognizer Command="{Binding SettingsCommand}"/>-->
-                        </Frame.GestureRecognizers>
-
-                        <Grid>
-                            <!-- Фон при нажатии -->
-                            <BoxView BackgroundColor="{StaticResource PrimaryColor}"
-                                   Opacity="0"
-                                   x:Name="SettingsButtonBackground"/>
-
-                            <!-- Иконка настроек -->
-                            <Label Text="⚙️"
-                                 FontSize="16"
-                                 HorizontalOptions="Center"
-                                 VerticalOptions="Center"/>
-                        </Grid>
-                    </Frame>
-                </Grid>
-
-                <!-- СЕТКА КАТЕГОРИЙ В ПРЕМИУМ СТИЛЕ -->
-                <FlexLayout BindableLayout.ItemsSource="{Binding Categories}"
-                          IsVisible="{Binding ShowCategoriesContent}"
-                          Direction="Row"
-                          Wrap="Wrap"
-                          JustifyContent="SpaceBetween"
-                          AlignItems="Start">
-
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="{x:Type models:Category}">
-                            <!-- КЛИКАБЕЛЬНАЯ КАРТОЧКА КАТЕГОРИИ -->
-                            <Frame WidthRequest="175"
-                                 HeightRequest="220"
-                                 Padding="0"
-                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
-                                 BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
-                                 CornerRadius="16"
-                                 HasShadow="True"
-                                 Margin="0,0,0,24">
-
-                                
-
-                                <!-- ОБРАБОТЧИК КЛИКА -->
-                                <Frame.GestureRecognizers>
-                                    <TapGestureRecognizer 
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MenuViewModel}}, Path=CategoryTappedCommand}"
-                                        CommandParameter="{Binding}"/>
-                                </Frame.GestureRecognizers>
-
-                                <Grid RowDefinitions="140,80"
-                                    RowSpacing="0">
-
-                                    <!-- Изображение категории с градиентом -->
-                                    <Frame Grid.Row="0"
-                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
-                                         CornerRadius="16"
-                                         Padding="0"
-                                         HorizontalOptions="Fill"
-                                         VerticalOptions="Fill"
-                                         InputTransparent="True">
-
-                                        <Grid>
-                                            <!-- Градиентный оверлей -->
-                                            <BoxView BackgroundColor="{StaticResource PrimaryColor}"
-                                                   Opacity="0.03"
-                                                   HorizontalOptions="Fill"
-                                                   VerticalOptions="Fill"
-                                                   InputTransparent="True"/>
-
-                                            <!-- Картинка категории -->
-                                            <Grid HorizontalOptions="Center"
-                                                  VerticalOptions="Center"
-                                                  InputTransparent="True">
-
-                                                <!-- PNG картинка (если есть ImageFile) -->
-                                                <Image Source="{Binding ImageFile}"
-                                                       IsVisible="{Binding HasImage}"
-                                                       Aspect="AspectFit"
-                                                       WidthRequest="90"
-                                                       HeightRequest="90"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center"
-                                                       Margin="10"/>
-
-                                                <!-- Эмодзи fallback (если ImageFile пустой) -->
-                                                <Label Text="{Binding Icon}"
-                                                       IsVisible="{Binding HasNoImage}"
-                                                       FontSize="48"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center"/>
-                                            </Grid>
-
-                                            <!-- Бейдж количества блюд (зелёный, сверху справа) -->
-                                            <Frame BackgroundColor="{StaticResource PrimaryColor}"
-                                                 CornerRadius="10"
-                                                 Padding="8,4"
-                                                 HorizontalOptions="End"
-                                                 VerticalOptions="Start"
-                                                 Margin="8"
-                                                 HeightRequest="24"
-                                                 HasShadow="True">
-                                                <Frame.Shadow>
-                                                    <Shadow Brush="{StaticResource PrimaryColor}"
-                                                          Offset="0,2"
-                                                          Radius="4"
-                                                          Opacity="0.3"/>
-                                                </Frame.Shadow>
-                                                <Label Text="{Binding DishCountText}"
-                                                     FontSize="11"
-                                                     TextColor="White"
-                                                     FontAttributes="Bold"/>
-                                            </Frame>
-                                        </Grid>
-                                    </Frame>
-
-                                    <!-- Название категории -->
-                                    <VerticalStackLayout Grid.Row="1"
-                                                       Padding="12,10"
-                                                       Spacing="4"
-                                                       VerticalOptions="Center">
-
-                                        <Label Text="{Binding Name}"
-                                             FontSize="15"
-                                             FontAttributes="Bold"
-                                             TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                             HorizontalOptions="Center"
-                                             HorizontalTextAlignment="Center"
-                                             MaxLines="2"
-                                             LineBreakMode="TailTruncation"/>
-
-                                        <!-- Подкатегории -->
-                                        <Label Text="{Binding SubcategoryCountText, StringFormat='{0} подкатегорий'}"
-                                             FontSize="11"
-                                             HorizontalOptions="Center"
-                                             TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Frame>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
-
-
-
-            </VerticalStackLayout>
-        </ScrollView>
 
     </Grid>
 
