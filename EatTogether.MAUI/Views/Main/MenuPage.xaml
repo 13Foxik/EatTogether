@@ -298,7 +298,7 @@
                           AlignItems="Start">
 
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="{x:Type models:Category}">
                             <!-- КЛИКАБЕЛЬНАЯ КАРТОЧКА КАТЕГОРИИ -->
                             <Frame WidthRequest="175"
                                  HeightRequest="220"
