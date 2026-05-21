@@ -133,6 +133,25 @@ namespace EatTogether.MAUI.ViewModels
             }
         }
         [RelayCommand]
+        private async Task SeedCategories()
+        {
+            try
+            {
+                IsBusy = true;
+                await _categoryService.SeedDefaultCategoriesAsync();
+                await LoadCategoriesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка сида категорий: {ex}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
         private async Task Settings()
         {
             Console.WriteLine("pizda");
