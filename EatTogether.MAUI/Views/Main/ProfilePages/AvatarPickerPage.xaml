@@ -20,21 +20,25 @@
         <VerticalStackLayout Spacing="0">
 
             <!-- Шапка с кнопкой Назад -->
-            <Grid Padding="16,16,16,8"
+            <Grid Padding="12,16,12,8"
                   BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="80"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="80"/>
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0"
                         Text="← Назад"
                         Command="{Binding GoBackCommand}"
-                        BackgroundColor="Transparent"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
                         TextColor="{StaticResource PrimaryColor}"
-                        FontSize="14"
-                        Padding="0"
-                        HeightRequest="36"/>
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        CornerRadius="8"
+                        HeightRequest="34"
+                        Padding="8,0"
+                        HorizontalOptions="Start"/>
 
                 <Label Grid.Column="1"
                        Text="Аватар"
