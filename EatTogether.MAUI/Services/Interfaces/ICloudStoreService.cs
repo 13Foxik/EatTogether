@@ -35,5 +35,6 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task<List<Dish>> GetDishesOnPlateFromDb(string plateId);
         Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories);
         Task<string> GenerateUniqueFamilyIdAsync(string collection);
+        Task SeedDefaultCategoriesAsync();
     }
 }

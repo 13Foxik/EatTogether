@@ -824,6 +824,49 @@ namespace EatTogether.MAUI.Services
             throw new InvalidOperationException($"Could not generate unique ID after {MAX_ATTEMPTS} attempts");
         }
 
+    public async Task SeedDefaultCategoriesAsync()
+    {
+        await SetupFirestore();
+
+        // Проверяем — если уже есть категории, ничего не делаем
+        var existing = await GetCategoriesAsync();
+        if (existing.Count > 0)
+        {
+            Console.WriteLine($"Категории уже существуют ({existing.Count} шт.), сид пропущен.");
+            return;
+        }
+
+        var categories = new List<(string name, string icon, int order)>
+        {
+            ("Завтраки",   "🍳", 1),
+            ("Супы",       "🍲", 2),
+            ("Горячее",    "🍖", 3),
+            ("Гарниры",    "🥦", 4),
+            ("Салаты",     "🥗", 5),
+            ("Выпечка",    "🥐", 6),
+            ("Десерты",    "🍰", 7),
+            ("Напитки",    "🥤", 8),
+            ("Закуски",    "🧀", 9),
+            ("Рыба",       "🐟", 10),
+        };
+
+        foreach (var (name, icon, order) in categories)
+        {
+            var id = await GenerateUniqueFamilyIdAsync("Categories");
+            var category = new Category
+            {
+                Id = id,
+                Name = name,
+                Icon = icon,
+                SortOrder = order,
+            };
+            await _db.Collection("Categories").Document(id).SetAsync(category);
+            Console.WriteLine($"Добавлена категория: {name}");
+        }
+
+        Console.WriteLine("Сид категорий завершён успешно.");
+    }
+
     private string GenerateRandomId(int lenght)
     {
         var random = new Random();
