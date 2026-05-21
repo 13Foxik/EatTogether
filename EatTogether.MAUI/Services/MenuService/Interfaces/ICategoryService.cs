@@ -4,8 +4,7 @@ namespace EatTogether.MAUI.Services.MenuService.Interfaces
 {
     public interface ICategoryService
     {
-        Task SetFamilyCategoriesAsync(string familyId);
-        Task<List<Category>> GetEnabledCategoriesAsync(string familyId);
+        Task<List<Category>> GetAllCategoriesAsync();
         Task SeedDefaultCategoriesAsync();
     }
 }

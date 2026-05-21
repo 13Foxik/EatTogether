@@ -114,8 +114,7 @@ namespace EatTogether.MAUI.ViewModels
             {
                 IsBusy = true;
 
-                var familyId = Preferences.Get("family_id", string.Empty);
-                var categories = await _categoryService.GetEnabledCategoriesAsync(familyId);
+                var categories = await _categoryService.GetAllCategoriesAsync();
 
                 Categories.Clear();
                 foreach (var category in categories)
