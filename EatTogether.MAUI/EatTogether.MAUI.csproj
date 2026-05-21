@@ -65,6 +65,20 @@
 		<MauiImage Include="Resources\Images\avatar_pig.png" />
 		<MauiImage Include="Resources\Images\avatar_slon.png" />
 
+		<!-- Картинки категорий меню -->
+		<MauiImage Include="Resources\Images\category_meat.png" />
+		<MauiImage Include="Resources\Images\category_garnir.png" />
+		<MauiImage Include="Resources\Images\category_salad.png" />
+		<MauiImage Include="Resources\Images\category_breakfast.png" />
+		<MauiImage Include="Resources\Images\category_dessert.png" />
+		<MauiImage Include="Resources\Images\category_bakery.png" />
+		<MauiImage Include="Resources\Images\category_drinks.png" />
+		<MauiImage Include="Resources\Images\category_vegetables.png" />
+		<MauiImage Include="Resources\Images\category_fruits.png" />
+		<MauiImage Include="Resources\Images\category_sauces.png" />
+		<MauiImage Include="Resources\Images\category_snacks.png" />
+		<MauiImage Include="Resources\Images\category_soup.png" />
+
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 

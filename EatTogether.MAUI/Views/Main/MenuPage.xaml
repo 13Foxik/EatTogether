@@ -322,26 +322,28 @@
                                                    VerticalOptions="Fill"
                                                    InputTransparent="True"/>
 
-                                            <!-- Иконка категории в элегантном стиле -->
-                                            <VerticalStackLayout Spacing="12"
-                                                               HorizontalOptions="Center"
-                                                               VerticalOptions="Center"
-                                                               Padding="20"
-                                                               InputTransparent="True">
-                                                <Frame BackgroundColor="{StaticResource PrimaryColor}"
-                                                       Opacity="0.1"
-                                                       CornerRadius="12"
-                                                       Padding="12"
-                                                       WidthRequest="48"
-                                                       HeightRequest="48"
-                                                       HorizontalOptions="Center">
-                                                    <Label Text="{Binding Icon}"
-                                                         FontSize="20"
-                                                         HorizontalOptions="Center"
-                                                         VerticalOptions="Center"
-                                                         TextColor="{StaticResource PrimaryColor}"/>
-                                                </Frame>
-                                            </VerticalStackLayout>
+                                            <!-- Картинка категории -->
+                                            <Grid HorizontalOptions="Center"
+                                                  VerticalOptions="Center"
+                                                  InputTransparent="True">
+
+                                                <!-- PNG картинка (если есть ImageFile) -->
+                                                <Image Source="{Binding ImageFile}"
+                                                       IsVisible="{Binding HasImage}"
+                                                       Aspect="AspectFit"
+                                                       WidthRequest="90"
+                                                       HeightRequest="90"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"
+                                                       Margin="10"/>
+
+                                                <!-- Эмодзи fallback (если ImageFile пустой) -->
+                                                <Label Text="{Binding Icon}"
+                                                       IsVisible="{Binding HasNoImage}"
+                                                       FontSize="48"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"/>
+                                            </Grid>
 
                                             <!-- Бейдж количества рецептов -->
                                             <Frame BackgroundColor="{StaticResource PrimaryColor}"
