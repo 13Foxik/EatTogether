@@ -12,6 +12,7 @@ namespace EatTogether.MAUI.ViewModels
     {
         private readonly ICategoryService _categoryService;
         private readonly ISubcategoryService _subcategoryService;
+        private readonly IDishService _dishService;
 
         [ObservableProperty]
         private ObservableCollection<Category> categories = new();
@@ -22,15 +23,21 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private bool hasFamily;
 
+        [ObservableProperty]
+        private int totalDishCount;
+
+        public string TotalDishCountText => TotalDishCount.ToString();
+
         public bool HasCategories => HasFamily && Categories?.Count > 0;
         public bool ShowNoFamilyMessage => !HasFamily;
         public bool ShowCategoriesContent => HasFamily && HasCategories && !IsBusy;
         public bool ShowNoCategoriesMessage => HasFamily && !HasCategories && !IsBusy;
 
-        public MenuViewModel(ICategoryService categoryService, ISubcategoryService subcategoryService)
+        public MenuViewModel(ICategoryService categoryService, ISubcategoryService subcategoryService, IDishService dishService)
         {
             _categoryService = categoryService;
             _subcategoryService = subcategoryService;
+            _dishService = dishService;
 
             CheckFamilyStatus();
 
@@ -40,7 +47,8 @@ namespace EatTogether.MAUI.ViewModels
 
         public MenuViewModel() : this(
             Application.Current.Handler.MauiContext.Services.GetService<ICategoryService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>()) { }
+            Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
+            Application.Current.Handler.MauiContext.Services.GetService<IDishService>()) { }
 
         private void CheckFamilyStatus()
         {
@@ -54,6 +62,8 @@ namespace EatTogether.MAUI.ViewModels
             OnPropertyChanged(nameof(ShowCategoriesContent));
             OnPropertyChanged(nameof(ShowNoCategoriesMessage));
         }
+
+        partial void OnTotalDishCountChanged(int value) => OnPropertyChanged(nameof(TotalDishCountText));
 
         partial void OnCategoriesChanged(ObservableCollection<Category> value) => UpdateComputedProperties();
         partial void OnIsBusyChanged(bool value) => UpdateComputedProperties();
@@ -99,9 +109,18 @@ namespace EatTogether.MAUI.ViewModels
 
                         category.SubcategoryCount = subcategories.Count;
 
-                        // Блюда считаем суммой по всем подкатегориям — тоже параллельно
-                        // (только если подкатегорий немного, иначе дорого)
-                        category.DishCount = 0;
+                        // Считаем блюда параллельно по всем подкатегориям
+                        if (subcategories.Count > 0)
+                        {
+                            var dishTasks = subcategories.Select(sub =>
+                                _dishService.GetDishListAsync(sub.Id));
+                            var dishLists = await Task.WhenAll(dishTasks);
+                            category.DishCount = dishLists.Sum(list => list?.Count ?? 0);
+                        }
+                        else
+                        {
+                            category.DishCount = 0;
+                        }
                     }
                     catch
                     {
@@ -111,6 +130,9 @@ namespace EatTogether.MAUI.ViewModels
                 });
 
                 await Task.WhenAll(tasks);
+
+                // Общий счётчик всех блюд
+                TotalDishCount = loaded.Sum(c => c.DishCount);
 
                 Categories.Clear();
                 foreach (var c in loaded)

@@ -402,49 +402,26 @@
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
 
-                <!-- СТАТИСТИКА И ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ -->
-                <Grid IsVisible="{Binding ShowCategoriesContent}"
-                      Margin="0,20"
-                      ColumnDefinitions="*,*"
-                      ColumnSpacing="16">
-
-                    <!-- Общее количество рецептов -->
-                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                           CornerRadius="12"
-                           Padding="16"
-                           HasShadow="False">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Всего рецептов"
-                                 FontSize="12"
-                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
-                                 HorizontalOptions="Start"/>
-                            <Label Text="15"
-                                 FontSize="20"
-                                 FontAttributes="Bold"
-                                 TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
-                                 HorizontalOptions="Start"/>
+                <!-- СТАТИСТИКА - только общее количество блюд -->
+                <Frame IsVisible="{Binding ShowCategoriesContent}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                       CornerRadius="12"
+                       Padding="20"
+                       Margin="0,20"
+                       HasShadow="False">
+                    <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+                        <Label Text="🍽️" FontSize="28" VerticalOptions="Center"/>
+                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                            <Label Text="Всего блюд в меню"
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
+                            <Label Text="{Binding TotalDishCountText}"
+                                   FontSize="26"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource PrimaryColor}"/>
                         </VerticalStackLayout>
-                    </Frame>
-
-                    <!-- Популярная категория -->
-                    <Frame Grid.Column="1"
-                           BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                           CornerRadius="12"
-                           Padding="16"
-                           HasShadow="False">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Самая популярная"
-                                 FontSize="12"
-                                 TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
-                                 HorizontalOptions="Start"/>
-                            <Label Text="Мясо"
-                                 FontSize="14"
-                                 FontAttributes="Bold"
-                                 TextColor="{StaticResource PrimaryColor}"
-                                 HorizontalOptions="Start"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </Grid>
+                    </HorizontalStackLayout>
+                </Frame>
 
             </VerticalStackLayout>
         </ScrollView>
