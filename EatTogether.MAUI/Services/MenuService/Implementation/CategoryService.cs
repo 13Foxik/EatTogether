@@ -38,15 +38,10 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
         }
         public async Task<List<Category>> GetEnabledCategoriesAsync(string familyId)
         {
-            var familyCategories = await _cloudStoreService.GetFamilyCategoriesAsync(familyId);
+            // Загружаем все глобальные категории напрямую — без фильтрации через FamilyCategories.
+            // Любая категория добавленная в коллекцию Categories будет видна всем семьям.
             var allCategories = await _cloudStoreService.GetCategoriesAsync();
-
-            var enabledCategories = allCategories
-                .Where(c => familyCategories.Any(fc => fc.CategoryId == c.Id && fc.IsEnabled))
-                .OrderBy(c => familyCategories.First(fc => fc.CategoryId == c.Id).SortOrder)
-                .ToList();
-
-            return enabledCategories;
+            return allCategories.OrderBy(c => c.SortOrder).ToList();
         }
     }
 }
