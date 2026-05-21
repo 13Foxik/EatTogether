@@ -19,29 +19,22 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <!-- Кастомная шапка со стрелкой назад -->
-            <Grid Padding="8,48,16,12"
+            <!-- Шапка с кнопкой Назад -->
+            <Grid Padding="16,16,16,8"
                   BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="48"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="48"/>
                 </Grid.ColumnDefinitions>
 
                 <Button Grid.Column="0"
+                        Text="← Назад"
                         Command="{Binding GoBackCommand}"
                         BackgroundColor="Transparent"
-                        WidthRequest="44"
-                        HeightRequest="44"
-                        CornerRadius="22"
-                        Padding="0">
-                    <Button.ImageSource>
-                        <FontImageSource Glyph="&#xE5C4;"
-                                         FontFamily="MaterialIconsOutlined"
-                                         Color="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                         Size="26"/>
-                    </Button.ImageSource>
-                </Button>
+                        TextColor="{StaticResource PrimaryColor}"
+                        FontSize="14"
+                        Padding="0"
+                        HeightRequest="36"/>
 
                 <Label Grid.Column="1"
                        Text="Аватар"
@@ -52,17 +45,12 @@
                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
             </Grid>
 
-            <VerticalStackLayout Padding="20" Spacing="24">
+            <VerticalStackLayout Padding="20,8,20,20" Spacing="20">
 
                 <!-- Текущий аватар -->
-                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
-                    <Label Text="Текущий аватар"
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                           HorizontalOptions="Center"/>
-
-                    <Border WidthRequest="100"
-                            HeightRequest="100"
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <Border WidthRequest="90"
+                            HeightRequest="90"
                             StrokeThickness="0"
                             BackgroundColor="{Binding CurrentAvatarColor, Converter={StaticResource StringToColor}}"
                             HorizontalOptions="Center">
@@ -70,15 +58,13 @@
                             <Ellipse/>
                         </Border.StrokeShape>
                         <Grid>
-                            <!-- Fallback: первая буква -->
                             <Label IsVisible="{Binding HasNoCurrentAvatar}"
                                    Text="?"
-                                   FontSize="40"
+                                   FontSize="36"
                                    FontAttributes="Bold"
                                    TextColor="White"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center"/>
-                            <!-- Выбранный аватар -->
                             <Image IsVisible="{Binding HasCurrentAvatar}"
                                    Source="{Binding CurrentAvatarKey, Converter={StaticResource AvatarImage}}"
                                    Aspect="AspectFit"
@@ -90,24 +76,24 @@
                 </VerticalStackLayout>
 
                 <!-- Выбор цвета фона -->
-                <VerticalStackLayout Spacing="12">
+                <VerticalStackLayout Spacing="10">
                     <Label Text="Цвет фона"
-                           FontSize="16"
+                           FontSize="15"
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
                     <CollectionView ItemsSource="{Binding Colors}"
                                     SelectionMode="None"
-                                    HeightRequest="56">
+                                    HeightRequest="52">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="vm:AvatarColorChoice">
-                                <Border WidthRequest="48"
-                                        HeightRequest="48"
-                                        StrokeThickness="{Binding IsSelected, Converter={StaticResource InvertedBool}, ConverterParameter=stroke}"
-                                        Stroke="White"
+                                <Border WidthRequest="44"
+                                        HeightRequest="44"
+                                        StrokeThickness="3"
+                                        Stroke="{Binding IsSelected, Converter={StaticResource InvertedBool}, ConverterParameter=stroke}"
                                         BackgroundColor="{Binding HexColor, Converter={StaticResource StringToColor}}">
                                     <Border.StrokeShape>
                                         <Ellipse/>
@@ -117,10 +103,9 @@
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AvatarPickerViewModel}}, Path=SelectColorCommand}"
                                             CommandParameter="{Binding .}"/>
                                     </Border.GestureRecognizers>
-                                    <!-- Галочка для выбранного цвета -->
                                     <Label IsVisible="{Binding IsSelected}"
                                            Text="✓"
-                                           FontSize="20"
+                                           FontSize="18"
                                            FontAttributes="Bold"
                                            TextColor="White"
                                            HorizontalOptions="Center"
@@ -132,15 +117,11 @@
                 </VerticalStackLayout>
 
                 <!-- Выбор аватара -->
-                <VerticalStackLayout Spacing="12">
+                <VerticalStackLayout Spacing="10">
                     <Label Text="Выбери аватар"
-                           FontSize="16"
+                           FontSize="15"
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-
-                    <Label Text="Аватар будет виден другим участникам семьи."
-                           FontSize="13"
-                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
 
                     <CollectionView ItemsSource="{Binding Avatars}"
                                     SelectionMode="None">
@@ -168,7 +149,7 @@
                                         <Border WidthRequest="72"
                                                 HeightRequest="72"
                                                 StrokeThickness="0"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+                                                BackgroundColor="{StaticResource PrimaryColor}">
                                             <Border.StrokeShape>
                                                 <Ellipse/>
                                             </Border.StrokeShape>
@@ -190,6 +171,18 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                 </VerticalStackLayout>
+
+                <!-- Кнопка сохранить -->
+                <Button Text="Сохранить"
+                        BackgroundColor="{StaticResource PrimaryColor}"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        CornerRadius="10"
+                        HeightRequest="48"
+                        HorizontalOptions="Fill"
+                        Command="{Binding SaveCommand}"
+                        Margin="0,8,0,0"/>
 
                 <!-- Кнопка сброса -->
                 <Button Text="Сбросить аватар"
