@@ -61,72 +61,37 @@ namespace EatTogether.MAUI.ViewModels
         [RelayCommand]
         private async Task GoBack()
         {
-            if (Application.Current?.MainPage?.Navigation is { } nav && nav.NavigationStack.Count > 1)
-                await nav.PopAsync();
+            if (Application.Current?.MainPage is Views.Main.MainPage mainPage &&
+                mainPage.CurrentPage is NavigationPage navPage)
+            {
+                await navPage.Navigation.PopAsync();
+            }
         }
 
         [RelayCommand]
-        private async Task SelectAvatar(AvatarChoice? choice)
+        private void SelectAvatar(AvatarChoice? choice)
         {
-            if (choice == null || IsBusy) return;
-            var user = _currentUserService.CurrentUser;
-            if (user == null) return;
+            if (choice == null) return;
 
-            try
-            {
-                IsBusy = true;
+            foreach (var a in Avatars)
+                a.IsSelected = string.Equals(a.Key, choice.Key, StringComparison.OrdinalIgnoreCase);
 
-                foreach (var a in Avatars)
-                    a.IsSelected = string.Equals(a.Key, choice.Key, StringComparison.OrdinalIgnoreCase);
-
-                CurrentAvatarKey = choice.Key;
-                user.Avatar = choice.Key;
-                _currentUserService.SetCurrentUser(user);
-
-                await _cloudStoreService.UpdateUserAvatar(user);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка смены аватара: {ex.Message}");
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+            CurrentAvatarKey = choice.Key;
         }
 
         [RelayCommand]
-        private async Task SelectColor(AvatarColorChoice? choice)
+        private void SelectColor(AvatarColorChoice? choice)
         {
-            if (choice == null || IsBusy) return;
-            var user = _currentUserService.CurrentUser;
-            if (user == null) return;
+            if (choice == null) return;
 
-            try
-            {
-                IsBusy = true;
+            foreach (var c in Colors)
+                c.IsSelected = string.Equals(c.HexColor, choice.HexColor, StringComparison.OrdinalIgnoreCase);
 
-                foreach (var c in Colors)
-                    c.IsSelected = string.Equals(c.HexColor, choice.HexColor, StringComparison.OrdinalIgnoreCase);
-
-                CurrentAvatarColor = choice.HexColor;
-                user.AvatarColor = choice.HexColor;
-                _currentUserService.SetCurrentUser(user);
-
-                await _cloudStoreService.UpdateUserAvatar(user);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка смены цвета аватара: {ex.Message}");
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+            CurrentAvatarColor = choice.HexColor;
         }
 
         [RelayCommand]
-        private async Task ClearAvatar()
+        private async Task Save()
         {
             var user = _currentUserService.CurrentUser;
             if (user == null || IsBusy) return;
@@ -134,22 +99,31 @@ namespace EatTogether.MAUI.ViewModels
             try
             {
                 IsBusy = true;
-                foreach (var a in Avatars) a.IsSelected = false;
 
-                CurrentAvatarKey = string.Empty;
-                user.Avatar = string.Empty;
+                user.Avatar = CurrentAvatarKey;
+                user.AvatarColor = CurrentAvatarColor;
                 _currentUserService.SetCurrentUser(user);
 
                 await _cloudStoreService.UpdateUserAvatar(user);
+
+                // Возвращаемся назад после сохранения
+                await GoBack();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Ошибка сброса аватара: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения аватара: {ex.Message}");
             }
             finally
             {
                 IsBusy = false;
             }
+        }
+
+        [RelayCommand]
+        private void ClearAvatar()
+        {
+            foreach (var a in Avatars) a.IsSelected = false;
+            CurrentAvatarKey = string.Empty;
         }
     }
 
