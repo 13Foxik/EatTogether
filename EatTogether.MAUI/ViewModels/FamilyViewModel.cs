@@ -1217,16 +1217,13 @@ public partial class FamilyViewModel : ObservableObject
                     }
                 }
 
-                // Добавляем высоту подсказки по управлению
-                membersHeight += 120; // Высота блока с подсказкой
-
                 return Math.Min(membersHeight, 800); // Максимум 800px
 
             case TabType.Requests:
                 if (!HasPendingRequests) return 250;
 
-                // ~140px на запрос + история
-                double requestsHeight = 100 + (PendingRequests.Count * 140) + 100; // +100 для истории
+                // ~140px на запрос
+                double requestsHeight = 100 + (PendingRequests.Count * 140);
                 return Math.Min(requestsHeight, 600);
 
             default:
