@@ -28,6 +28,11 @@ public partial class FamilyViewModel : ObservableObject
     [ObservableProperty]
     private TabItem _currentTab;
 
+    // Вычисляемые свойства для видимости вкладок (без CarouselView)
+    public bool IsActivityTab => SelectedTabIndex == 0;
+    public bool IsMembersTab  => SelectedTabIndex == 1;
+    public bool IsRequestsTab => SelectedTabIndex == 2;
+
     [ObservableProperty]
     private bool _hasFamily;
 
@@ -1465,6 +1470,13 @@ public partial class FamilyViewModel : ObservableObject
 
             CurrentTabHeight = value.Height;
         }
+    }
+
+    partial void OnSelectedTabIndexChanged(int value)
+    {
+        OnPropertyChanged(nameof(IsActivityTab));
+        OnPropertyChanged(nameof(IsMembersTab));
+        OnPropertyChanged(nameof(IsRequestsTab));
     }
 
     partial void OnIsScrolledDownChanged(bool value)
