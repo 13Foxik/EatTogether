@@ -224,21 +224,11 @@
                                  Margin="{Binding SelectedTabIndex, Converter={StaticResource TabIndicatorMarginConverter}}"
                                  VerticalOptions="End"/>
 
-                        <!-- Контент вкладок - ВЫСОТА ПОДСТРАИВАЕТСЯ -->
-                        <CarouselView ItemsSource="{Binding Tabs}"
-                                      CurrentItem="{Binding CurrentTab}"
-                                      Loop="False"
-                                      PeekAreaInsets="0"
-                                      HorizontalScrollBarVisibility="Never"
-                                      HorizontalOptions="FillAndExpand"
-                                      VerticalOptions="Start">
-
-                            <CarouselView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:TabItem">
-                                    <Grid>
+                        <!-- Контент вкладок -->
+                        <VerticalStackLayout>
 
                                         <!-- АКТИВНОСТЬ - ТАРЕЛКИ -->
-                                        <VerticalStackLayout IsVisible="{Binding IsActivity}" 
+                                        <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsActivityTab}" 
                                                              Spacing="16"
                                                              Padding="20,16,20,40">
 
@@ -732,7 +722,7 @@
                                         </VerticalStackLayout>
 
                                         <!-- УЧАСТНИКИ - ИСПРАВЛЕННЫЙ ВАРИАНТ -->
-                                        <VerticalStackLayout IsVisible="{Binding IsMembers}" 
+                                        <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsMembersTab}" 
                                                              Spacing="12"
                                                              Padding="20,16,20,40">
 
@@ -910,7 +900,7 @@
                                         </VerticalStackLayout>
 
                                         <!-- ЗАПРОСЫ НА ВСТУПЛЕНИЕ -->
-                                        <VerticalStackLayout IsVisible="{Binding IsRequests}" 
+                                        <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsRequestsTab}" 
                                                              Spacing="16"
                                                              Padding="20,16,20,40">
 
@@ -1057,10 +1047,7 @@
                                             <!-- Дополнительное пространство в конце -->
                                             <BoxView HeightRequest="30" Color="Transparent"/>
                                         </VerticalStackLayout>
-                                    </Grid>
-                                </DataTemplate>
-                            </CarouselView.ItemTemplate>
-                        </CarouselView>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>
