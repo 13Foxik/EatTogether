@@ -9,6 +9,7 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task UpdateUserAvatar(User user);
         Task UpdateRequestStatus(MembershipRequest request, RequestStatus status);
         Task InsertFamilyModel(Family family);
+        Task UpdateFamilyModel(string familyId, string name, string description);
         Task AddMemberToFamily(string familyId, FamilyMember member);
         Task PermissionUpToDB(string userId, string familyId);
         Task PermissionDownToDB(string userId, string familyId);

@@ -60,6 +60,20 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
             return false;
         }
 
+        public async Task UpdateFamily(string familyId, string name, string description)
+        {
+            await _cloudStoreService.UpdateFamilyModel(familyId, name, description);
+
+            // Обновляем локальный кэш
+            var current = _currentFamilyService.GetCurrentFamily();
+            if (current != null && current.Id == familyId)
+            {
+                current.Name = name;
+                current.Description = description;
+                _currentFamilyService.SetCurrentFamily(current);
+            }
+        }
+
         public async Task AcceptMember(MembershipRequest request)
         {
             User user = await _cloudStoreService.GetUserModel(request.UserId);

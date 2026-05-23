@@ -64,7 +64,8 @@
                                     BorderColor="{StaticResource PrimaryColor}"
                                     CornerRadius="8"
                                     Padding="12,6"
-                                    HeightRequest="30"/>
+                                    HeightRequest="30"
+                                    Command="{Binding EditFamilyCommand}"/>
                         </HorizontalStackLayout>
 
                         <!-- Основная информация -->
@@ -90,6 +91,17 @@
                                        FontSize="20"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                <!-- Код семьи -->
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="Код:"
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                    <Label Text="{Binding FamilyId}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource PrimaryColor}"/>
+                                </HorizontalStackLayout>
 
                                 <HorizontalStackLayout Spacing="8">
                                     <Frame BackgroundColor="{StaticResource PrimaryColor}" 
@@ -203,10 +215,11 @@
                                     CommandParameter="2"/>
                         </Grid>
 
-                        <!-- Индикатор активной вкладка -->
+                        <!-- Индикатор активной вкладки -->
                         <BoxView HeightRequest="3"
                                  WidthRequest="80"
                                  BackgroundColor="{StaticResource PrimaryColor}"
+                                 Color="{StaticResource PrimaryColor}"
                                  HorizontalOptions="Start"
                                  Margin="{Binding SelectedTabIndex, Converter={StaticResource TabIndicatorMarginConverter}}"
                                  VerticalOptions="End"/>
@@ -680,7 +693,10 @@
                                                 </VerticalStackLayout>
 
                                                 <!-- Подсказка по функционалу -->
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                               Path=BindingContext.HasPlates, 
+                                                               Converter={StaticResource InvertedBoolConverter}}"
+                                                       BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                                        CornerRadius="12"
                                                        Padding="16"
                                                        Margin="0,20,0,0">
@@ -729,39 +745,8 @@
                                                                HorizontalOptions="Center"
                                                                VerticalOptions="Center"/>
 
-                                            <!-- Сообщение когда нет участников -->
-                                            <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                       Path=BindingContext.FamilyMembers.Count, 
-                                                                       Converter={StaticResource InvertedBoolConverter}}"
-                                                   BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                   CornerRadius="12"
-                                                   Padding="20">
-                                                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
-                                                    <Label Text="👥"
-                                                           FontSize="32"
-                                                           HorizontalOptions="Center"/>
-
-                                                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                                                        <Label Text="Нет участников"
-                                                               FontSize="16"
-                                                               FontAttributes="Bold"    
-                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                                               HorizontalOptions="Center"/>
-
-                                                        <Label Text="Участники семьи будут отображаться здесь"
-                                                               FontSize="14"
-                                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                                                               HorizontalOptions="Center"
-                                                               HorizontalTextAlignment="Center"/>
-                                                    </VerticalStackLayout>
-                                                </VerticalStackLayout>
-                                            </Frame>
-
-                                            <!-- Список участников - ИСПРАВЛЕННАЯ СТРУКТУРА -->
-                                            <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                     Path=BindingContext.FamilyMembers.Count, 
-                                                                                     Converter={StaticResource CollectionCountToVisibilityConverter}}"
-                                                                 Spacing="12"
+                                            <!-- Список участников -->
+                                            <VerticalStackLayout Spacing="12"
                                                                  VerticalOptions="FillAndExpand">
 
                                                 <CollectionView ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
@@ -1036,7 +1021,7 @@
                                                    CornerRadius="12"
                                                    Padding="20">
                                                 <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
-                                                    <Label Text="🎉"
+                                                    <Label Text="📋"
                                                            FontSize="32"
                                                            HorizontalOptions="Center"/>
 
@@ -1047,20 +1032,30 @@
                                                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                HorizontalOptions="Center"/>
 
-                                                        <Label Text="Все запросы на вступление будут отображаться здесь"
+                                                        <Label Text="Чтобы кто-то вступил в семью — дайте ему код семьи. Участник должен ввести его на странице присоединения."
                                                                FontSize="14"
                                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                HorizontalOptions="Center"
-                                                               VerticalTextAlignment="Center"/>
+                                                               HorizontalTextAlignment="Center"/>
                                                     </VerticalStackLayout>
 
-                                                    <Button Text="Поделиться приглашением"
-                                                            BackgroundColor="{StaticResource PrimaryColor}"
-                                                            TextColor="White"
-                                                            CornerRadius="8"
-                                                            Padding="24,12"
-                                                            FontSize="14"
-                                                            HorizontalOptions="Center"/>
+                                                    <!-- Показываем код семьи -->
+                                                    <Frame BackgroundColor="{StaticResource PrimaryColor}"
+                                                           CornerRadius="10"
+                                                           Padding="16,10"
+                                                           HorizontalOptions="Center">
+                                                        <HorizontalStackLayout Spacing="8">
+                                                            <Label Text="Код семьи:"
+                                                                   FontSize="14"
+                                                                   TextColor="White"
+                                                                   VerticalOptions="Center"/>
+                                                            <Label Text="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.FamilyId}"
+                                                                   FontSize="18"
+                                                                   FontAttributes="Bold"
+                                                                   TextColor="White"
+                                                                   VerticalOptions="Center"/>
+                                                        </HorizontalStackLayout>
+                                                    </Frame>
                                                 </VerticalStackLayout>
                                             </Frame>
 
