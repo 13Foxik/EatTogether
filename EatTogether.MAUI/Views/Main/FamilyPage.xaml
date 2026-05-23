@@ -231,7 +231,7 @@
                                       PeekAreaInsets="0"
                                       HorizontalScrollBarVisibility="Never"
                                       HorizontalOptions="FillAndExpand"
-                                      HeightRequest="{Binding CurrentTabHeight}">
+                                      VerticalOptions="Start">
 
                             <CarouselView.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TabItem">
@@ -766,12 +766,10 @@
 
                                                                 <Grid ColumnDefinitions="Auto,*,Auto" 
                                                                       ColumnSpacing="12"
-                                                                      RowDefinitions="Auto,Auto"
                                                                       VerticalOptions="FillAndExpand">
 
                                                                     <!-- Аватар участника: пресет или первая буква имени -->
-                                                                    <Border Grid.RowSpan="2"
-                                                                            WidthRequest="44"
+                                                                    <Border WidthRequest="44"
                                                                             HeightRequest="44"
                                                                             StrokeThickness="0"
                                                                             Stroke="Transparent"
@@ -828,7 +826,6 @@
 
                                                                     <!-- Блок с действиями -->
                                                                     <VerticalStackLayout Grid.Column="2" 
-                                                                                         Grid.RowSpan="2"
                                                                                          Spacing="4"
                                                                                          HorizontalOptions="End"
                                                                                          VerticalOptions="Center">
@@ -896,31 +893,6 @@
                                                                         </Frame>
                                                                     </VerticalStackLayout>
 
-                                                                    <!-- Разделитель для кнопок действий -->
-                                                                    <BoxView Grid.ColumnSpan="3"
-                                                                             Grid.Row="1"
-                                                                             HeightRequest="1"
-                                                                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
-                                                                             Margin="0,8,0,8"
-                                                                             IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
-
-                                                                    <!-- Кнопка профиля -->
-                                                                    <Button Grid.Column="1"
-                                                                            Grid.Row="1"
-                                                                            Text="Профиль"
-                                                                            BackgroundColor="Transparent"
-                                                                            TextColor="{StaticResource PrimaryColor}"
-                                                                            FontSize="12"
-                                                                            BorderWidth="1"
-                                                                            BorderColor="{StaticResource PrimaryColor}"
-                                                                            CornerRadius="6"
-                                                                            Padding="12,4"
-                                                                            HeightRequest="28"
-                                                                            HorizontalOptions="Start"
-                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                              Path=BindingContext.ViewMemberProfileCommand}"
-                                                                            CommandParameter="{Binding}"
-                                                                            IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
                                                                 </Grid>
                                                             </Frame>
                                                         </DataTemplate>
@@ -931,77 +903,6 @@
                                                         <StackLayout HeightRequest="40"/>
                                                     </CollectionView.Footer>
                                                 </CollectionView>
-
-                                                <!-- Подсказка по функционалу управления -->
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                       CornerRadius="12"
-                                                       Padding="16"
-                                                       Margin="0,10,0,0">
-                                                    <VerticalStackLayout Spacing="8">
-                                                        <Label Text="👑 Управление участниками"
-                                                               FontSize="14"
-                                                               FontAttributes="Bold"
-                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-
-                                                        <VerticalStackLayout Spacing="4">
-                                                            <HorizontalStackLayout Spacing="8">
-                                                                <Frame BackgroundColor="#4CAF50"
-                                                                       CornerRadius="4"
-                                                                       Padding="4,2"
-                                                                       HeightRequest="20"
-                                                                       WidthRequest="20">
-                                                                    <Label Text="↑"
-                                                                           FontSize="10"
-                                                                           TextColor="White"
-                                                                           FontAttributes="Bold"
-                                                                           HorizontalOptions="Center"/>
-                                                                </Frame>
-                                                                <Label Text="Повысить - повысить роль участника (Может: Админ или Глава)"
-                                                                       FontSize="11"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                            </HorizontalStackLayout>
-
-                                                            <HorizontalStackLayout Spacing="8">
-                                                                <Frame BackgroundColor="#2196F3"
-                                                                       CornerRadius="4"
-                                                                       Padding="4,2"
-                                                                       HeightRequest="20"
-                                                                       WidthRequest="20">
-                                                                    <Label Text="↓"
-                                                                           FontSize="10"
-                                                                           TextColor="White"
-                                                                           FontAttributes="Bold"
-                                                                           HorizontalOptions="Center"/>
-                                                                </Frame>
-                                                                <Label Text="Понизить - понизить роль участника (Может: Админ или Глава)"
-                                                                       FontSize="11"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                            </HorizontalStackLayout>
-
-                                                            <HorizontalStackLayout Spacing="8">
-                                                                <Frame BackgroundColor="#F44336"
-                                                                       CornerRadius="4"
-                                                                       Padding="4,2"
-                                                                       HeightRequest="20"
-                                                                       WidthRequest="20">
-                                                                    <Label Text="✕"
-                                                                           FontSize="10"
-                                                                           TextColor="White"
-                                                                           FontAttributes="Bold"
-                                                                           HorizontalOptions="Center"/>
-                                                                </Frame>
-                                                                <Label Text="Исключить - удалить участника из семьи (Может: Админ или Глава)"
-                                                                       FontSize="11"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                            </HorizontalStackLayout>
-
-                                                            <Label Text="* Глава может управлять всеми участниками, включая Админов"
-                                                                   FontSize="10"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                                                                   FontAttributes="Italic"/>
-                                                        </VerticalStackLayout>
-                                                    </VerticalStackLayout>
-                                                </Frame>
 
                                                 <!-- Дополнительное пространство в конце -->
                                                 <BoxView HeightRequest="30" Color="Transparent"/>
@@ -1152,35 +1053,6 @@
                                                     </CollectionView.Footer>
                                                 </CollectionView>
                                             </VerticalStackLayout>
-
-                                            <!-- История запросов -->
-                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                   CornerRadius="12"
-                                                   Padding="16">
-                                                <VerticalStackLayout Spacing="12">
-                                                    <Label Text="Последние действия"
-                                                           FontSize="14"
-                                                           FontAttributes="Bold"
-                                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-
-                                                    <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
-                                                        <BoxView WidthRequest="4"
-                                                                 HeightRequest="40"
-                                                                 BackgroundColor="#4CAF50"
-                                                                 CornerRadius="2"
-                                                                 VerticalOptions="Center"/>
-
-                                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                            <Label Text="Петр принят в семью"
-                                                                   FontSize="14"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                            <Label Text="3 дня назад"
-                                                                   FontSize="12"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                        </VerticalStackLayout>
-                                                    </Grid>
-                                                </VerticalStackLayout>
-                                            </Frame>
 
                                             <!-- Дополнительное пространство в конце -->
                                             <BoxView HeightRequest="30" Color="Transparent"/>
