@@ -54,6 +54,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<ProfileViewModel>();
             builder.Services.AddTransient<FamilyViewModel>();
             builder.Services.AddTransient<CreateFamilyViewModel>();
+            builder.Services.AddTransient<EditFamilyViewModel>();
             builder.Services.AddTransient<SubcategoriesViewModel>();
             builder.Services.AddTransient<MenuViewModel>();
             builder.Services.AddTransient<PlateViewModel>();
@@ -66,6 +67,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<ProfilePage>();
             builder.Services.AddTransient<FamilyPage>();
             builder.Services.AddTransient<CreateFamilyPage>();
+            builder.Services.AddTransient<EditFamilyPage>();
             builder.Services.AddTransient<SubcategoriesPage>();
             builder.Services.AddTransient<PlatePage>();
             builder.Services.AddTransient<AvatarPickerPage>();

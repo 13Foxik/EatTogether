@@ -12,9 +12,9 @@ public class TabIndicatorMarginConverter : IValueConverter
             // под каждой вкладкой
             switch (selectedIndex)
             {
-                case 0: return new Thickness(25, -10, 0, 0);   // Центр под "Активность"
-                case 1: return new Thickness(137, -10, 0, 0);  // Центр под "Участники"  
-                case 2: return new Thickness(250, -10, 0, 0);  // Центр под "Запросы"
+                case 0: return new Thickness(25, 0, 0, 0);   // Центр под "Активность"
+                case 1: return new Thickness(137, 0, 0, 0);  // Центр под "Участники"  
+                case 2: return new Thickness(250, 0, 0, 0);  // Центр под "Запросы"
                 default: return new Thickness(25, 0, 0, 0);
             }
         }

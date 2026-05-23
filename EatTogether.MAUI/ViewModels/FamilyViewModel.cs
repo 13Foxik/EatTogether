@@ -5,8 +5,7 @@ using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Main;
-using EatTogether.MAUI.Views.Main.FamilyPages;
-using System.Collections.ObjectModel;
+using EatTogether.MAUI.Views.Main.FamilyPages;using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using EatTogether.MAUI.Messages;
 
@@ -71,6 +70,9 @@ public partial class FamilyViewModel : ObservableObject
 
     [ObservableProperty]
     private string _familyDescription;
+
+    [ObservableProperty]
+    private string _familyId;
 
     [ObservableProperty]
     private string _familyAvatar;
@@ -232,6 +234,7 @@ public partial class FamilyViewModel : ObservableObject
             {
                 FamilyName = currentFamily.Name ?? "Моя семья";
                 FamilyDescription = currentFamily.Description ?? "Описание семьи пока не добавлено";
+                FamilyId = currentFamily.Id ?? "";
                 MembersCount = $"{currentFamily.CountUsers} участников";
 
                 if (currentFamily.Members != null && currentFamily.Members.Any())
@@ -1264,6 +1267,25 @@ public partial class FamilyViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async void EditFamily()
+    {
+        var family = _currentFamilyService?.GetCurrentFamily();
+        if (family == null) return;
+
+        if (Application.Current?.MainPage is MainPage mainPage &&
+            mainPage.CurrentPage is NavigationPage nav)
+        {
+            var editVm = new EditFamilyViewModel(_familyService, _currentFamilyService)
+            {
+                EditName = family.Name ?? "",
+                EditDescription = family.Description ?? "",
+                FamilyId = family.Id ?? ""
+            };
+            await nav.Navigation.PushAsync(new EditFamilyPage(editVm));
+        }
+    }
+
+    [RelayCommand]
     private async void CreateFamily()
     {
         if (Application.Current?.MainPage is MainPage mainPage)
@@ -1275,7 +1297,6 @@ public partial class FamilyViewModel : ObservableObject
             }
         }
     }
-
     [RelayCommand]
     private async void JoinFamily()
     {

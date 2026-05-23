@@ -157,6 +157,18 @@ namespace EatTogether.MAUI.Services
             Console.WriteLine($"Family {family.Id} saved to Firestore");
         }
 
+        public async Task UpdateFamilyModel(string familyId, string name, string description)
+        {
+            await SetupFirestore();
+            var doc = _db.Collection("Families").Document(familyId);
+            await doc.UpdateAsync(new Dictionary<string, object>
+            {
+                { "Name", name },
+                { "Description", description }
+            });
+            Console.WriteLine($"Family {familyId} updated — Name='{name}'");
+        }
+
         public async Task AddMemberToFamily(string familyId, FamilyMember member)
         {
             await SetupFirestore();
