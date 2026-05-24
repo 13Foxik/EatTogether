@@ -64,6 +64,7 @@
                                     BorderColor="{StaticResource PrimaryColor}"
                                     CornerRadius="8"
                                     Padding="12,6"
+                                    Margin="10,0,0,0"
                                     HeightRequest="30"
                                     Command="{Binding EditFamilyCommand}"/>
                         </HorizontalStackLayout>
@@ -114,15 +115,6 @@
                                                FontAttributes="Bold"/>
                                     </Frame>
 
-                                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" 
-                                           CornerRadius="10" 
-                                           Padding="8,4"
-                                           HeightRequest="20">
-                                        <Label Text="Активна"
-                                               FontSize="10"
-                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                               FontAttributes="Bold"/>
-                                    </Frame>
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
@@ -164,14 +156,6 @@
                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                        VerticalOptions="Center"/>
 
-                                <Button Text="Пригласить"
-                                        Grid.Column="1"
-                                        BackgroundColor="{StaticResource PrimaryColor}"
-                                        TextColor="White"
-                                        FontSize="12"
-                                        CornerRadius="8"
-                                        Padding="16,8"
-                                        HeightRequest="32"/>
                             </Grid>
                         </Border>
 
@@ -716,8 +700,6 @@
                                                     </VerticalStackLayout>
                                                 </Frame>
 
-                                                <!-- Дополнительное пространство в конце -->
-                                                <BoxView HeightRequest="30" Color="Transparent"/>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
 
@@ -894,8 +876,6 @@
                                                     </CollectionView.Footer>
                                                 </CollectionView>
 
-                                                <!-- Дополнительное пространство в конце -->
-                                                <BoxView HeightRequest="30" Color="Transparent"/>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
 
@@ -1044,8 +1024,6 @@
                                                 </CollectionView>
                                             </VerticalStackLayout>
 
-                                            <!-- Дополнительное пространство в конце -->
-                                            <BoxView HeightRequest="30" Color="Transparent"/>
                                         </VerticalStackLayout>
                         </VerticalStackLayout>
                     </VerticalStackLayout>

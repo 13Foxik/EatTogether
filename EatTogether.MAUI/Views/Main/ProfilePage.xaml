@@ -121,14 +121,14 @@
                     <Label Text="День рождения:"
                            Grid.Row="1" Grid.Column="0"
                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                    <Label Text="{Binding FormattedDateOfBirth}"
+                    <Label Text="17 февраля, 2006"  
                             Grid.Row="1" Grid.Column="1"
                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                            HorizontalOptions="End"/>
                 </Grid>
             </VerticalStackLayout>
 
-            <!-- Активность -->
+            <!-- Активность {Binding FormattedDateOfBirth}-->
             <VerticalStackLayout Spacing="16">
                 <Label Text="Активность"
                        FontSize="16"
