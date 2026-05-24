@@ -157,9 +157,11 @@
 		<!-- Отключаем AOT/интерпретатор чтобы избежать reflection-краш в Firebase/gRPC -->
 		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 		<UseInterpreter>false</UseInterpreter>
-		<!-- Отладочные символы в Release для crash-репортов (crashlytics/adb logcat) -->
 		<AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
-		<DebugType>none</DebugType>
+		<!-- Отладочные символы — нужны чтобы Visual Studio мог подключиться к Release-процессу -->
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>pdbonly</DebugType>
+		<AndroidEnableDebugging>true</AndroidEnableDebugging>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
