@@ -21,18 +21,19 @@
         <VerticalStackLayout Padding="20" Spacing="5">
 
             <!-- Логотип -->
-            <Image Source="logo.png"
+            <!--<Image Source="logo.png"
                    BackgroundColor="Gray"
                    HeightRequest="120"
                    WidthRequest="200"
                    HorizontalOptions="Center"
-                   Margin="0,20,0,10"/>
+                   Margin="0,20,0,10"/>-->
 
             <!-- Заголовок -->
             <Label Text="Авторизация"
                    FontSize="18"
                    FontAttributes="Bold"
-                   HorizontalOptions="Center"/>
+                   HorizontalOptions="Center"
+                   Margin="0,200,0,0"/>
             <Label Text="Войдите в свой аккаунт"
                    FontSize="16"
                    HorizontalOptions="Center"
