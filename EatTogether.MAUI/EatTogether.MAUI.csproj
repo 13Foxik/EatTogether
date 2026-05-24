@@ -154,10 +154,21 @@
 		<AndroidLinkMode>None</AndroidLinkMode>
 		<Optimize>true</Optimize>
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<!-- Отключаем AOT/интерпретатор чтобы избежать reflection-краш в Firebase/gRPC -->
+		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+		<UseInterpreter>false</UseInterpreter>
+		<!-- Отладочные символы в Release для crash-репортов (crashlytics/adb logcat) -->
+		<AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+		<DebugType>none</DebugType>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<AndroidLinkMode>None</AndroidLinkMode>
 	</PropertyGroup>
+
+	<!-- Linker preserve file (используется если AndroidLinkMode != None) -->
+	<ItemGroup>
+		<AndroidLinkDescription Include="Platforms\Android\Linker.xml" />
+	</ItemGroup>
 
 </Project>

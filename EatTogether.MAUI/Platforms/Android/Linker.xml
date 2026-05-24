@@ -1,0 +1,39 @@
+<!--
+  Файл preserve-инструкций для Android Linker / IL Trimmer.
+  Используется при AndroidLinkMode != None и при включённом IL Trimming.
+  
+  Сохраняем все типы и члены библиотек, активно использующих рефлексию:
+    - Firebase Authentication (.net)
+    - Google.Cloud.Firestore (Protobuf + gRPC)
+    - Microsoft.Maui.Controls (ресурсы и DataTemplate)
+    - CommunityToolkit.Maui
+    - CommunityToolkit.Mvvm
+    - Само приложение
+-->
+<linker>
+  <!-- Сохраняем всё приложение -->
+  <assembly fullname="EatTogether.MAUI" preserve="all"/>
+
+  <!-- Firebase Authentication -->
+  <assembly fullname="FirebaseAuthentication.net" preserve="all"/>
+
+  <!-- Firebase / Firestore -->
+  <assembly fullname="Google.Cloud.Firestore" preserve="all"/>
+  <assembly fullname="Google.Api.CommonProtos" preserve="all"/>
+  <assembly fullname="Google.Api.Gax" preserve="all"/>
+  <assembly fullname="Google.Api.Gax.Grpc" preserve="all"/>
+  <assembly fullname="Google.Protobuf" preserve="all"/>
+  <assembly fullname="Grpc.Core.Api" preserve="all"/>
+  <assembly fullname="Grpc.Net.Client" preserve="all"/>
+  <assembly fullname="Grpc.Net.Common" preserve="all"/>
+  <assembly fullname="Google.Cloud.Firestore.V1" preserve="all"/>
+
+  <!-- CommunityToolkit -->
+  <assembly fullname="CommunityToolkit.Maui.Core" preserve="all"/>
+  <assembly fullname="CommunityToolkit.Mvvm" preserve="all"/>
+
+  <!-- MAUI Controls -->
+  <assembly fullname="Microsoft.Maui.Controls" preserve="all"/>
+  <assembly fullname="Microsoft.Maui" preserve="all"/>
+  <assembly fullname="Microsoft.Maui.Essentials" preserve="all"/>
+</linker>

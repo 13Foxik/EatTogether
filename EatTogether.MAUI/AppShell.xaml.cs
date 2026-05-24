@@ -12,25 +12,28 @@ namespace EatTogether.MAUI
             InitializeComponent();
             _currentUserService = currentUserService;
 
-            Task.Delay(500).ContinueWith(async _ =>
-            {
-                await CheckAuthState();
-            });
+            // Используем Loaded-событие Shell, чтобы проверка авторизации
+            // выполнялась ПОСЛЕ того как UI-дерево полностью построено.
+            // Это надёжно работает и в Debug, и в Release (AOT/Trimming).
+            this.Loaded += OnShellLoaded;
+        }
+
+        private async void OnShellLoaded(object? sender, EventArgs e)
+        {
+            this.Loaded -= OnShellLoaded;
+            await CheckAuthState();
         }
 
         private async Task CheckAuthState()
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
+            if (_currentUserService.CurrentUser != null)
             {
-                if (_currentUserService.CurrentUser != null)
-                {
-                    Application.Current.MainPage = new MainPage();
-                }
-                else
-                {
-                    await GoToAsync("//SignInPage");
-                }
-            });
+                Application.Current!.MainPage = new MainPage();
+            }
+            else
+            {
+                await GoToAsync("//SignInPage");
+            }
         }
     }
 }

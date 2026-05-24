@@ -31,7 +31,9 @@ namespace EatTogether.MAUI.Services
                 {
                     new EmailProvider(),
                 },
-                UserRepository = new FileUserRepository("FirebaseSample")
+                UserRepository = new FileUserRepository(
+                    Path.Combine(FileSystem.AppDataDirectory, "FirebaseSample")
+                )
             };
             _firebaseAuthClient = new FirebaseAuthClient(config);
             var currentUserFromFirebase = _firebaseAuthClient.User;
