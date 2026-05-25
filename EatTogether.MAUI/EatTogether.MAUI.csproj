@@ -149,16 +149,28 @@
 	  </MauiXaml>
 	</ItemGroup>
 
-	<!-- Release-сборка: линкер выключен, чтобы Firebase/MAUI reflection не отрезался; JIT-оптимизации включены для производительности -->
+	<!-- Release-сборка -->
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<!-- Линкер выключен — иначе Firebase / gRPC / Protobuf теряют рефлексию -->
 		<AndroidLinkMode>None</AndroidLinkMode>
 		<Optimize>true</Optimize>
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
-		<!-- Отключаем AOT/интерпретатор чтобы избежать reflection-краш в Firebase/gRPC -->
+
+		<!--
+		  КЛЮЧЕВОЙ FIX: полностью отключаем AOT.
+		  Ошибка «GUID of dependent assembly Xamarin.AndroidX.Core doesn't match»
+		  возникает потому что предкомпилированные .dll.so в пакетах NuGet были
+		  собраны под одну версию AndroidX, а разрешённые пакеты — другая версия.
+		  При RunAOTCompilation=false рантайм использует JIT вместо AOT-кеша,
+		  несоответствие GUID перестаёт иметь значение.
+		-->
+		<RunAOTCompilation>false</RunAOTCompilation>
 		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+		<AotAssemblies>false</AotAssemblies>
 		<UseInterpreter>false</UseInterpreter>
 		<AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
-		<!-- Отладочные символы — нужны чтобы Visual Studio мог подключиться к Release-процессу -->
+
+		<!-- PDB-символы: нужны для подключения отладчика VS к Release-процессу -->
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>pdbonly</DebugType>
 		<AndroidEnableDebugging>true</AndroidEnableDebugging>
