@@ -117,6 +117,19 @@
                                     </Frame>
 
                                 </HorizontalStackLayout>
+
+                                <!-- Кнопка выхода из семьи -->
+                                <Button Text="Выйти из семьи"
+                                        Command="{Binding LeaveFamilyCommand}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#F44336"
+                                        FontSize="11"
+                                        BorderWidth="1"
+                                        BorderColor="#F44336"
+                                        CornerRadius="6"
+                                        Padding="8,2"
+                                        HeightRequest="26"
+                                        HorizontalOptions="Start"/>
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 

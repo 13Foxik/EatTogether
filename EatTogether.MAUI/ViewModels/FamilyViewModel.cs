@@ -2,10 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services;
+using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Main;
-using EatTogether.MAUI.Views.Main.FamilyPages;using System.Collections.ObjectModel;
+using EatTogether.MAUI.Views.Main.FamilyPages;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using EatTogether.MAUI.Messages;
 
@@ -21,6 +23,7 @@ public partial class FamilyViewModel : ObservableObject
     private readonly IPlateService _plateService;
     private readonly IDishService _dishService;
     private readonly IFamilyMemberControlService _memberControlService;
+    private readonly ICloudStoreService _cloudStoreService;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -113,7 +116,8 @@ public partial class FamilyViewModel : ObservableObject
         IFamilyService familyService,
         IPlateService plateService,
         IDishService dishService,
-        IFamilyMemberControlService memberControlService)
+        IFamilyMemberControlService memberControlService,
+        ICloudStoreService cloudStoreService)
     {
         _currentUserService = currentUserService;
         _createFamilyViewModel = createFamilyViewModel;
@@ -123,6 +127,7 @@ public partial class FamilyViewModel : ObservableObject
         _plateService = plateService;
         _dishService = dishService;
         _memberControlService = memberControlService;
+        _cloudStoreService = cloudStoreService;
 
         _currentUserService.UserChanged += OnUserChanged;
         _currentFamilyService.FamilyChanged += OnFamilyChanged;
@@ -163,7 +168,8 @@ public partial class FamilyViewModel : ObservableObject
         App.Services.GetService<IFamilyService>(),
         App.Services.GetService<IPlateService>(),
         App.Services.GetService<IDishService>(),
-        App.Services.GetService<IFamilyMemberControlService>())
+        App.Services.GetService<IFamilyMemberControlService>(),
+        App.Services.GetService<ICloudStoreService>())
     {
     }
 
@@ -500,6 +506,49 @@ public partial class FamilyViewModel : ObservableObject
     }
 
     // ========== МЕТОДЫ ДЛЯ ТАРЕЛОК И БЛЮД ==========
+
+    [RelayCommand]
+    private async Task LeaveFamily()
+    {
+        try
+        {
+            var currentFamily = _currentFamilyService?.GetCurrentFamily();
+            if (currentFamily == null) return;
+
+            var currentUser = _currentUserService.CurrentUser;
+            if (currentUser == null) return;
+
+            if (CurrentUserMember?.Role == FamilyRole.Owner)
+            {
+                await Shell.Current.DisplayAlert("Невозможно выйти",
+                    "Вы — глава семьи. Сначала передайте роль другому участнику.", "OK");
+                return;
+            }
+
+            bool confirm = await Shell.Current.DisplayAlert("Выйти из семьи",
+                $"Вы уверены, что хотите покинуть семью «{FamilyName}»?",
+                "Выйти", "Отмена");
+
+            if (!confirm) return;
+
+            bool result = await _cloudStoreService.LeaveFamilyFromDB(currentUser.Uid, currentFamily.Id);
+
+            if (result)
+            {
+                _currentFamilyService.ClearFamily();
+                if (currentUser.UserFamilies != null)
+                    currentUser.UserFamilies.Remove(currentFamily.Id);
+
+                HasFamily = false;
+                FamilyMembers.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка", ex.Message, "OK");
+        }
+    }
+
 
     [RelayCommand]
     private async void LoadPlates()
