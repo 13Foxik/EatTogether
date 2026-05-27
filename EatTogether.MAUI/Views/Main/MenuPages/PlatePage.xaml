@@ -250,7 +250,7 @@
 
                                         <!-- Кнопка удаления из тарелки -->
                                         <Frame Grid.Column="1"
-                                               BackgroundColor="{AppThemeBinding Light={StaticResource Red50}, Dark={StaticResource Red900}}"
+                                               BackgroundColor="{AppThemeBinding Light={StaticResource Red100}, Dark={StaticResource Red900}}"
                                                BorderColor="{AppThemeBinding Light={StaticResource Red200}, Dark={StaticResource Red700}}"
                                                CornerRadius="10"
                                                Padding="0"
