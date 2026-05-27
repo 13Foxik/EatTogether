@@ -63,17 +63,30 @@ namespace EatTogether.MAUI.ViewModels
                 var tempList = new ObservableCollection<Dish>();
                 var dishIds = _plateService.GetDishIds();
 
+                Console.WriteLine($"[PlateVM] LoadPlate: dishIds.Count={dishIds?.Count}");
+
+                if (dishIds == null || dishIds.Count == 0)
+                {
+                    DishesInPlate = tempList;
+                    TotalDishesCount = 0;
+                    UpdateEmptyState();
+                    return;
+                }
+
                 tempList = await test(tempList, dishIds);
 
                 DishesInPlate = tempList;
-                TotalDishesCount = dishIds.Count();
+                TotalDishesCount = dishIds.Count;
                 UpdateEmptyState();
-                IsLoading = false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при загрузке блюд в тарелке: {ex}");
-                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось загрузить блюда в тарелке", "OK");
+                Console.WriteLine($"[PlateVM] Ошибка при загрузке блюд: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", $"Не удалось загрузить блюда в тарелке: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
