@@ -64,6 +64,9 @@ public partial class FamilyViewModel : ObservableObject
     private FamilyMember _currentUserMember;
 
     [ObservableProperty]
+    private bool _canManagePlates;
+
+    [ObservableProperty]
     private string _membersCount;
 
     [ObservableProperty]
@@ -230,6 +233,7 @@ public partial class FamilyViewModel : ObservableObject
                         if (member.IsCurrentUser)
                         {
                             CurrentUserMember = member;
+                            UpdateCanManagePlates();
                         }
 
                         _userNames[member.UserId] = member.DisplayName;
@@ -292,6 +296,7 @@ public partial class FamilyViewModel : ObservableObject
                 if (member.IsCurrentUser)
                 {
                     CurrentUserMember = member;
+                    UpdateCanManagePlates();
                 }
 
                 _userNames[member.UserId] = member.DisplayName;
@@ -465,6 +470,12 @@ public partial class FamilyViewModel : ObservableObject
             await Shell.Current.DisplayAlert("Ошибка",
                 $"Ошибка при исключении участника: {ex.Message}", "OK");
         }
+    }
+
+    private void UpdateCanManagePlates()
+    {
+        CanManagePlates = CurrentUserMember != null &&
+                          CurrentUserMember.Role != FamilyRole.Member;
     }
 
     // ========== МЕТОДЫ ДЛЯ ТАРЕЛОК И БЛЮД ==========
@@ -706,6 +717,7 @@ public partial class FamilyViewModel : ObservableObject
     private async void AcceptDish(Dish dish)
     {
         if (dish == null || dish.Status != RequestStatus.Pending) return;
+        if (!CanManagePlates) return;
 
         try
         {
@@ -768,6 +780,7 @@ public partial class FamilyViewModel : ObservableObject
     private async void RejectDish(Dish dish)
     {
         if (dish == null || dish.Status != RequestStatus.Pending) return;
+        if (!CanManagePlates) return;
 
         try
         {
@@ -910,6 +923,7 @@ public partial class FamilyViewModel : ObservableObject
     [RelayCommand]
     private async void AcceptPlate(string plateId)
     {
+        if (!CanManagePlates) return;
         var plate = PendingPlates.FirstOrDefault(p => p.Id == plateId);
         if (plate != null)
         {
@@ -958,6 +972,7 @@ public partial class FamilyViewModel : ObservableObject
     [RelayCommand]
     private async void RejectPlate(string plateId)
     {
+        if (!CanManagePlates) return;
         var plate = PendingPlates.FirstOrDefault(p => p.Id == plateId);
         if (plate != null)
         {
