@@ -128,9 +128,9 @@ namespace EatTogether.MAUI.ViewModels
 
         public SubcategoriesViewModel(string categoryId, string categoryName)
             : this(categoryId, categoryName,
-                  Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
-                  Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
-                  Application.Current.Handler.MauiContext.Services.GetService<ICurrentPlateService>())
+                  App.Services.GetService<ISubcategoryService>(),
+                  App.Services.GetService<IDishService>(),
+                  App.Services.GetService<ICurrentPlateService>())
         {
         }
 
@@ -570,7 +570,7 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    await currentNavigation.Navigation.PushAsync(new MenuPage());
+                    await currentNavigation.Navigation.PopAsync();
                 }
             }
         }
