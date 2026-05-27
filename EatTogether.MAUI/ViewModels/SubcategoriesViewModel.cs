@@ -320,25 +320,17 @@ namespace EatTogether.MAUI.ViewModels
         {
             if (subcategory == null) return;
 
-            var tempList = Subcategories.ToList();
-
             // Сбрасываем режим добавления у всех подкатегорий
-            foreach (var item in tempList)
+            foreach (var item in Subcategories)
             {
                 item.IsAddingDish = false;
                 item.NewDishName = string.Empty;
             }
 
             // Включаем режим добавления для выбранной подкатегории
-            var target = tempList.FirstOrDefault(s => s.Id == subcategory.Id);
-            if (target != null)
-            {
-                target.IsAddingDish = true;
-                target.NewDishName = string.Empty;
-            }
-
-            // Принудительно обновляем коллекцию чтобы UI отреагировал
-            Subcategories = new ObservableCollection<Subcategory>(tempList);
+            // Subcategory теперь ObservableObject — UI обновится автоматически
+            subcategory.IsAddingDish = true;
+            subcategory.NewDishName = string.Empty;
         }
 
         [RelayCommand]
@@ -362,14 +354,8 @@ namespace EatTogether.MAUI.ViewModels
                     subcategory.Id);
 
                 // Сбрасываем форму сразу
-                var tempList = Subcategories.ToList();
-                var target = tempList.FirstOrDefault(s => s.Id == subcategory.Id);
-                if (target != null)
-                {
-                    target.IsAddingDish = false;
-                    target.NewDishName = string.Empty;
-                }
-                Subcategories = new ObservableCollection<Subcategory>(tempList);
+                subcategory.IsAddingDish = false;
+                subcategory.NewDishName = string.Empty;
 
                 await LoadSubcategoriesAsync();
             }
@@ -856,16 +842,8 @@ namespace EatTogether.MAUI.ViewModels
         {
             if (subcategory == null) return;
 
-            var tempList = Subcategories.ToList();
-            var target = tempList.FirstOrDefault(s => s.Id == subcategory.Id);
-            if (target != null)
-            {
-                target.IsAddingDish = false;
-                target.NewDishName = string.Empty;
-            }
-
-            // Принудительно обновляем коллекцию чтобы UI отреагировал
-            Subcategories = new ObservableCollection<Subcategory>(tempList);
+            subcategory.IsAddingDish = false;
+            subcategory.NewDishName = string.Empty;
         }
 
         private void UpdateComputedProperties()
