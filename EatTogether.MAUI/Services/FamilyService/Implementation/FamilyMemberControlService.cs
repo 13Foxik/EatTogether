@@ -52,8 +52,8 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 if (!isNotSelf)
                     return false;
 
-                // 4. Проверяем, что есть куда повышать (не превышает Admin)
-                bool canBePromoted = targetMember.Role < FamilyRole.Admin;
+                // 4. Проверяем, что есть куда повышать (не превышает Editor)
+                bool canBePromoted = targetMember.Role < FamilyRole.Editor;
                 if (!canBePromoted)
                     return false;
 
@@ -269,6 +269,19 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
             {
                 Console.WriteLine($"Ошибка при исключении участника: {ex.Message}");
                 return false;
+            }
+        }
+
+        public async Task<bool> LeaveFamily(string userId, string familyId)
+        {
+            try
+            {
+                return await _cloudStoreService.LeaveFamilyFromDB(userId, familyId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при выходе из семьи: {ex.Message}");
+                throw; // Пробрасываем текст ошибки в ViewModel
             }
         }
 

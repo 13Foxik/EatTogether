@@ -344,6 +344,53 @@ namespace EatTogether.MAUI.Services
             }
         }
 
+        public async Task<bool> LeaveFamilyFromDB(string userId, string familyId)
+        {
+            await SetupFirestore();
+
+            var documentFamily = _db.Collection("Families").Document(familyId);
+            var documentUser = _db.Collection("Users").Document(userId);
+
+            try
+            {
+                return await _db.RunTransactionAsync(async transaction =>
+                {
+                    var familySnapshot = await transaction.GetSnapshotAsync(documentFamily);
+                    if (!familySnapshot.Exists)
+                        throw new Exception("Семья не найдена");
+
+                    var family = familySnapshot.ConvertTo<Family>();
+
+                    var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
+                    if (memberToRemove == null)
+                        throw new Exception("Вы не являетесь участником этой семьи");
+
+                    // Глава не может просто выйти — нужно сначала передать роль
+                    if (memberToRemove.Role == FamilyRole.Owner)
+                        throw new Exception("Глава семьи не может выйти. Сначала передайте роль другому участнику.");
+
+                    family.Members.RemoveAll(m => m.UserId == userId);
+                    family.CountUsers = family.Members.Count;
+
+                    Dictionary<string, object> familyUpdates = new()
+                    {
+                        { "Members", family.Members },
+                        { "CountUsers", family.CountUsers }
+                    };
+
+                    transaction.Update(documentFamily, familyUpdates);
+                    transaction.Update(documentUser, "UserFamilies", FieldValue.ArrayRemove(familyId));
+
+                    return true;
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при выходе из семьи: {ex.Message}");
+                throw; // Пробрасываем, чтобы показать текст ошибки пользователю
+            }
+        }
+
         public async Task InsertMembership(MembershipRequest request)
         {
             await SetupFirestore();

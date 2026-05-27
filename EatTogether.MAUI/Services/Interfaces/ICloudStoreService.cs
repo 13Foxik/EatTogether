@@ -13,6 +13,7 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task PermissionUpToDB(string userId, string familyId);
         Task PermissionDownToDB(string userId, string familyId);
         Task<bool> KickMemberFromDB(string userId, string familyId);
+        Task<bool> LeaveFamilyFromDB(string userId, string familyId);
         Task InsertMembership(MembershipRequest request);
         Task<User> GetUserModel(string documentId);
         Task<Family> GetFamilyModel(string documentId);

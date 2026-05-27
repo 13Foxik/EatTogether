@@ -909,15 +909,14 @@
                                                                         </Frame>
                                                                     </VerticalStackLayout>
 
-                                                                    <!-- Разделитель для кнопок действий -->
+                                                                    <!-- Разделитель -->
                                                                     <BoxView Grid.ColumnSpan="3"
                                                                              Grid.Row="1"
                                                                              HeightRequest="1"
                                                                              BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
-                                                                             Margin="0,8,0,8"
-                                                                             IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
+                                                                             Margin="0,8,0,8"/>
 
-                                                                    <!-- Кнопка профиля -->
+                                                                    <!-- Кнопка профиля (только для других участников) -->
                                                                     <Button Grid.Column="1"
                                                                             Grid.Row="1"
                                                                             Text="Профиль"
@@ -934,6 +933,23 @@
                                                                                               Path=BindingContext.ViewMemberProfileCommand}"
                                                                             CommandParameter="{Binding}"
                                                                             IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
+
+                                                                    <!-- Кнопка "Выйти из семьи" (только для текущего пользователя) -->
+                                                                    <Button Grid.Column="1"
+                                                                            Grid.Row="1"
+                                                                            Text="Выйти из семьи"
+                                                                            BackgroundColor="Transparent"
+                                                                            TextColor="#F44336"
+                                                                            FontSize="12"
+                                                                            BorderWidth="1"
+                                                                            BorderColor="#F44336"
+                                                                            CornerRadius="6"
+                                                                            Padding="12,4"
+                                                                            HeightRequest="28"
+                                                                            HorizontalOptions="Start"
+                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                                                              Path=BindingContext.LeaveFamilyCommand}"
+                                                                            IsVisible="{Binding IsCurrentUser}"/>
                                                                 </Grid>
                                                             </Frame>
                                                         </DataTemplate>
