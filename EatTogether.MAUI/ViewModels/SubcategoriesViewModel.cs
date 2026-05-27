@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using EatTogether.MAUI.Messages;
 using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Views.Main.MenuPages;
