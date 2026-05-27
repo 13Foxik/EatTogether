@@ -105,7 +105,7 @@ namespace EatTogether.MAUI.ViewModels
                 });
 
             // Загружаем данные
-            Task.Run(async () => await LoadSubcategoriesAsync());
+            MainThread.BeginInvokeOnMainThread(async () => await LoadSubcategoriesAsync());
         }
 
         private async Task RefreshDishesStateAsync()
@@ -576,7 +576,7 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    await currentNavigation.Navigation.PushAsync(new MenuPage());
+                    await currentNavigation.Navigation.PopAsync();
                 }
             }
         }
