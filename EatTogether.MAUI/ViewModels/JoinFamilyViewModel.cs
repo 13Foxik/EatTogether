@@ -12,6 +12,18 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private string _familyId;
 
+        [ObservableProperty]
+        private string _joinMessage;
+
+        [ObservableProperty]
+        private string _errorMessage;
+
+        [ObservableProperty]
+        private bool _hasError;
+
+        [ObservableProperty]
+        private bool _isRequestSent;
+
         private readonly IMembershipService _membershipService;
         private readonly CurrentUserService _currentUserService;
 
@@ -21,9 +33,6 @@ namespace EatTogether.MAUI.ViewModels
             _currentUserService = currentUserService;
         }
 
-        public JoinFamilyViewModel() : this(Application.Current.Handler.MauiContext.Services.GetService<IMembershipService>(), 
-                                            Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>()) { }
-
         [RelayCommand]
         private async Task GoBack()
         {
@@ -32,7 +41,7 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    await currentNavigation.Navigation.PushAsync(new FamilyPage());
+                    await currentNavigation.Navigation.PopAsync();
                 }
             }
         }
@@ -40,25 +49,38 @@ namespace EatTogether.MAUI.ViewModels
         [RelayCommand]
         private async Task SendJoinRequest()
         {
+            HasError = false;
+            ErrorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(FamilyId))
+            {
+                HasError = true;
+                ErrorMessage = "Введите ID семьи";
+                return;
+            }
+
             try
             {
                 await _membershipService.CreateRequest(FamilyId, _currentUserService.GetCurrentUser());
+                IsRequestSent = true;
+
+                await Task.Delay(1500);
 
                 if (Application.Current?.MainPage is MainPage mainPage)
                 {
                     var currentNavigation = mainPage.CurrentPage as NavigationPage;
                     if (currentNavigation != null)
                     {
-                        await currentNavigation.Navigation.PushAsync(new FamilyPage());
+                        await currentNavigation.Navigation.PopAsync();
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Ошибка", ex.Message, "OK");
+                HasError = true;
+                ErrorMessage = ex.Message;
                 Console.WriteLine($"Не удалось подать заявку: {ex}");
             }
-
         }
     }
 }
