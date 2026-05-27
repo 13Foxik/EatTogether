@@ -149,11 +149,14 @@
 	  </MauiXaml>
 	</ItemGroup>
 
-	<!-- Release-сборка: линкер выключен, чтобы Firebase/MAUI reflection не отрезался; JIT-оптимизации включены для производительности -->
+	<!-- Release-сборка: линкер выключен, чтобы Firebase/MAUI reflection не отрезался; AOT выключен из-за несовместимости с AndroidX -->
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<AndroidLinkMode>None</AndroidLinkMode>
-		<Optimize>true</Optimize>
+		<RunAOTCompilation>false</RunAOTCompilation>
+		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<AndroidUseAapt2>true</AndroidUseAapt2>
+		<Optimize>true</Optimize>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
