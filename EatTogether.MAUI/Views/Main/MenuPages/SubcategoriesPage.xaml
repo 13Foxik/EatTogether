@@ -405,83 +405,6 @@
                                        Spacing="8"
                                        IsVisible="{Binding IsExpanded}">
 
-                                        <!-- КНОПКА ДОБАВЛЕНИЯ БЛЮДА (только Editor+) -->
-                                        <Frame IsVisible="{Binding IsAddingDish, Converter={x:StaticResource InverseBoolConverter}}"
-                                             BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark={StaticResource PrimaryDarkColor}}"
-                                             CornerRadius="12"
-                                             Padding="0"
-                                             HasShadow="False">
-
-                                            <Frame.GestureRecognizers>
-                                                <TapGestureRecognizer 
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=StartAddingDishCommand}"
-                                                    CommandParameter="{Binding }"/>
-                                            </Frame.GestureRecognizers>
-
-                                            <Grid Padding="16,12" ColumnDefinitions="*, Auto">
-                                                <Label Grid.Column="0"
-                                                     Text="Добавить блюдо"
-                                                     FontSize="15"
-                                                     FontAttributes="Bold"
-                                                     TextColor="White"
-                                                     VerticalOptions="Center"/>
-
-                                                <Label Grid.Column="1"
-                                                     Text="+"
-                                                     FontSize="18"
-                                                     FontAttributes="Bold"
-                                                     TextColor="White"
-                                                     VerticalOptions="Center"/>
-                                            </Grid>
-                                        </Frame>
-
-                                        <!-- ФОРМА ДОБАВЛЕНИЯ БЛЮДА -->
-                                        <Frame IsVisible="{Binding IsAddingDish}" 
-                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
-                                                 CornerRadius="12"
-                                                 Padding="16"
-                                                 HasShadow="False">
-
-                                            <VerticalStackLayout Spacing="12">
-                                                <Label Text="Новое блюдо"
-                                                     FontSize="14"
-                                                     FontAttributes="Bold"
-                                                     TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-
-                                                <Entry Text="{Binding NewDishName}"
-                                                        Placeholder="Введите название блюда..."
-                                                        FontSize="15"
-                                                        BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray700}}"
-                                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
-                                                        PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
-                                                        ClearButtonVisibility="WhileEditing"
-                                                        HeightRequest="44"/>
-
-                                                <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
-                                                    <Button Grid.Column="0"
-                                                          Text="Отмена"
-                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=CancelAddingDishCommand}"
-                                                          CommandParameter="{Binding}"
-                                                          BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                                          TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
-                                                          CornerRadius="8"
-                                                          HeightRequest="36"
-                                                          FontSize="13"/>
-
-                                                    <Button Grid.Column="1"
-                                                          Text="Добавить"
-                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=AddDishCommand}"
-                                                          CommandParameter="{Binding}"
-                                                          BackgroundColor="{StaticResource PrimaryColor}"
-                                                          TextColor="White"
-                                                          CornerRadius="8"
-                                                          HeightRequest="36"
-                                                          FontSize="13"
-                                                          FontAttributes="Bold"/>
-                                                </Grid>
-                                            </VerticalStackLayout>
-                                        </Frame>
-
                                         <!-- СООБЩЕНИЕ ЕСЛИ НЕТ БЛЮД -->
                                         <Frame IsVisible="{Binding Dishes.Count, Converter={x:StaticResource IntToInverseBoolConverter}}"
                                              BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
@@ -602,6 +525,67 @@
                                             </BindableLayout.ItemTemplate>
 
                                         </VerticalStackLayout>
+
+                                        <!-- КНОПКА ДОБАВЛЕНИЯ БЛЮДА (только Editor+) -->
+                                        <Button
+                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=CanEditMenu}"
+                                            Text="+ Добавить блюдо"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=StartAddingDishCommand}"
+                                            CommandParameter="{Binding}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark={StaticResource PrimaryDarkColor}}"
+                                            TextColor="White"
+                                            CornerRadius="12"
+                                            HeightRequest="44"
+                                            FontSize="15"
+                                            FontAttributes="Bold"
+                                            Margin="0,4,0,0"/>
+
+                                        <!-- ФОРМА ДОБАВЛЕНИЯ БЛЮДА -->
+                                        <Frame IsVisible="{Binding IsAddingDish}"
+                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
+                                                 CornerRadius="12"
+                                                 Padding="16"
+                                                 HasShadow="False">
+
+                                            <VerticalStackLayout Spacing="12">
+                                                <Label Text="Новое блюдо"
+                                                     FontSize="14"
+                                                     FontAttributes="Bold"
+                                                     TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                                <Entry Text="{Binding NewDishName}"
+                                                        Placeholder="Введите название блюда..."
+                                                        FontSize="15"
+                                                        BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray700}}"
+                                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                                        PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                                                        ClearButtonVisibility="WhileEditing"
+                                                        HeightRequest="44"/>
+
+                                                <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                                                    <Button Grid.Column="0"
+                                                          Text="Отмена"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=CancelAddingDishCommand}"
+                                                          CommandParameter="{Binding}"
+                                                          BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                          TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark=White}"
+                                                          CornerRadius="8"
+                                                          HeightRequest="36"
+                                                          FontSize="13"/>
+
+                                                    <Button Grid.Column="1"
+                                                          Text="Добавить"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=ConfirmAddingDishCommand}"
+                                                          CommandParameter="{Binding}"
+                                                          BackgroundColor="{StaticResource PrimaryColor}"
+                                                          TextColor="White"
+                                                          CornerRadius="8"
+                                                          HeightRequest="36"
+                                                          FontSize="13"
+                                                          FontAttributes="Bold"/>
+                                                </Grid>
+                                            </VerticalStackLayout>
+                                        </Frame>
 
                                     </VerticalStackLayout>
 
