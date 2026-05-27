@@ -67,6 +67,9 @@ public partial class FamilyViewModel : ObservableObject
     [ObservableProperty]
     private FamilyMember _currentUserMember;
 
+    // Права: Admin и Owner могут управлять семьёй (редактировать, принимать запросы)
+    public bool CanManageFamily => (CurrentUserMember?.Role ?? FamilyRole.Member) >= FamilyRole.Admin;
+
     [ObservableProperty]
     private string _membersCount;
 
@@ -1425,7 +1428,7 @@ public partial class FamilyViewModel : ObservableObject
             if (currentFamily?.Memberships != null)
             {
                 var pending = currentFamily.Memberships
-                    .Where(r => r.Status == RequestStatus.Pending)
+                    .Where(r => r.Status == RequestStatus.Pending && r.RespondedAt == default)
                     .ToList();
 
                 foreach (var request in pending)
@@ -1449,6 +1452,11 @@ public partial class FamilyViewModel : ObservableObject
     }
 
     // Частичные методы
+    partial void OnCurrentUserMemberChanged(FamilyMember value)
+    {
+        OnPropertyChanged(nameof(CanManageFamily));
+    }
+
     partial void OnCurrentTabChanged(TabItem value)
     {
         if (value != null)

@@ -66,6 +66,7 @@
                                     Padding="12,6"
                                     Margin="10,0,0,0"
                                     HeightRequest="30"
+                                    IsVisible="{Binding CanManageFamily}"
                                     Command="{Binding EditFamilyCommand}"/>
                         </HorizontalStackLayout>
 
@@ -187,7 +188,7 @@
                                     Command="{Binding SelectTabCommand}"
                                     CommandParameter="1"/>
 
-                            <!-- Requests Tab -->
+                            <!-- Requests Tab (только Admin+) -->
                             <Button Text="Запросы"
                                     Grid.Column="2"
                                     BackgroundColor="Transparent"
@@ -195,6 +196,7 @@
                                     CornerRadius="6"
                                     BorderWidth="0"
                                     FontSize="14"
+                                    IsVisible="{Binding CanManageFamily}"
                                     Command="{Binding SelectTabCommand}"
                                     CommandParameter="2"/>
                         </Grid>
@@ -879,10 +881,13 @@
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
 
-                                        <!-- ЗАПРОСЫ НА ВСТУПЛЕНИЕ -->
+                                        <!-- ЗАПРОСЫ НА ВСТУПЛЕНИЕ (только Admin+) -->
                                         <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsRequestsTab}" 
                                                              Spacing="16"
                                                              Padding="20,16,20,40">
+
+                                            <!-- Запросы видны только Admin+ -->
+                                            <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanManageFamily}">
 
                                             <!-- Состояние когда запросов нет -->
                                             <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
@@ -1024,7 +1029,9 @@
                                                 </CollectionView>
                                             </VerticalStackLayout>
 
-                                        </VerticalStackLayout>
+                                            </VerticalStackLayout><!-- /CanManageFamily -->
+
+                                        </VerticalStackLayout><!-- /IsRequestsTab -->
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Frame>
