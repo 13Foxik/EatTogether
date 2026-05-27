@@ -33,7 +33,7 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
             {
                 UserId = _currentUserService.GetCurrentUser()?.Uid ?? "default_user",
                 DishesId = new List<string>(),
-                FamilyId = _currentFamilyService.GetCurrentFamily().Id
+                FamilyId = _currentFamilyService.GetCurrentFamily()?.Id ?? string.Empty
             };
         }
 
