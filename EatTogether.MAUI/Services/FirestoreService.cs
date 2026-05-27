@@ -285,10 +285,13 @@ namespace EatTogether.MAUI.Services
         {
             await SetupFirestore();
 
+            var currentUser = _currentUserService.GetCurrentUser();
+            if (currentUser == null) return false;
+
             var documentFamily = _db.Collection("Families").Document(familyId);
             var documentUser = _db.Collection("Users").Document(userId);
 
-            string currentUserId = _currentUserService.GetCurrentUser().Uid;
+            string currentUserId = currentUser.Uid;
 
             try
             {
@@ -301,6 +304,7 @@ namespace EatTogether.MAUI.Services
                         throw new Exception("Семья не найдена");
 
                     var family = familySnapshot.ConvertTo<Family>();
+                    family.Members ??= new List<FamilyMember>();
 
                     // Находим пользователя для удаления
                     var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
@@ -377,6 +381,7 @@ namespace EatTogether.MAUI.Services
                         throw new Exception("Семья не найдена");
 
                     var family = familySnapshot.ConvertTo<Family>();
+                    family.Members ??= new List<FamilyMember>();
 
                     var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
                     if (memberToRemove == null)
