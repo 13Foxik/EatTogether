@@ -55,6 +55,8 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<FamilyViewModel>();
             builder.Services.AddTransient<CreateFamilyViewModel>();
             builder.Services.AddTransient<EditFamilyViewModel>();
+            builder.Services.AddTransient<JoinFamilyViewModel>();
+            builder.Services.AddTransient<JoinFamilyPage>();
             builder.Services.AddTransient<SubcategoriesViewModel>();
             builder.Services.AddTransient<MenuViewModel>();
             builder.Services.AddTransient<PlateViewModel>();
