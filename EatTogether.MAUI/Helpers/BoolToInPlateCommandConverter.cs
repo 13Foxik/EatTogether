@@ -144,4 +144,26 @@ namespace EatTogether.MAUI.Helpers
             throw new NotImplementedException();
         }
     }
+
+    // BoolToBackgroundColorConverter — фон карточки блюда (зелёный если в тарелке, белый/тёмный если нет)
+    public class BoolToBackgroundColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool isInPlate && isInPlate)
+            {
+                return Application.Current?.RequestedTheme == AppTheme.Dark
+                    ? Color.FromArgb("#1B5E20")
+                    : Color.FromArgb("#E8F5E9");
+            }
+            return Application.Current?.RequestedTheme == AppTheme.Dark
+                ? Color.FromArgb("#1E1E1E")
+                : Colors.White;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
