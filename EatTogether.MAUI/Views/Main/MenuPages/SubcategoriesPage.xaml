@@ -109,6 +109,7 @@
                              FontSize="22"
                              FontAttributes="Bold"
                              TextColor="White"
+                             Margin="0,0,30,0"
                              HorizontalOptions="Center"
                              HorizontalTextAlignment="Center"/>
 
@@ -116,6 +117,7 @@
                              FontSize="14"
                              TextColor="White"
                              Opacity="0.9"
+                             Margin="0,0,30,0"
                              HorizontalOptions="Center"
                              HorizontalTextAlignment="Center"/>
                     </VerticalStackLayout>
