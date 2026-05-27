@@ -188,7 +188,7 @@
                                     Command="{Binding SelectTabCommand}"
                                     CommandParameter="1"/>
 
-                            <!-- Requests Tab (только Admin+) -->
+                            <!-- Requests Tab -->
                             <Button Text="Запросы"
                                     Grid.Column="2"
                                     BackgroundColor="Transparent"
@@ -196,7 +196,6 @@
                                     CornerRadius="6"
                                     BorderWidth="0"
                                     FontSize="14"
-                                    IsVisible="{Binding CanManageFamily}"
                                     Command="{Binding SelectTabCommand}"
                                     CommandParameter="2"/>
                         </Grid>
@@ -889,13 +888,10 @@
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
 
-                                        <!-- ЗАПРОСЫ НА ВСТУПЛЕНИЕ (только Admin+) -->
+                                        <!-- ЗАПРОСЫ НА ВСТУПЛЕНИЕ -->
                                         <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsRequestsTab}" 
                                                              Spacing="16"
                                                              Padding="20,16,20,40">
-
-                                            <!-- Запросы видны только Admin+ -->
-                                            <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CanManageFamily}">
 
                                             <!-- Состояние когда запросов нет -->
                                             <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
@@ -966,7 +962,6 @@
 
                                                                     <!-- Аватар и имя пользователя -->
                                                                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                                                                        <!-- Аватар -->
                                                                         <Frame WidthRequest="44"
                                                                                HeightRequest="44"
                                                                                CornerRadius="22"
@@ -981,7 +976,6 @@
                                                                                    VerticalOptions="Center"/>
                                                                         </Frame>
 
-                                                                        <!-- Имя пользователя -->
                                                                         <Label Text="{Binding UserDisplayName}"
                                                                                FontSize="16"
                                                                                FontAttributes="Bold"
@@ -995,10 +989,11 @@
                                                                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                            Margin="56,-15,0,10"/>
 
-                                                                    <!-- Кнопки -->
+                                                                    <!-- Кнопки только для Admin+ -->
                                                                     <HorizontalStackLayout Spacing="12" 
                                                                                            HorizontalOptions="Center"
-                                                                                           Margin="0,0,0,0">
+                                                                                           IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                              Path=BindingContext.CanManageFamily}">
                                                                         <Button Text="Принять"
                                                                                 BackgroundColor="{StaticResource PrimaryColor}"
                                                                                 TextColor="White"
@@ -1030,14 +1025,11 @@
                                                         </DataTemplate>
                                                     </CollectionView.ItemTemplate>
 
-                                                    <!-- Пустое пространство после списка запросов -->
                                                     <CollectionView.Footer>
                                                         <StackLayout HeightRequest="40"/>
                                                     </CollectionView.Footer>
                                                 </CollectionView>
                                             </VerticalStackLayout>
-
-                                            </VerticalStackLayout><!-- /CanManageFamily -->
 
                                         </VerticalStackLayout><!-- /IsRequestsTab -->
                         </VerticalStackLayout>

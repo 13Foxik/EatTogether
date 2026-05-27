@@ -125,17 +125,10 @@
                 </Frame>
 
                 <!-- Заголовок категорий -->
-                <Grid IsVisible="{Binding ShowCategoriesContent}" HorizontalOptions="FillAndExpand">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0" Text="Категории блюд"
-                           FontSize="22" FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                           VerticalOptions="Center"/>
-                    <Label Grid.Column="1" Text="⚙️" FontSize="20" VerticalOptions="Center"/>
-                </Grid>
+                <Label IsVisible="{Binding ShowCategoriesContent}"
+                       Text="Категории блюд"
+                       FontSize="22" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
 
                 <!-- Сетка категорий -->
                 <FlexLayout BindableLayout.ItemsSource="{Binding Categories}"
