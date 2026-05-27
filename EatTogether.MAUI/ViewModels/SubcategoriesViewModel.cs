@@ -402,7 +402,7 @@ namespace EatTogether.MAUI.ViewModels
             foreach (var dishId in _plateService.GetDishIds())
             {
                 Dish dish = await _dishService.GetDishAsync(dishId);
-                if (_plateService.HasDish(dish.Id))
+                if (dish != null && _plateService.HasDish(dish.Id))
                 {
                     dishIds.Add(dishId);
                 }
