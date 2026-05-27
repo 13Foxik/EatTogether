@@ -738,6 +738,7 @@ public partial class FamilyViewModel : ObservableObject
     private async void AcceptDish(Dish dish)
     {
         if (dish == null || dish.Status != RequestStatus.Pending) return;
+        if (!CanManageFamily) return;
 
         try
         {
@@ -800,6 +801,7 @@ public partial class FamilyViewModel : ObservableObject
     private async void RejectDish(Dish dish)
     {
         if (dish == null || dish.Status != RequestStatus.Pending) return;
+        if (!CanManageFamily) return;
 
         try
         {
@@ -942,6 +944,7 @@ public partial class FamilyViewModel : ObservableObject
     [RelayCommand]
     private async void AcceptPlate(string plateId)
     {
+        if (!CanManageFamily) return;
         var plate = PendingPlates.FirstOrDefault(p => p.Id == plateId);
         if (plate != null)
         {
@@ -990,6 +993,7 @@ public partial class FamilyViewModel : ObservableObject
     [RelayCommand]
     private async void RejectPlate(string plateId)
     {
+        if (!CanManageFamily) return;
         var plate = PendingPlates.FirstOrDefault(p => p.Id == plateId);
         if (plate != null)
         {
