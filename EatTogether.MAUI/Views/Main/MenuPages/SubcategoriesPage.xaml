@@ -74,7 +74,7 @@
                          TranslationY="40"/>
 
                 <!-- Контент шапки -->
-                <Grid ColumnDefinitions="Auto, *, Auto" Padding="20,0">
+                <Grid ColumnDefinitions="Auto, *" Padding="20,0">
 
                     <!-- Кнопка назад -->
                     <Frame Grid.Column="0"
@@ -119,29 +119,6 @@
                              HorizontalOptions="Center"
                              HorizontalTextAlignment="Center"/>
                     </VerticalStackLayout>
-
-                    <!-- Кнопка настроек -->
-                    <Frame Grid.Column="2"
-                           BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
-                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
-                           CornerRadius="10"
-                           Padding="0"
-                           WidthRequest="36"
-                           HeightRequest="36"
-                           HorizontalOptions="End"
-                           VerticalOptions="Center"
-                           HasShadow="True"
-                           Opacity="0.8">
-
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SettingsCommand}"/>
-                        </Frame.GestureRecognizers>
-
-                        <Label Text="⚙️"
-                             FontSize="14"
-                             HorizontalOptions="Center"
-                             VerticalOptions="Center"/>
-                    </Frame>
                 </Grid>
             </Grid>
         </Border>

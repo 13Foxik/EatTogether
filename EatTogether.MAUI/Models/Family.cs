@@ -54,6 +54,7 @@ namespace EatTogether.MAUI.Models
                 ["DisplayName"] = member.DisplayName ?? "",
                 ["Email"] = member.Email ?? "",
                 ["AvatarUrl"] = member.AvatarUrl ?? "",
+                ["AvatarColor"] = member.AvatarColor ?? "",
                 ["Role"] = (int)member.Role, // Сохраняем как число
                 ["JoinedAt"] = member.JoinedAt,
             }).ToList();
@@ -75,6 +76,7 @@ namespace EatTogether.MAUI.Models
                             DisplayName = dict.ContainsKey("DisplayName") ? dict["DisplayName"]?.ToString() : "",
                             Email = dict.ContainsKey("Email") ? dict["Email"]?.ToString() : "",
                             AvatarUrl = dict.ContainsKey("AvatarUrl") ? dict["AvatarUrl"]?.ToString() : "",
+                            AvatarColor = dict.ContainsKey("AvatarColor") ? dict["AvatarColor"]?.ToString() : "",
                             Role = GetRoleFromFirestore(dict),
                             JoinedAt = dict.ContainsKey("JoinedAt") ? ((Timestamp)dict["JoinedAt"]).ToDateTime() : DateTime.UtcNow,
                         };
