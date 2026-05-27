@@ -410,15 +410,10 @@
                                              CornerRadius="12"
                                              Padding="0"
                                              HasShadow="False">
-                                            <Frame.IsVisible>
-                                                <MultiBinding Converter="{x:StaticResource InverseBoolConverter}">
-                                                    <Binding Path="IsAddingDish"/>
-                                                </MultiBinding>
-                                            </Frame.IsVisible>
 
                                             <Frame.GestureRecognizers>
                                                 <TapGestureRecognizer 
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=AddDishCommand}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=StartAddingDishCommand}"
                                                     CommandParameter="{Binding }"/>
                                             </Frame.GestureRecognizers>
 
