@@ -320,24 +320,25 @@ namespace EatTogether.MAUI.ViewModels
         {
             if (subcategory == null) return;
 
+            var tempList = Subcategories.ToList();
+
             // Сбрасываем режим добавления у всех подкатегорий
-            foreach (var item in Subcategories)
+            foreach (var item in tempList)
             {
                 item.IsAddingDish = false;
                 item.NewDishName = string.Empty;
             }
 
             // Включаем режим добавления для выбранной подкатегории
-            subcategory.IsAddingDish = true;
-            subcategory.NewDishName = string.Empty;
-
-            var index = Subcategories.IndexOf(subcategory);
-            if (index != -1)
+            var target = tempList.FirstOrDefault(s => s.Id == subcategory.Id);
+            if (target != null)
             {
-                var tempList = Subcategories.ToList();
-                tempList[index] = subcategory;
-                Subcategories = new ObservableCollection<Subcategory>(tempList);
+                target.IsAddingDish = true;
+                target.NewDishName = string.Empty;
             }
+
+            // Принудительно обновляем коллекцию чтобы UI отреагировал
+            Subcategories = new ObservableCollection<Subcategory>(tempList);
         }
 
         [RelayCommand]
@@ -360,8 +361,15 @@ namespace EatTogether.MAUI.ViewModels
                     Preferences.Get("family_id", string.Empty),
                     subcategory.Id);
 
-                subcategory.IsAddingDish = false;
-                subcategory.NewDishName = string.Empty;
+                // Сбрасываем форму сразу
+                var tempList = Subcategories.ToList();
+                var target = tempList.FirstOrDefault(s => s.Id == subcategory.Id);
+                if (target != null)
+                {
+                    target.IsAddingDish = false;
+                    target.NewDishName = string.Empty;
+                }
+                Subcategories = new ObservableCollection<Subcategory>(tempList);
 
                 await LoadSubcategoriesAsync();
             }
@@ -848,16 +856,16 @@ namespace EatTogether.MAUI.ViewModels
         {
             if (subcategory == null) return;
 
-            subcategory.IsAddingDish = false;
-            subcategory.NewDishName = string.Empty;
-
-            var index = Subcategories.IndexOf(subcategory);
-            if (index != -1)
+            var tempList = Subcategories.ToList();
+            var target = tempList.FirstOrDefault(s => s.Id == subcategory.Id);
+            if (target != null)
             {
-                var tempList = Subcategories.ToList();
-                tempList[index] = subcategory;
-                Subcategories = new ObservableCollection<Subcategory>(tempList);
+                target.IsAddingDish = false;
+                target.NewDishName = string.Empty;
             }
+
+            // Принудительно обновляем коллекцию чтобы UI отреагировал
+            Subcategories = new ObservableCollection<Subcategory>(tempList);
         }
 
         private void UpdateComputedProperties()
