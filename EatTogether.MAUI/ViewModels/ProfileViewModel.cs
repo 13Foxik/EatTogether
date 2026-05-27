@@ -92,7 +92,7 @@ namespace EatTogether.MAUI.ViewModels
             if (Application.Current?.MainPage is MainPage mainPage &&
                 mainPage.CurrentPage is NavigationPage navPage)
             {
-                await navPage.Navigation.PushAsync(new AvatarPickerPage());
+                await navPage.Navigation.PushAsync(App.Services.GetService<AvatarPickerPage>());
             }
         }
 

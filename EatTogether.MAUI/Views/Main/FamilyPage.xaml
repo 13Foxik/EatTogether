@@ -9,7 +9,7 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.BindingContext>
-        <vm:FamilyViewModel />
+        <!-- BindingContext задаётся через code-behind -->
     </ContentPage.BindingContext>
 
     <ContentPage.Resources>

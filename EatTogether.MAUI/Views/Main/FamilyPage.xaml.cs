@@ -5,9 +5,14 @@ namespace EatTogether.MAUI.Views.Main;
 
 public partial class FamilyPage : ContentPage
 {
-    public FamilyPage()
+    public FamilyPage() : this(App.Services.GetService<FamilyViewModel>())
+    {
+    }
+
+    public FamilyPage(FamilyViewModel viewModel)
     {
         InitializeComponent();
+        BindingContext = viewModel;
     }
 
     private void OnScrollViewScrolled(object sender, ScrolledEventArgs e)

@@ -153,14 +153,14 @@ public partial class FamilyViewModel : ObservableObject
     }
 
     public FamilyViewModel() : this(
-        Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<CreateFamilyViewModel>(),
-        Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<IMembershipService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<IFamilyService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<IPlateService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
-        Application.Current.Handler.MauiContext.Services.GetService<IFamilyMemberControlService>())
+        App.Services.GetService<CurrentUserService>(),
+        App.Services.GetService<CreateFamilyViewModel>(),
+        App.Services.GetService<ICurrentFamilyService>(),
+        App.Services.GetService<IMembershipService>(),
+        App.Services.GetService<IFamilyService>(),
+        App.Services.GetService<IPlateService>(),
+        App.Services.GetService<IDishService>(),
+        App.Services.GetService<IFamilyMemberControlService>())
     {
     }
 
@@ -1283,7 +1283,7 @@ public partial class FamilyViewModel : ObservableObject
                 EditDescription = family.Description ?? "",
                 FamilyId = family.Id ?? ""
             };
-            await nav.Navigation.PushAsync(new EditFamilyPage(editVm));
+                await nav.Navigation.PushAsync(App.Services.GetService<EditFamilyPage>());
         }
     }
 
@@ -1295,7 +1295,7 @@ public partial class FamilyViewModel : ObservableObject
             var currentNavigation = mainPage.CurrentPage as NavigationPage;
             if (currentNavigation != null)
             {
-                await currentNavigation.Navigation.PushAsync(new CreateFamilyPage(_createFamilyViewModel));
+                await currentNavigation.Navigation.PushAsync(App.Services.GetService<CreateFamilyPage>());
             }
         }
     }
@@ -1307,7 +1307,7 @@ public partial class FamilyViewModel : ObservableObject
             var currentNavigation = mainPage.CurrentPage as NavigationPage;
             if (currentNavigation != null)
             {
-                await currentNavigation.Navigation.PushAsync(new JoinFamilyPage());
+                await currentNavigation.Navigation.PushAsync(App.Services.GetService<JoinFamilyPage>());
             }
         }
     }

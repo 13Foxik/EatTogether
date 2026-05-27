@@ -40,8 +40,8 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         public PlateViewModel() : this(
-            Application.Current.Handler.MauiContext.Services.GetService<ICurrentPlateService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<IDishService>())
+            App.Services.GetService<ICurrentPlateService>(),
+            App.Services.GetService<IDishService>())
         {
         }
 
