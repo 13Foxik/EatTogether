@@ -94,5 +94,24 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
             }
             await _cloudStoreService.AddMemberToFamily(request.FamilyId, member);
         }
+
+        public async Task<bool> LeaveFamily(string familyId)
+        {
+            var currentUser = _currentUserService.GetCurrentUser();
+            if (currentUser == null) return false;
+
+            var result = await _cloudStoreService.LeaveFamilyInDB(currentUser.Uid, familyId);
+
+            if (result)
+            {
+                // Убираем семью из локального пользователя и сбрасываем текущую семью
+                if (currentUser.UserFamilies != null)
+                    currentUser.UserFamilies.Remove(familyId);
+
+                _currentFamilyService.SetCurrentFamily(null);
+            }
+
+            return result;
+        }
     }
 }

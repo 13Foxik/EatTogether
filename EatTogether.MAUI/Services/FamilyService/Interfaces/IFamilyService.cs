@@ -8,5 +8,6 @@ namespace EatTogether.MAUI.Services.FamilyService.Interfaces
         Task UpdateFamily(string familyId, string name, string description);
         Task<bool> HasUserInFamily(string familyId, User user);
         Task AcceptMember(MembershipRequest request);
+        Task<bool> LeaveFamily(string familyId);
     }
 }

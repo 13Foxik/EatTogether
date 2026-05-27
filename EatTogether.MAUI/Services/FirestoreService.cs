@@ -209,7 +209,7 @@ namespace EatTogether.MAUI.Services
                 bool userFound = false;
                 foreach (var member in family.Members)
                 {
-                    if (member.UserId == userId && member.Role != FamilyRole.Admin)
+                    if (member.UserId == userId && member.Role < FamilyRole.Editor)
                     {
                         member.Role = member.Role + 1;
                         userFound = true;
@@ -357,6 +357,66 @@ namespace EatTogether.MAUI.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при удалении пользователя: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> LeaveFamilyInDB(string userId, string familyId)
+        {
+            await SetupFirestore();
+
+            var documentFamily = _db.Collection("Families").Document(familyId);
+            var documentUser   = _db.Collection("Users").Document(userId);
+
+            try
+            {
+                return await _db.RunTransactionAsync(async transaction =>
+                {
+                    var familySnapshot = await transaction.GetSnapshotAsync(documentFamily);
+                    if (!familySnapshot.Exists)
+                        throw new Exception("Семья не найдена");
+
+                    var family = familySnapshot.ConvertTo<Family>();
+
+                    var leavingMember = family.Members.FirstOrDefault(m => m.UserId == userId);
+                    if (leavingMember == null)
+                        throw new Exception("Пользователь не найден в семье");
+
+                    // Если уходит Admin — передать права редактору или случайному участнику
+                    if (leavingMember.Role == FamilyRole.Admin)
+                    {
+                        var remaining = family.Members
+                            .Where(m => m.UserId != userId)
+                            .ToList();
+
+                        if (remaining.Any())
+                        {
+                            // Сначала ищем редактора, потом любого участника
+                            var successor = remaining
+                                .OrderByDescending(m => (int)m.Role)
+                                .First();
+                            successor.Role = FamilyRole.Admin;
+                        }
+                    }
+
+                    family.Members.RemoveAll(m => m.UserId == userId);
+                    family.CountUsers = family.Members.Count;
+
+                    Dictionary<string, object> familyUpdates = new()
+                    {
+                        { "Members", family.Members },
+                        { "CountUsers", family.CountUsers }
+                    };
+
+                    transaction.Update(documentFamily, familyUpdates);
+                    transaction.Update(documentUser, "UserFamilies", FieldValue.ArrayRemove(familyId));
+
+                    return true;
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при выходе из семьи: {ex.Message}");
                 return false;
             }
         }

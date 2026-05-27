@@ -379,20 +379,10 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                // Обновляем роль в локальных данных
-                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
-                if (updatedMember != null && updatedMember.Role < FamilyRole.Admin)
-                {
-                    updatedMember.Role = updatedMember.Role + 1;
-                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
-                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
-
-                    // Обновляем права для всех участников
-                    await LoadMemberPermissions();
-
-                    await Shell.Current.DisplayAlert("Успех",
-                        $"{member.DisplayName} повышен в роли", "OK");
-                }
+                // Полная перезагрузка — избегаем краша от устаревших объектов в DataTemplate
+                LoadFamilyData();
+                await Shell.Current.DisplayAlert("Успех",
+                    $"{member.DisplayName} повышен в роли", "OK");
             }
             else
             {
@@ -421,20 +411,10 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                // Обновляем роль в локальных данных
-                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
-                if (updatedMember != null && updatedMember.Role > FamilyRole.Member)
-                {
-                    updatedMember.Role = updatedMember.Role - 1;
-                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
-                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
-
-                    // Обновляем права для всех участников
-                    await LoadMemberPermissions();
-
-                    await Shell.Current.DisplayAlert("Успех",
-                        $"{member.DisplayName} понижен в роли", "OK");
-                }
+                // Полная перезагрузка
+                LoadFamilyData();
+                await Shell.Current.DisplayAlert("Успех",
+                    $"{member.DisplayName} понижен в роли", "OK");
             }
             else
             {
@@ -446,6 +426,61 @@ public partial class FamilyViewModel : ObservableObject
         {
             await Shell.Current.DisplayAlert("Ошибка",
                 $"Ошибка при понижении участника: {ex.Message}", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task LeaveFamily()
+    {
+        var currentFamily = _currentFamilyService?.GetCurrentFamily();
+        if (currentFamily == null) return;
+
+        string confirmMsg = "Вы уверены, что хотите покинуть семью?";
+
+        if (CurrentUserMember?.Role == FamilyRole.Admin)
+        {
+            var others = FamilyMembers.Where(m => !m.IsCurrentUser).ToList();
+            if (others.Any())
+            {
+                var successor = others.OrderByDescending(m => (int)m.Role).First();
+                confirmMsg = $"Вы уверены? Права администратора будут переданы {successor.DisplayName}.";
+            }
+        }
+
+        bool confirm = await Shell.Current.DisplayAlert("Выход из семьи", confirmMsg, "Выйти", "Отмена");
+        if (!confirm) return;
+
+        try
+        {
+            bool result = await _familyService.LeaveFamily(currentFamily.Id);
+
+            if (result)
+            {
+                // Сбрасываем локальное состояние UI
+                FamilyMembers.Clear();
+                PendingPlates.Clear();
+                ProcessedPlates.Clear();
+                PendingRequests.Clear();
+                CurrentUserMember = null;
+                FamilyName = string.Empty;
+                FamilyId = string.Empty;
+
+                // Обновляем currentUser — это триггернет UserChanged → UpdateUserInfo → HasFamily = false
+                var user = _currentUserService.CurrentUser;
+                if (user?.UserFamilies != null)
+                {
+                    user.UserFamilies.Remove(currentFamily.Id);
+                    _currentUserService.CurrentUser = user;
+                }
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Ошибка", "Не удалось выйти из семьи.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка", $"Ошибка: {ex.Message}", "OK");
         }
     }
 

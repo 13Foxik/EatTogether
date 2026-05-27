@@ -52,8 +52,8 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 if (!isNotSelf)
                     return false;
 
-                // 4. Проверяем, что есть куда повышать (не превышает Admin)
-                bool canBePromoted = targetMember.Role < FamilyRole.Admin;
+                // 4. Повышать можно только до Editor (не выше)
+                bool canBePromoted = targetMember.Role < FamilyRole.Editor;
                 if (!canBePromoted)
                     return false;
 
@@ -184,9 +184,9 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 // Выполняем повышение
                 await _cloudStoreService.PermissionUpToDB(userId, familyId);
 
-                // Обновляем локальные данные
+                // Обновляем локальные данные (максимум до Editor)
                 var updatedMember = currentFamily.Members.FirstOrDefault(m => m.UserId == userId);
-                if (updatedMember != null && updatedMember.Role < FamilyRole.Admin)
+                if (updatedMember != null && updatedMember.Role < FamilyRole.Editor)
                 {
                     updatedMember.Role = updatedMember.Role + 1;
                 }
