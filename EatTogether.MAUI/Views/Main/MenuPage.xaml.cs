@@ -13,6 +13,14 @@ public partial class MenuPage : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is MenuViewModel vm)
+            vm.OnAppearing();
+    }
+
     private async void OnGoToFamilyClicked(object sender, EventArgs e)
     {
         if (Application.Current?.MainPage is MainPage mainPage)
