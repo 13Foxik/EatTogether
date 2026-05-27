@@ -23,6 +23,7 @@
     <Color x:Key="AppleButtonColor">#FF000000</Color>
     <Color x:Key="AppleTextColor">#FFFFFFFF</Color>
 
+    <Color x:Key="ErrorColor">#D32F2F</Color>
     <Color x:Key="DarkRed">#8F1D1D</Color>
 
     <!-- Конвертеры -->
