@@ -341,6 +341,38 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         [RelayCommand]
+        private async Task ConfirmAddingDish(Subcategory subcategory)
+        {
+            if (subcategory == null) return;
+
+            if (string.IsNullOrWhiteSpace(subcategory.NewDishName))
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Введите название блюда", "OK");
+                return;
+            }
+
+            try
+            {
+                var dishName = subcategory.NewDishName.Trim();
+
+                await _dishService.CreateDishAsync(
+                    dishName,
+                    Preferences.Get("family_id", string.Empty),
+                    subcategory.Id);
+
+                subcategory.IsAddingDish = false;
+                subcategory.NewDishName = string.Empty;
+
+                await LoadSubcategoriesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при добавлении блюда: {ex}");
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Не удалось добавить блюдо", "OK");
+            }
+        }
+
+        [RelayCommand]
         private async Task TogglePlate(Dish dish)
         {
             if (dish == null) return;
