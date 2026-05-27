@@ -5,9 +5,9 @@
     xmlns:maui="using:Microsoft.Maui"
     xmlns:local="using:EatTogether.MAUI.WinUI">
 
-</maui:MauiWinUIApplication>
+    <maui:MauiWinUIApplication.Resources>
+        <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
+        <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+    </maui:MauiWinUIApplication.Resources>
 
-<maui:MauiWinUIApplication.Resources>
-    <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
-    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-</maui:MauiWinUIApplication.Resources>
+</maui:MauiWinUIApplication>
