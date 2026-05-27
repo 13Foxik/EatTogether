@@ -26,6 +26,8 @@
             <helpers:BoolToInPlateButtonBackgroundColorConverter x:Key="InPlateButtonBackgroundColorConverter"/>
             <helpers:BoolToInPlateButtonBorderColorConverter x:Key="InPlateButtonBorderColorConverter"/>
             <helpers:BoolToInPlateButtonTextColorConverter x:Key="InPlateButtonTextColorConverter"/>
+            <!-- Конвертер фона карточки блюда (IsInPlate → зелёный/серый) -->
+            <helpers:BoolToInPlateBackgroundColorConverter x:Key="BoolToBackgroundColorConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 

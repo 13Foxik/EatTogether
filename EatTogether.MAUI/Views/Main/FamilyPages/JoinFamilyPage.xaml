@@ -6,10 +6,6 @@
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
 
-    <ContentPage.BindingContext>
-        <vm:JoinFamilyViewModel />
-    </ContentPage.BindingContext>
-
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
