@@ -118,7 +118,7 @@ namespace EatTogether.MAUI.ViewModels
                 });
 
             // Загружаем данные
-            Task.Run(async () => await LoadSubcategoriesAsync());
+            MainThread.BeginInvokeOnMainThread(async () => await LoadSubcategoriesAsync());
         }
 
         private async Task RefreshDishesStateAsync()
@@ -421,9 +421,10 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    // Переходим на страницу тарелки
-                    var platePage = new PlatePage(new PlateViewModel());
-                    await currentNavigation.Navigation.PushAsync(platePage);
+                    // Переходим на страницу тарелки через DI
+                    var platePage = App.Services.GetService<PlatePage>();
+                    if (platePage != null)
+                        await currentNavigation.Navigation.PushAsync(platePage);
                 }
             }
         }
