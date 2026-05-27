@@ -1,10 +1,11 @@
-﻿using Google.Cloud.Firestore;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Google.Cloud.Firestore;
 using System.Collections.ObjectModel;
 
 namespace EatTogether.MAUI.Models
 {
     [FirestoreData]
-    public class Subcategory
+    public partial class Subcategory : ObservableObject
     {
         [FirestoreProperty]
         public string Id { get; set; }
@@ -24,10 +25,15 @@ namespace EatTogether.MAUI.Models
         // Изменяем на ObservableCollection для автоматического обновления UI
         public ObservableCollection<Dish> Dishes { get; set; } = new ObservableCollection<Dish>();
 
-        // Эти свойства не хранятся в Firestore, они для UI
-        public bool IsExpanded { get; set; }
-        public string NewDishName { get; set; }
-        public bool IsAddingDish { get; set; }
+        // UI-свойства с уведомлением об изменениях
+        [ObservableProperty]
+        private bool isExpanded;
+
+        [ObservableProperty]
+        private string newDishName;
+
+        [ObservableProperty]
+        private bool isAddingDish;
 
         public Subcategory() { }
 
