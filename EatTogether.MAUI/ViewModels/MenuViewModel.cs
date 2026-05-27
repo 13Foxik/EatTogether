@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Views.Main.MenuPages;
@@ -13,6 +14,7 @@ namespace EatTogether.MAUI.ViewModels
         private readonly ICategoryService _categoryService;
         private readonly ISubcategoryService _subcategoryService;
         private readonly IDishService _dishService;
+        private readonly ICurrentFamilyService _currentFamilyService;
 
         [ObservableProperty]
         private ObservableCollection<Category> categories = new();
@@ -33,11 +35,15 @@ namespace EatTogether.MAUI.ViewModels
         public bool ShowCategoriesContent => HasFamily && HasCategories && !IsBusy;
         public bool ShowNoCategoriesMessage => HasFamily && !HasCategories && !IsBusy;
 
-        public MenuViewModel(ICategoryService categoryService, ISubcategoryService subcategoryService, IDishService dishService)
+        public MenuViewModel(ICategoryService categoryService, ISubcategoryService subcategoryService, IDishService dishService, ICurrentFamilyService currentFamilyService)
         {
             _categoryService = categoryService;
             _subcategoryService = subcategoryService;
             _dishService = dishService;
+            _currentFamilyService = currentFamilyService;
+
+            // Подписываемся на событие — когда семья загрузится асинхронно после логина, обновим состояние
+            _currentFamilyService.FamilyChanged += OnFamilyChanged;
 
             CheckFamilyStatus();
 
@@ -48,11 +54,21 @@ namespace EatTogether.MAUI.ViewModels
         public MenuViewModel() : this(
             Application.Current.Handler.MauiContext.Services.GetService<ICategoryService>(),
             Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<IDishService>()) { }
+            Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
+            Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>()) { }
+
+        private void OnFamilyChanged(object? sender, FamilyChangedEventArgs e)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                CheckFamilyStatus();
+            });
+        }
 
         private void CheckFamilyStatus()
         {
-            HasFamily = !string.IsNullOrEmpty(Preferences.Get("family_id", string.Empty));
+            HasFamily = _currentFamilyService.GetCurrentFamily() != null
+                        || !string.IsNullOrEmpty(Preferences.Get("family_id", string.Empty));
         }
 
         private void UpdateComputedProperties()
