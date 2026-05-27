@@ -225,8 +225,9 @@
                              HorizontalOptions="Start"/>
                     </VerticalStackLayout>
 
-                    <!-- КНОПКИ ДОБАВЛЕНИЯ И УПРАВЛЕНИЯ -->
-                    <HorizontalStackLayout Grid.Column="1" Spacing="8" HorizontalOptions="End" VerticalOptions="Center">
+                    <!-- КНОПКИ ДОБАВЛЕНИЯ И УПРАВЛЕНИЯ (только Editor+) -->
+                    <HorizontalStackLayout Grid.Column="1" Spacing="8" HorizontalOptions="End" VerticalOptions="Center"
+                                           IsVisible="{Binding CanEditMenu}">
 
                         <!-- Кнопка добавления блюда -->
                         <Frame BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray800}}"
@@ -324,7 +325,7 @@
                                                  TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
                                         </VerticalStackLayout>
 
-                                        <!-- Кнопка редактирования подкатегории -->
+                                        <!-- Кнопка редактирования подкатегории (только Editor+) -->
                                         <Frame Grid.Column="1"
                                                BackgroundColor="Transparent"
                                                BorderColor="Transparent"
@@ -333,7 +334,8 @@
                                                HeightRequest="32"
                                                HorizontalOptions="End"
                                                VerticalOptions="Center"
-                                               Margin="0,0,8,0">
+                                               Margin="0,0,8,0"
+                                               IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=CanEditMenu}">
 
                                             <Frame.GestureRecognizers>
                                                 <TapGestureRecognizer 
@@ -348,7 +350,7 @@
                                                  VerticalOptions="Center"/>
                                         </Frame>
 
-                                        <!-- Кнопка удаления подкатегории -->
+                                        <!-- Кнопка удаления подкатегории (только Editor+) -->
                                         <Frame Grid.Column="2"
                                                BackgroundColor="Transparent"
                                                BorderColor="Transparent"
@@ -357,7 +359,8 @@
                                                HeightRequest="32"
                                                HorizontalOptions="End"
                                                VerticalOptions="Center"
-                                               Margin="0,0,12,0">
+                                               Margin="0,0,12,0"
+                                               IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=CanEditMenu}">
 
                                             <Frame.GestureRecognizers>
                                                 <TapGestureRecognizer 
@@ -401,12 +404,17 @@
                                        Spacing="8"
                                        IsVisible="{Binding IsExpanded}">
 
-                                        <!-- КНОПКА ДОБАВЛЕНИЯ БЛЮДА -->
+                                        <!-- КНОПКА ДОБАВЛЕНИЯ БЛЮДА (только Editor+) -->
                                         <Frame IsVisible="{Binding IsAddingDish, Converter={x:StaticResource InverseBoolConverter}}"
                                              BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryColor}, Dark={StaticResource PrimaryDarkColor}}"
                                              CornerRadius="12"
                                              Padding="0"
                                              HasShadow="False">
+                                            <Frame.IsVisible>
+                                                <MultiBinding Converter="{x:StaticResource InverseBoolConverter}">
+                                                    <Binding Path="IsAddingDish"/>
+                                                </MultiBinding>
+                                            </Frame.IsVisible>
 
                                             <Frame.GestureRecognizers>
                                                 <TapGestureRecognizer 
@@ -540,7 +548,7 @@
                                                                      VerticalOptions="Center"/>
                                                             </Frame>
 
-                                                            <!-- Кнопка редактирования -->
+                                                            <!-- Кнопка редактирования (только Editor+) -->
                                                             <Frame Grid.Column="2"
                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Blue100}, Dark={StaticResource Blue900}}"
                                                                    BorderColor="{AppThemeBinding Light={StaticResource Blue300}, Dark={StaticResource Blue700}}"
@@ -550,7 +558,8 @@
                                                                    HeightRequest="36"
                                                                    HorizontalOptions="End"
                                                                    VerticalOptions="Center"
-                                                                   Margin="0,0,8,0">
+                                                                   Margin="0,0,8,0"
+                                                                   IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=CanEditMenu}">
 
                                                                 <Frame.GestureRecognizers>
                                                                     <TapGestureRecognizer 
@@ -566,7 +575,7 @@
                                                                      VerticalOptions="Center"/>
                                                             </Frame>
 
-                                                            <!-- Кнопка удаления -->
+                                                            <!-- Кнопка удаления (только Editor+) -->
                                                             <Frame Grid.Column="3"
                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Red100}, Dark={StaticResource Red900}}"
                                                                    BorderColor="{AppThemeBinding Light={StaticResource Red300}, Dark={StaticResource Red700}}"
@@ -575,7 +584,8 @@
                                                                    WidthRequest="36"
                                                                    HeightRequest="36"
                                                                    HorizontalOptions="End"
-                                                                   VerticalOptions="Center">
+                                                                   VerticalOptions="Center"
+                                                                   IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=CanEditMenu}">
 
                                                                 <Frame.GestureRecognizers>
                                                                     <TapGestureRecognizer 

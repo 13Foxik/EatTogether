@@ -15,6 +15,8 @@ namespace EatTogether.MAUI.ViewModels
         private readonly ISubcategoryService _subcategoryService;
         private readonly IDishService _dishService;
         private readonly ICurrentPlateService _plateService;
+        private readonly ICurrentFamilyService _currentFamilyService;
+        private readonly Services.CurrentUserService _currentUserService;
         private readonly string _categoryId;
 
         [ObservableProperty]
@@ -69,6 +71,10 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private bool showPlatePanel;
 
+        // Права на редактирование меню: Editor, Admin, Owner
+        [ObservableProperty]
+        private bool canEditMenu;
+
         public bool HasSubcategories => Subcategories?.Count > 0;
         public bool ShowNoSubcategoriesMessage => !IsBusy && !HasSubcategories;
         public bool ShowSubcategoriesContent => !IsBusy && HasSubcategories;
@@ -77,16 +83,27 @@ namespace EatTogether.MAUI.ViewModels
         public SubcategoriesViewModel(string categoryId, string categoryName,
             ISubcategoryService subcategoryService,
             IDishService dishService,
-            ICurrentPlateService plateService)
+            ICurrentPlateService plateService,
+            ICurrentFamilyService currentFamilyService = null,
+            Services.CurrentUserService currentUserService = null)
         {
             _categoryId = categoryId;
             _subcategoryService = subcategoryService;
             _dishService = dishService;
             _plateService = plateService;
+            _currentFamilyService = currentFamilyService;
+            _currentUserService = currentUserService;
             CategoryName = categoryName;
 
             // Инициализация
             Subcategories = new ObservableCollection<Subcategory>();
+
+            // Определяем права текущего пользователя
+            CheckUserRole();
+
+            // Подписываемся на изменение семьи чтобы обновить роль
+            if (_currentFamilyService != null)
+                _currentFamilyService.FamilyChanged += (s, e) => CheckUserRole();
 
             WeakReferenceMessenger.Default.Register<PlateUpdatedMessage>(
                 this,
@@ -130,8 +147,30 @@ namespace EatTogether.MAUI.ViewModels
             : this(categoryId, categoryName,
                   App.Services.GetService<ISubcategoryService>(),
                   App.Services.GetService<IDishService>(),
-                  App.Services.GetService<ICurrentPlateService>())
+                  App.Services.GetService<ICurrentPlateService>(),
+                  App.Services.GetService<ICurrentFamilyService>(),
+                  App.Services.GetService<Services.CurrentUserService>())
         {
+        }
+
+        private void CheckUserRole()
+        {
+            try
+            {
+                var user = _currentUserService?.GetCurrentUser();
+                var family = _currentFamilyService?.GetCurrentFamily();
+                if (user == null || family?.Members == null)
+                {
+                    CanEditMenu = false;
+                    return;
+                }
+                var member = family.Members.FirstOrDefault(m => m.UserId == user.Uid);
+                CanEditMenu = (member?.Role ?? Models.FamilyRole.Member) >= Models.FamilyRole.Editor;
+            }
+            catch
+            {
+                CanEditMenu = false;
+            }
         }
 
         [RelayCommand]
