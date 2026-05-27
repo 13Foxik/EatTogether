@@ -401,7 +401,7 @@ namespace EatTogether.MAUI.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при выходе из семьи: {ex.Message}");
-                throw;
+                return false;
             }
         }
 
