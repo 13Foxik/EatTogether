@@ -26,6 +26,9 @@
             <helpers:BoolToInPlateButtonBackgroundColorConverter x:Key="InPlateButtonBackgroundColorConverter"/>
             <helpers:BoolToInPlateButtonBorderColorConverter x:Key="InPlateButtonBorderColorConverter"/>
             <helpers:BoolToInPlateButtonTextColorConverter x:Key="InPlateButtonTextColorConverter"/>
+
+            <!-- Конвертер фона карточки блюда -->
+            <helpers:BoolToBackgroundColorConverter x:Key="BoolToBackgroundColorConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -408,7 +411,7 @@
 
                                             <Frame.GestureRecognizers>
                                                 <TapGestureRecognizer 
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=AddDishCommand}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=StartAddingDishCommand}"
                                                     CommandParameter="{Binding }"/>
                                             </Frame.GestureRecognizers>
 
@@ -464,7 +467,7 @@
 
                                                     <Button Grid.Column="1"
                                                           Text="Добавить"
-                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=AddDishCommand}"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SubcategoriesViewModel}}, Path=StartAddingDishCommand}"
                                                           CommandParameter="{Binding}"
                                                           BackgroundColor="{StaticResource PrimaryColor}"
                                                           TextColor="White"

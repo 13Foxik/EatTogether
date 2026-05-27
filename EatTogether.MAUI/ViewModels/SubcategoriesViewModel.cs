@@ -6,6 +6,7 @@ using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Views.Main.MenuPages;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 
 namespace EatTogether.MAUI.ViewModels
@@ -15,6 +16,7 @@ namespace EatTogether.MAUI.ViewModels
         private readonly ISubcategoryService _subcategoryService;
         private readonly IDishService _dishService;
         private readonly ICurrentPlateService _plateService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly string _categoryId;
 
         [ObservableProperty]
@@ -77,12 +79,14 @@ namespace EatTogether.MAUI.ViewModels
         public SubcategoriesViewModel(string categoryId, string categoryName,
             ISubcategoryService subcategoryService,
             IDishService dishService,
-            ICurrentPlateService plateService)
+            ICurrentPlateService plateService,
+            IServiceProvider serviceProvider)
         {
             _categoryId = categoryId;
             _subcategoryService = subcategoryService;
             _dishService = dishService;
             _plateService = plateService;
+            _serviceProvider = serviceProvider;
             CategoryName = categoryName;
 
             // Инициализация
@@ -130,7 +134,8 @@ namespace EatTogether.MAUI.ViewModels
             : this(categoryId, categoryName,
                   Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
                   Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
-                  Application.Current.Handler.MauiContext.Services.GetService<ICurrentPlateService>())
+                  Application.Current.Handler.MauiContext.Services.GetService<ICurrentPlateService>(),
+                  Application.Current.Handler.MauiContext.Services)
         {
         }
 
@@ -382,9 +387,10 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    // Переходим на страницу тарелки
-                    var platePage = new PlatePage(new PlateViewModel());
-                    await currentNavigation.Navigation.PushAsync(platePage);
+                    // Переходим на страницу тарелки через DI
+                    var platePage = _serviceProvider.GetService<PlatePage>();
+                    if (platePage != null)
+                        await currentNavigation.Navigation.PushAsync(platePage);
                 }
             }
         }

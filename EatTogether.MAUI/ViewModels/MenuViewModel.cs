@@ -1,9 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Views.Main.MenuPages;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 
 namespace EatTogether.MAUI.ViewModels
@@ -11,6 +12,7 @@ namespace EatTogether.MAUI.ViewModels
     public partial class MenuViewModel : ObservableObject
     {
         private readonly ICategoryService _categoryService;
+        private readonly IServiceProvider _serviceProvider;
 
         [ObservableProperty]
         private ObservableCollection<Category> categories = new();
@@ -33,9 +35,10 @@ namespace EatTogether.MAUI.ViewModels
         // Показываем сообщение "нет категорий" только если пользователь в семье И нет категорий
         public bool ShowNoCategoriesMessage => HasFamily && !HasCategories && !IsBusy;
 
-        public MenuViewModel(ICategoryService categoryService)
+        public MenuViewModel(ICategoryService categoryService, IServiceProvider serviceProvider)
         {
             _categoryService = categoryService;
+            _serviceProvider = serviceProvider;
 
             // Инициализируем состояние семьи
             CheckFamilyStatus();
@@ -47,7 +50,9 @@ namespace EatTogether.MAUI.ViewModels
             }
         }
 
-        public MenuViewModel() : this(Application.Current.Handler.MauiContext.Services.GetService<ICategoryService>()) { }
+        public MenuViewModel() : this(
+            Application.Current.Handler.MauiContext.Services.GetService<ICategoryService>(),
+            Application.Current.Handler.MauiContext.Services) { }
 
         // Метод для проверки статуса семьи
         private void CheckFamilyStatus()
@@ -98,7 +103,14 @@ namespace EatTogether.MAUI.ViewModels
                 var currentNavigation = mainPage.CurrentPage as NavigationPage;
                 if (currentNavigation != null)
                 {
-                    var subcategoriesPage = new SubcategoriesPage(new SubcategoriesViewModel(category.Id, category.Name));
+                    var vm = new SubcategoriesViewModel(
+                        category.Id,
+                        category.Name,
+                        _serviceProvider.GetRequiredService<ISubcategoryService>(),
+                        _serviceProvider.GetRequiredService<IDishService>(),
+                        _serviceProvider.GetRequiredService<ICurrentPlateService>(),
+                        _serviceProvider);
+                    var subcategoriesPage = new SubcategoriesPage(vm);
                     await currentNavigation.Navigation.PushAsync(subcategoriesPage);
                 }
             }
@@ -132,6 +144,7 @@ namespace EatTogether.MAUI.ViewModels
                 IsBusy = false;
             }
         }
+
         [RelayCommand]
         private async Task Settings()
         {
