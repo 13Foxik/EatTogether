@@ -34,10 +34,10 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         public CreateFamilyViewModel() : this(
-            Application.Current.Handler.MauiContext.Services.GetService<IFamilyService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<CurrentUserService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<IUserService>()) { }
+            App.Services.GetService<IFamilyService>(),
+            App.Services.GetService<CurrentUserService>(),
+            App.Services.GetService<ICurrentFamilyService>(),
+            App.Services.GetService<IUserService>()) { }
 
         [RelayCommand]
         private async Task GoBack()

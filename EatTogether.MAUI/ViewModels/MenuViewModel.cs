@@ -52,10 +52,10 @@ namespace EatTogether.MAUI.ViewModels
         }
 
         public MenuViewModel() : this(
-            Application.Current.Handler.MauiContext.Services.GetService<ICategoryService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<ISubcategoryService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<IDishService>(),
-            Application.Current.Handler.MauiContext.Services.GetService<ICurrentFamilyService>()) { }
+            App.Services.GetService<ICategoryService>(),
+            App.Services.GetService<ISubcategoryService>(),
+            App.Services.GetService<IDishService>(),
+            App.Services.GetService<ICurrentFamilyService>()) { }
 
         private void OnFamilyChanged(object? sender, FamilyChangedEventArgs e)
         {
