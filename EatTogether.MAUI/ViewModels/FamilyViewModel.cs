@@ -379,23 +379,20 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                var idx = FamilyMembers.IndexOf(FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId));
-                if (idx >= 0)
+                // Обновляем роль в локальных данных
+                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
+                if (updatedMember != null && updatedMember.Role < FamilyRole.Admin)
                 {
-                    var updated = FamilyMembers[idx];
-                    updated.Role = updated.Role + 1;
-                    updated.RoleText = _memberControlService.GetRoleText(updated.Role);
-                    updated.RoleColor = _memberControlService.GetRoleColor(updated.Role);
-                    updated.CanPromote = await _memberControlService.CanPromote(updated);
-                    updated.CanDemote = await _memberControlService.CanDemote(updated);
-                    updated.CanKick = await _memberControlService.CanKick(updated);
+                    updatedMember.Role = updatedMember.Role + 1;
+                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
+                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
 
-                    // Заменяем объект в коллекции — это гарантированно триггерит UI
-                    FamilyMembers[idx] = updated;
+                    // Обновляем права для всех участников
+                    await LoadMemberPermissions();
+
+                    await Shell.Current.DisplayAlert("Успех",
+                        $"{member.DisplayName} повышен в роли", "OK");
                 }
-
-                await Shell.Current.DisplayAlert("Успех",
-                    $"{member.DisplayName} повышен в роли", "OK");
             }
             else
             {
@@ -424,23 +421,20 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                var idx = FamilyMembers.IndexOf(FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId));
-                if (idx >= 0)
+                // Обновляем роль в локальных данных
+                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
+                if (updatedMember != null && updatedMember.Role > FamilyRole.Member)
                 {
-                    var updated = FamilyMembers[idx];
-                    updated.Role = updated.Role - 1;
-                    updated.RoleText = _memberControlService.GetRoleText(updated.Role);
-                    updated.RoleColor = _memberControlService.GetRoleColor(updated.Role);
-                    updated.CanPromote = await _memberControlService.CanPromote(updated);
-                    updated.CanDemote = await _memberControlService.CanDemote(updated);
-                    updated.CanKick = await _memberControlService.CanKick(updated);
+                    updatedMember.Role = updatedMember.Role - 1;
+                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
+                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
 
-                    // Заменяем объект в коллекции — это гарантированно триггерит UI
-                    FamilyMembers[idx] = updated;
+                    // Обновляем права для всех участников
+                    await LoadMemberPermissions();
+
+                    await Shell.Current.DisplayAlert("Успех",
+                        $"{member.DisplayName} понижен в роли", "OK");
                 }
-
-                await Shell.Current.DisplayAlert("Успех",
-                    $"{member.DisplayName} понижен в роли", "OK");
             }
             else
             {
@@ -502,56 +496,6 @@ public partial class FamilyViewModel : ObservableObject
         {
             await Shell.Current.DisplayAlert("Ошибка",
                 $"Ошибка при исключении участника: {ex.Message}", "OK");
-        }
-    }
-
-    [RelayCommand]
-    private async Task LeaveFamily()
-    {
-        try
-        {
-            var currentFamily = _currentFamilyService?.GetCurrentFamily();
-            if (currentFamily == null) return;
-
-            var currentUser = _currentUserService.CurrentUser;
-            if (currentUser == null) return;
-
-            // Глава не может выйти — покажем понятное сообщение
-            if (CurrentUserMember?.Role == FamilyRole.Owner)
-            {
-                await Shell.Current.DisplayAlert("Невозможно выйти",
-                    "Вы являетесь главой семьи. Сначала передайте роль другому участнику.", "OK");
-                return;
-            }
-
-            bool confirm = await Shell.Current.DisplayAlert("Выйти из семьи",
-                $"Вы уверены, что хотите покинуть семью «{FamilyName}»?",
-                "Выйти", "Отмена");
-
-            if (!confirm) return;
-
-            bool result = await _memberControlService.LeaveFamily(currentUser.Uid, currentFamily.Id);
-
-            if (result)
-            {
-                // Очищаем локальные данные семьи
-                _currentFamilyService.ClearFamily();
-
-                var user = _currentUserService.CurrentUser;
-                if (user?.UserFamilies != null)
-                {
-                    user.UserFamilies.Remove(currentFamily.Id);
-                }
-
-                HasFamily = false;
-                FamilyMembers.Clear();
-
-                await Shell.Current.DisplayAlert("Готово", "Вы вышли из семьи.", "OK");
-            }
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlert("Ошибка", ex.Message, "OK");
         }
     }
 

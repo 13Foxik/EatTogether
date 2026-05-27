@@ -10,7 +10,6 @@ namespace EatTogether.MAUI.Services.FamilyService.Interfaces
         Task<bool> Promote(string userId, string familyId);
         Task<bool> Demote(string userId, string familyId);
         Task<bool> Kick(string userId, string familyId);
-        Task<bool> LeaveFamily(string userId, string familyId);
         string GetRoleText(FamilyRole role);
         Color GetRoleColor(FamilyRole role);
     }
