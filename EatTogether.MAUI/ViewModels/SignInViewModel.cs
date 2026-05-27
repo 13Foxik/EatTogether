@@ -23,6 +23,9 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private bool _isPasswordVisible = true;
 
+        [ObservableProperty]
+        private bool _isBusy;
+
         [RelayCommand]
         private async Task SignInWithEmailAsync()
         {

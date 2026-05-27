@@ -36,11 +36,20 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private bool _isPasswordVisible = true;
 
+        [ObservableProperty]
+        private bool _isBusy;
+
         private readonly IEmailAuth _emailAuthService;
 
         public SignUpViewModel(IEmailAuth emailAuthService)
         {
             _emailAuthService = emailAuthService;
+        }
+
+        [RelayCommand]
+        private void ChangeLanguage()
+        {
+            // TODO: реализация смены языка
         }
 
         [RelayCommand]
