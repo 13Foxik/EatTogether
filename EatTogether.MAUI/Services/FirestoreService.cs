@@ -369,49 +369,54 @@ namespace EatTogether.MAUI.Services
         {
             await SetupFirestore();
 
-            var documentFamily = _db.Collection("Families").Document(familyId);
-            var documentUser = _db.Collection("Users").Document(userId);
-
             try
             {
-                return await _db.RunTransactionAsync(async transaction =>
+                var documentFamily = _db.Collection("Families").Document(familyId);
+                var documentUser = _db.Collection("Users").Document(userId);
+
+                // Читаем семью
+                var familySnapshot = await documentFamily.GetSnapshotAsync();
+                if (!familySnapshot.Exists)
                 {
-                    // Читаем оба документа ДО любых записей (требование Firestore транзакций)
-                    var familySnapshot = await transaction.GetSnapshotAsync(documentFamily);
-                    var userSnapshot = await transaction.GetSnapshotAsync(documentUser);
+                    Console.WriteLine("LeaveFamilyFromDB: семья не найдена");
+                    return false;
+                }
 
-                    if (!familySnapshot.Exists)
-                        throw new Exception("Семья не найдена");
-                    if (!userSnapshot.Exists)
-                        throw new Exception("Пользователь не найден");
+                var family = familySnapshot.ConvertTo<Family>();
+                family.Members ??= new List<FamilyMember>();
 
-                    var family = familySnapshot.ConvertTo<Family>();
-                    family.Members ??= new List<FamilyMember>();
+                var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
+                if (memberToRemove == null)
+                {
+                    Console.WriteLine($"LeaveFamilyFromDB: участник {userId} не найден среди {family.Members.Count} участников");
+                    return false;
+                }
 
-                    var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
-                    if (memberToRemove == null)
-                        throw new Exception($"Участник {userId} не найден в семье. Участников: {family.Members.Count}");
+                if (memberToRemove.Role == FamilyRole.Owner)
+                {
+                    Console.WriteLine("LeaveFamilyFromDB: глава не может выйти");
+                    return false;
+                }
 
-                    if (memberToRemove.Role == FamilyRole.Owner)
-                        throw new Exception("Глава семьи не может выйти. Сначала передайте роль другому участнику.");
+                // Убираем участника из семьи
+                family.Members.RemoveAll(m => m.UserId == userId);
+                family.CountUsers = family.Members.Count;
 
-                    family.Members.RemoveAll(m => m.UserId == userId);
-                    family.CountUsers = family.Members.Count;
-
-                    var converter = new FamilyMemberListConverter();
-                    transaction.Update(documentFamily, new Dictionary<string, object>
-                    {
-                        { "Members", converter.ToFirestore(family.Members) },
-                        { "CountUsers", family.CountUsers }
-                    });
-                    transaction.Update(documentUser, "UserFamilies", FieldValue.ArrayRemove(familyId));
-
-                    return true;
+                var converter = new FamilyMemberListConverter();
+                await documentFamily.UpdateAsync(new Dictionary<string, object>
+                {
+                    { "Members", converter.ToFirestore(family.Members) },
+                    { "CountUsers", family.CountUsers }
                 });
+
+                // Убираем familyId из UserFamilies пользователя
+                await documentUser.UpdateAsync("UserFamilies", FieldValue.ArrayRemove(familyId));
+
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при выходе из семьи: {ex.Message}");
+                Console.WriteLine($"LeaveFamilyFromDB ошибка: {ex.GetType().Name}: {ex.Message}");
                 return false;
             }
         }

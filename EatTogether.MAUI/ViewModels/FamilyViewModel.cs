@@ -388,19 +388,16 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
+                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
+                if (updatedMember != null && updatedMember.Role < FamilyRole.Admin)
                 {
-                    var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
-                    if (updatedMember != null && updatedMember.Role < FamilyRole.Admin)
-                    {
-                        updatedMember.Role = updatedMember.Role + 1;
-                        updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
-                        updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
-                        await LoadMemberPermissions();
-                    }
-                    await Shell.Current.DisplayAlert("Успех",
-                        $"{member.DisplayName} повышен в роли", "OK");
-                });
+                    updatedMember.Role = updatedMember.Role + 1;
+                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
+                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
+                    await LoadMemberPermissions();
+                }
+                await Shell.Current.DisplayAlert("Успех",
+                    $"{member.DisplayName} повышен в роли", "OK");
             }
             else
             {
@@ -429,19 +426,16 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
+                var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
+                if (updatedMember != null && updatedMember.Role > FamilyRole.Member)
                 {
-                    var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
-                    if (updatedMember != null && updatedMember.Role > FamilyRole.Member)
-                    {
-                        updatedMember.Role = updatedMember.Role - 1;
-                        updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
-                        updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
-                        await LoadMemberPermissions();
-                    }
-                    await Shell.Current.DisplayAlert("Успех",
-                        $"{member.DisplayName} понижен в роли", "OK");
-                });
+                    updatedMember.Role = updatedMember.Role - 1;
+                    updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
+                    updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
+                    await LoadMemberPermissions();
+                }
+                await Shell.Current.DisplayAlert("Успех",
+                    $"{member.DisplayName} понижен в роли", "OK");
             }
             else
             {
@@ -536,14 +530,11 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                await MainThread.InvokeOnMainThreadAsync(() =>
-                {
-                    _currentFamilyService.ClearFamily();
-                    if (currentUser.UserFamilies != null)
-                        currentUser.UserFamilies.Remove(currentFamily.Id);
-                    FamilyMembers.Clear();
-                    HasFamily = false;
-                });
+                _currentFamilyService.ClearFamily();
+                if (currentUser.UserFamilies != null)
+                    currentUser.UserFamilies.Remove(currentFamily.Id);
+                FamilyMembers.Clear();
+                HasFamily = false;
             }
             else
             {
