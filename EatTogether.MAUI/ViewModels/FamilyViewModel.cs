@@ -197,8 +197,11 @@ public partial class FamilyViewModel : ObservableObject
 
     private void OnFamilyChanged(object sender, FamilyChangedEventArgs e)
     {
-        LoadFamilyData();
-        LoadPlates();
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            LoadFamilyData();
+            LoadPlates();
+        });
     }
 
     private void OnUserChanged(object sender, UserChangedEventArgs e)
