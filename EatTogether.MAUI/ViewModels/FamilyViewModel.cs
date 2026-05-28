@@ -396,19 +396,11 @@ public partial class FamilyViewModel : ObservableObject
                     updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
                     await LoadMemberPermissions();
                 }
-                await Shell.Current.DisplayAlert("Успех",
-                    $"{member.DisplayName} повышен в роли", "OK");
-            }
-            else
-            {
-                await Shell.Current.DisplayAlert("Ошибка",
-                    "Не удалось повысить участника. Проверьте ваши права.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Ошибка",
-                $"Ошибка при повышении участника: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"PromoteMember error: {ex}");
         }
     }
 
@@ -434,19 +426,11 @@ public partial class FamilyViewModel : ObservableObject
                     updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
                     await LoadMemberPermissions();
                 }
-                await Shell.Current.DisplayAlert("Успех",
-                    $"{member.DisplayName} понижен в роли", "OK");
-            }
-            else
-            {
-                await Shell.Current.DisplayAlert("Ошибка",
-                    "Не удалось понизить участника. Проверьте ваши права.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Ошибка",
-                $"Ошибка при понижении участника: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"DemoteMember error: {ex}");
         }
     }
 
@@ -457,12 +441,6 @@ public partial class FamilyViewModel : ObservableObject
 
         try
         {
-            bool confirm = await Shell.Current.DisplayAlert("Подтверждение",
-                $"Вы уверены, что хотите исключить {member.DisplayName} из семьи?",
-                "Исключить", "Отмена");
-
-            if (!confirm) return;
-
             var currentFamily = _currentFamilyService?.GetCurrentFamily();
             if (currentFamily == null) return;
 
@@ -470,33 +448,22 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
-                // Удаляем из локальных данных
                 var memberToRemove = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
                 if (memberToRemove != null)
                 {
                     FamilyMembers.Remove(memberToRemove);
                     MembersCount = $"{FamilyMembers.Count} участников";
 
-                    // ОБНОВЛЯЕМ ВЫСОТУ ПОСЛЕ УДАЛЕНИЯ УЧАСТНИКА
                     if (CurrentTab?.Type == TabType.Members)
                     {
                         UpdateTabHeight();
                     }
                 }
-
-                await Shell.Current.DisplayAlert("Успех",
-                    $"{member.DisplayName} исключен из семьи", "OK");
-            }
-            else
-            {
-                await Shell.Current.DisplayAlert("Ошибка",
-                    "Не удалось исключить участника. Проверьте ваши права.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Ошибка",
-                $"Ошибка при исключении участника: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"KickMember error: {ex}");
         }
     }
 
@@ -513,18 +480,9 @@ public partial class FamilyViewModel : ObservableObject
             var currentUser = _currentUserService.CurrentUser;
             if (currentUser == null) return;
 
+            // Глава не может выйти
             if (CurrentUserMember?.Role == FamilyRole.Owner)
-            {
-                await Shell.Current.DisplayAlert("Невозможно выйти",
-                    "Вы — глава семьи. Сначала передайте роль другому участнику.", "OK");
                 return;
-            }
-
-            bool confirm = await Shell.Current.DisplayAlert("Выйти из семьи",
-                $"Вы уверены, что хотите покинуть семью «{FamilyName}»?",
-                "Выйти", "Отмена");
-
-            if (!confirm) return;
 
             bool result = await _cloudStoreService.LeaveFamilyFromDB(currentUser.Uid, currentFamily.Id);
 
@@ -536,15 +494,10 @@ public partial class FamilyViewModel : ObservableObject
                 FamilyMembers.Clear();
                 HasFamily = false;
             }
-            else
-            {
-                await Shell.Current.DisplayAlert("Ошибка",
-                    "Не удалось выйти из семьи. Попробуйте ещё раз.", "OK");
-            }
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Ошибка", ex.Message, "OK");
+            System.Diagnostics.Debug.WriteLine($"LeaveFamily error: {ex}");
         }
     }
 
