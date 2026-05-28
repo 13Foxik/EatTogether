@@ -376,16 +376,21 @@ namespace EatTogether.MAUI.Services
             {
                 return await _db.RunTransactionAsync(async transaction =>
                 {
+                    // Читаем оба документа ДО любых записей (требование Firestore транзакций)
                     var familySnapshot = await transaction.GetSnapshotAsync(documentFamily);
+                    var userSnapshot = await transaction.GetSnapshotAsync(documentUser);
+
                     if (!familySnapshot.Exists)
                         throw new Exception("Семья не найдена");
+                    if (!userSnapshot.Exists)
+                        throw new Exception("Пользователь не найден");
 
                     var family = familySnapshot.ConvertTo<Family>();
                     family.Members ??= new List<FamilyMember>();
 
                     var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
                     if (memberToRemove == null)
-                        throw new Exception("Вы не являетесь участником этой семьи");
+                        throw new Exception($"Участник {userId} не найден в семье. Участников: {family.Members.Count}");
 
                     if (memberToRemove.Role == FamilyRole.Owner)
                         throw new Exception("Глава семьи не может выйти. Сначала передайте роль другому участнику.");
@@ -393,9 +398,10 @@ namespace EatTogether.MAUI.Services
                     family.Members.RemoveAll(m => m.UserId == userId);
                     family.CountUsers = family.Members.Count;
 
+                    var converter = new FamilyMemberListConverter();
                     transaction.Update(documentFamily, new Dictionary<string, object>
                     {
-                        { "Members", family.Members },
+                        { "Members", converter.ToFirestore(family.Members) },
                         { "CountUsers", family.CountUsers }
                     });
                     transaction.Update(documentUser, "UserFamilies", FieldValue.ArrayRemove(familyId));
@@ -406,7 +412,7 @@ namespace EatTogether.MAUI.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при выходе из семьи: {ex.Message}");
-                return false;
+                throw; // пробрасываем чтобы увидеть реальную причину
             }
         }
 
