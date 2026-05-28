@@ -414,7 +414,6 @@ namespace EatTogether.MAUI.Services
                 Console.WriteLine($"Ошибка при выходе из семьи: {ex.Message}");
                 return false;
             }
-            }
         }
 
         public async Task InsertMembership(MembershipRequest request)
