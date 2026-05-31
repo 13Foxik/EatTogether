@@ -121,8 +121,8 @@
                     <Label Text="День рождения:"
                            Grid.Row="1" Grid.Column="0"
                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                    <Label Text="17 февраля, 2006"  
-                            Grid.Row="1" Grid.Column="1"
+                    <Label Text="{Binding FormattedDateOfBirth}"
+                           Grid.Row="1" Grid.Column="1"
                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                            HorizontalOptions="End"/>
                 </Grid>
@@ -155,6 +155,7 @@
 
             <!-- Настройки -->
             <Button Text="Настройки"
+                    Command="{Binding OpenSettingsCommand}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray600}}"
                     TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                     CornerRadius="8"

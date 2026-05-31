@@ -61,6 +61,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<MenuViewModel>();
             builder.Services.AddTransient<PlateViewModel>();
             builder.Services.AddTransient<AvatarPickerViewModel>();
+            builder.Services.AddTransient<SettingsViewModel>();
 
             //Pages
             builder.Services.AddTransient<SignInPage>();
@@ -73,6 +74,7 @@ namespace EatTogether.MAUI
             builder.Services.AddTransient<SubcategoriesPage>();
             builder.Services.AddTransient<PlatePage>();
             builder.Services.AddTransient<AvatarPickerPage>();
+            builder.Services.AddTransient<SettingsPage>();
 
             builder.Services.AddSingleton<AppShell>();
 

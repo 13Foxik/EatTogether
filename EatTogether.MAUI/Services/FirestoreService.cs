@@ -124,6 +124,21 @@ namespace EatTogether.MAUI.Services
                 }
             }
         }
+        public async Task UpdateUserProfile(User user)
+        {
+            await SetupFirestore();
+            var userDoc = _db.Collection("Users").Document(user.Uid);
+            await userDoc.UpdateAsync(new Dictionary<string, object>
+            {
+                { "FirstName",        user.FirstName        ?? string.Empty },
+                { "LastName",         user.LastName         ?? string.Empty },
+                { "DisplayName",      user.DisplayName      ?? string.Empty },
+                { "DateOfBirthday",   Google.Cloud.Firestore.Timestamp.FromDateTime(
+                                          user.DateOfBirthday.ToUniversalTime()) },
+                { "TotalPlatesCount", user.TotalPlatesCount }
+            });
+            Console.WriteLine($"User {user.Uid} profile updated");
+        }
         public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
         {
             await SetupFirestore();

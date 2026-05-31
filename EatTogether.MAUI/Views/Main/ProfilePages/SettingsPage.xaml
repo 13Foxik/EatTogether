@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:EatTogether.MAUI.ViewModels"
+             xmlns:converters="clr-namespace:EatTogether.MAUI.Converters"
+             x:Class="EatTogether.MAUI.Views.Main.ProfilePages.SettingsPage"
+             x:DataType="vm:SettingsViewModel"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertedBoolConverter x:Key="InvertedBool"/>
+            <converters:StringNotEmptyToBoolConverter x:Key="StringNotEmpty"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Шапка -->
+        <Grid Grid.Row="0"
+              Padding="12,16,16,12"
+              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="80"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Text="← Назад"
+                    Command="{Binding GoBackCommand}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                    TextColor="{StaticResource PrimaryColor}"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="34"
+                    Padding="8,0"
+                    HorizontalOptions="Start"/>
+
+            <Label Grid.Column="1"
+                   Text="Настройки профиля"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+        </Grid>
+
+        <!-- Контент -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="20">
+
+                <!-- Имя -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Имя"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                    <Border Stroke="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                            Padding="14,0">
+                        <Entry Text="{Binding FirstName}"
+                               Placeholder="Введите имя"
+                               FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                               ClearButtonVisibility="WhileEditing"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Фамилия -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Фамилия"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                    <Border Stroke="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                            Padding="14,0">
+                        <Entry Text="{Binding LastName}"
+                               Placeholder="Введите фамилию"
+                               FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                               ClearButtonVisibility="WhileEditing"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Никнейм -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Никнейм"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                    <Label Text="Отображается под именем в профиле"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                    <Border Stroke="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                            Padding="14,0">
+                        <Entry Text="{Binding NickName}"
+                               Placeholder="Введите никнейм"
+                               FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"
+                               ClearButtonVisibility="WhileEditing"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Дата рождения -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Дата рождения"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                    <Border Stroke="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                            Padding="14,8">
+                        <DatePicker Date="{Binding DateOfBirth}"
+                                    MinimumDate="01/01/1900"
+                                    MaximumDate="31/12/2020"
+                                    Format="dd MMMM yyyy"
+                                    FontSize="15"
+                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Ошибка -->
+                <Label Text="{Binding ErrorMessage}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmpty}}"
+                       TextColor="#F44336"
+                       FontSize="13"
+                       HorizontalOptions="Center"/>
+
+                <!-- Кнопка сохранить -->
+                <Button Text="Сохранить"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBool}}"
+                        BackgroundColor="{StaticResource PrimaryColor}"
+                        TextColor="White"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        CornerRadius="12"
+                        HeightRequest="50"
+                        HorizontalOptions="Fill"
+                        Margin="0,8,0,0"/>
+
+                <ActivityIndicator IsVisible="{Binding IsBusy}"
+                                   IsRunning="{Binding IsBusy}"
+                                   Color="{StaticResource PrimaryColor}"
+                                   HorizontalOptions="Center"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

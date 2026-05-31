@@ -7,6 +7,7 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task InsertUserModel(User user);
         Task UpdateUserFamilies(User user);
         Task UpdateUserAvatar(User user);
+        Task UpdateUserProfile(User user);
         Task UpdateRequestStatus(MembershipRequest request, RequestStatus status);
         Task InsertFamilyModel(Family family);
         Task UpdateFamilyModel(string familyId, string name, string description);

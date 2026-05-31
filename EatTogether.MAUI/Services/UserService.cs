@@ -19,6 +19,10 @@ namespace EatTogether.MAUI.Services
         {
             await _cloudStoreService.InsertUserModel(user);
         }
+        public async Task UpdateProfile(User user)
+        {
+            await _cloudStoreService.UpdateUserProfile(user);
+        }
         public async Task CheckFamilies()
         {
             User user = _currentUserService.GetCurrentUser();

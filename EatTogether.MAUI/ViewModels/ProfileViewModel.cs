@@ -5,7 +5,6 @@ using EatTogether.MAUI.Messages;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
-using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Auth;
 using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Views.Main.ProfilePages;
@@ -18,8 +17,8 @@ namespace EatTogether.MAUI.ViewModels
     {
         private readonly CurrentUserService _currentUserService;
         private readonly IAuthService _authService;
-        private readonly IPlateService _plateService;
         private readonly ICurrentFamilyService _currentFamilyService;
+        private readonly IUserService _userService;
 
         [ObservableProperty]
         private string _displayName;
@@ -75,7 +74,7 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private string _platesCount = "0";
 
-        // Храним как int для инкремента
+        // Внутренний счётчик
         private int _platesCountInt = 0;
 
         public bool HasAvatar => !string.IsNullOrEmpty(Avatar);
@@ -84,21 +83,21 @@ namespace EatTogether.MAUI.ViewModels
         public ProfileViewModel(
             CurrentUserService currentUserService,
             IAuthService authService,
-            IPlateService plateService,
-            ICurrentFamilyService currentFamilyService)
+            ICurrentFamilyService currentFamilyService,
+            IUserService userService)
         {
             _currentUserService = currentUserService;
             _authService = authService;
-            _plateService = plateService;
             _currentFamilyService = currentFamilyService;
+            _userService = userService;
 
             _currentUserService.UserChanged += OnUserChanged;
             _currentFamilyService.FamilyChanged += OnFamilyChanged;
 
-            // Подписываемся на отправку тарелок — без чтения из БД
+            // При каждой отправке тарелки — инкрементируем и сохраняем в БД
             WeakReferenceMessenger.Default.Register<PlateUpdatedMessage>(this, (r, msg) =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
+                MainThread.BeginInvokeOnMainThread(async () =>
                 {
                     if (msg.Action == PlateUpdateAction.Added)
                         _platesCountInt++;
@@ -106,12 +105,18 @@ namespace EatTogether.MAUI.ViewModels
                         _platesCountInt--;
 
                     PlatesCount = _platesCountInt.ToString();
+
+                    // Сохраняем актуальное значение в БД
+                    var user = _currentUserService.CurrentUser;
+                    if (user != null)
+                    {
+                        user.TotalPlatesCount = _platesCountInt;
+                        await _userService.UpdateProfile(user);
+                    }
                 });
             });
 
             UpadateUserInfo();
-            // Начальное значение — из локального кэша семьи (не читаем БД)
-            LoadPlatesCountFromCache();
         }
 
         [RelayCommand]
@@ -132,48 +137,22 @@ namespace EatTogether.MAUI.ViewModels
             }
         }
 
+        [RelayCommand]
+        private async Task OpenSettings()
+        {
+            if (Application.Current?.MainPage is MainPage mainPage &&
+                mainPage.CurrentPage is NavigationPage navPage)
+            {
+                await navPage.Navigation.PushAsync(App.Services.GetService<SettingsPage>());
+            }
+        }
+
         private void OnUserChanged(object sender, UserChangedEventArgs e)
         {
             UpadateUserInfo();
-            LoadPlatesCountFromCache();
         }
 
-        private void OnFamilyChanged(object sender, FamilyChangedEventArgs e)
-        {
-            LoadPlatesCountFromCache();
-        }
-
-        /// <summary>
-        /// Считает тарелки из локального кэша семьи — без обращения к БД.
-        /// Используется только при первой загрузке / смене семьи.
-        /// Далее счётчик меняется через PlateUpdatedMessage.
-        /// </summary>
-        private void LoadPlatesCountFromCache()
-        {
-            try
-            {
-                var currentUser = _currentUserService.CurrentUser;
-                var currentFamily = _currentFamilyService.GetCurrentFamily();
-
-                if (currentUser == null || currentFamily == null)
-                {
-                    _platesCountInt = 0;
-                    PlatesCount = "0";
-                    return;
-                }
-
-                // Считаем по локальному списку Memberships или Plates если они есть в кэше
-                // Если кэш пустой — начинаем с 0, дальше инкрементируем через сообщения
-                _platesCountInt = 0;
-                PlatesCount = "0";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка счётчика тарелок: {ex.Message}");
-                _platesCountInt = 0;
-                PlatesCount = "0";
-            }
-        }
+        private void OnFamilyChanged(object sender, FamilyChangedEventArgs e) { }
 
         private void UpadateUserInfo()
         {
@@ -182,6 +161,10 @@ namespace EatTogether.MAUI.ViewModels
             DateOfBirth = _currentUserService.CurrentUser?.DateOfBirthday ?? DateTime.MinValue;
             Avatar = _currentUserService.CurrentUser?.Avatar ?? string.Empty;
             AvatarColor = _currentUserService.CurrentUser?.DisplayColor ?? "#1F744D";
+
+            // Восстанавливаем счётчик тарелок из профиля пользователя
+            _platesCountInt = _currentUserService.CurrentUser?.TotalPlatesCount ?? 0;
+            PlatesCount = _platesCountInt.ToString();
         }
         private void CheckFirstLastName()
         {
