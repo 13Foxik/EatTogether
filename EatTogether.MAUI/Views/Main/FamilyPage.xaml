@@ -25,6 +25,8 @@
             <converters:StringEmptyToBoolConverter x:Key="StringEmpty"/>
             <converters:StringToColorConverter x:Key="StringToColor"/>
             <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
+            <converters:BoolToExpandColorConverter x:Key="BoolToExpand"/>
+            <converters:ExpandedArrowConverter x:Key="ExpandedArrow"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -369,23 +371,29 @@
                                                                                            HorizontalOptions="Center"/>
                                                                                 </Frame>
 
-                                                                                <!-- Кнопка раскрытия/скрытия -->
-                                                                                <Button BackgroundColor="Transparent"
-                                                                                        Padding="0"
-                                                                                        WidthRequest="32"
-                                                                                        HeightRequest="32"
-                                                                                        CornerRadius="16"
-                                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                                          Path=BindingContext.TogglePlateCommand}"
-                                                                                        CommandParameter="{Binding Id}">
-                                                                                    <Button.ImageSource>
-                                                                                        <FontImageSource Glyph="{Binding IsExpanded, 
-                                                                                                                         Converter={StaticResource ExpandedIconConverter}}"
-                                                                                                         FontFamily="MaterialIconsOutlined"
-                                                                                                         Color="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource Gray300}}"
-                                                                                                         Size="20"/>
-                                                                                    </Button.ImageSource>
-                                                                                </Button>
+                                                                                <!-- Кнопка раскрытия/скрытия — ОЖИДАЮЩИЕ -->
+                                                                                <Border WidthRequest="34"
+                                                                                        HeightRequest="34"
+                                                                                        BackgroundColor="{Binding IsExpanded, 
+                                                                                            Converter={StaticResource BoolToExpand}}"
+                                                                                        StrokeThickness="0"
+                                                                                        VerticalOptions="Center">
+                                                                                    <Border.StrokeShape>
+                                                                                        <RoundRectangle CornerRadius="10"/>
+                                                                                    </Border.StrokeShape>
+                                                                                    <Border.GestureRecognizers>
+                                                                                        <TapGestureRecognizer
+                                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                              Path=BindingContext.TogglePlateCommand}"
+                                                                                            CommandParameter="{Binding Id}"/>
+                                                                                    </Border.GestureRecognizers>
+                                                                                    <Label Text="{Binding IsExpanded, Converter={StaticResource ExpandedArrow}}"
+                                                                                           FontSize="18"
+                                                                                           FontAttributes="Bold"
+                                                                                           TextColor="White"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Border>
                                                                             </HorizontalStackLayout>
                                                                         </Grid>
 
@@ -624,23 +632,29 @@
                                                                                            HorizontalOptions="Center"/>
                                                                                 </Frame>
 
-                                                                                <!-- Кнопка раскрытия/скрытия -->
-                                                                                <Button BackgroundColor="Transparent"
-                                                                                        Padding="0"
-                                                                                        WidthRequest="28"
-                                                                                        HeightRequest="28"
-                                                                                        CornerRadius="14"
-                                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                                          Path=BindingContext.TogglePlateCommand}"
-                                                                                        CommandParameter="{Binding Id}">
-                                                                                    <Button.ImageSource>
-                                                                                        <FontImageSource Glyph="{Binding IsExpanded, 
-                                                                                                                         Converter={StaticResource ExpandedIconConverter}}"
-                                                                                                         FontFamily="MaterialIconsOutlined"
-                                                                                                         Color="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource Gray300}}"
-                                                                                                         Size="18"/>
-                                                                                    </Button.ImageSource>
-                                                                                </Button>
+                                                                                <!-- Кнопка раскрытия/скрытия — ОБРАБОТАННЫЕ -->
+                                                                                <Border WidthRequest="30"
+                                                                                        HeightRequest="30"
+                                                                                        BackgroundColor="{Binding IsExpanded, 
+                                                                                            Converter={StaticResource BoolToExpand}}"
+                                                                                        StrokeThickness="0"
+                                                                                        VerticalOptions="Center">
+                                                                                    <Border.StrokeShape>
+                                                                                        <RoundRectangle CornerRadius="8"/>
+                                                                                    </Border.StrokeShape>
+                                                                                    <Border.GestureRecognizers>
+                                                                                        <TapGestureRecognizer
+                                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                              Path=BindingContext.TogglePlateCommand}"
+                                                                                            CommandParameter="{Binding Id}"/>
+                                                                                    </Border.GestureRecognizers>
+                                                                                    <Label Text="{Binding IsExpanded, Converter={StaticResource ExpandedArrow}}"
+                                                                                           FontSize="16"
+                                                                                           FontAttributes="Bold"
+                                                                                           TextColor="White"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Border>
                                                                             </HorizontalStackLayout>
                                                                         </Grid>
 

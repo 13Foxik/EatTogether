@@ -6,5 +6,6 @@ namespace EatTogether.MAUI.Services.FamilyService.Interfaces
     {
         Task CreateRequest(string familyId, User user);
         Task UpdateRequestStatus(MembershipRequest request, RequestStatus status);
+        Task DeleteRequest(MembershipRequest request);
     }
 }

@@ -1405,9 +1405,10 @@ public partial class FamilyViewModel : ObservableObject
             };
 
             await _familyService.AcceptMember(request);
-            await _membershipService.UpdateRequestStatus(request, RequestStatus.Accepted);
+            // Удаляем запрос из Firestore (вместо обновления статуса)
+            await _membershipService.DeleteRequest(request);
 
-            // Удаляем из локального кэша семьи — чтобы при повторном LoadPendingRequests не всплыл
+            // Удаляем из локального кэша семьи
             var currentFamily = _currentFamilyService?.GetCurrentFamily();
             currentFamily?.Memberships?.Remove(request);
 

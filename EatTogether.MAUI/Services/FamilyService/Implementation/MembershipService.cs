@@ -30,5 +30,10 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
             await _cloudStoreService.UpdateRequestStatus(request, status);
         }
 
+        public async Task DeleteRequest(MembershipRequest request)
+        {
+            await _cloudStoreService.DeleteMembership(request);
+        }
+
     }
 }

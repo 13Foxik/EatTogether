@@ -464,6 +464,15 @@ namespace EatTogether.MAUI.Services
             }
         }
 
+        public async Task DeleteMembership(MembershipRequest request)
+        {
+            await SetupFirestore();
+            // Memberships — массив внутри документа Families, удаляем через ArrayRemove
+            await _db.Collection("Families")
+                .Document(request.FamilyId)
+                .UpdateAsync("Memberships", FieldValue.ArrayRemove(request));
+        }
+
         public async Task<User?> GetUserModel(string documentId)
         {
             await SetupFirestore();
