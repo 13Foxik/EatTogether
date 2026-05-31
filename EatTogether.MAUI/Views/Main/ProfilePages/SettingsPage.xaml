@@ -124,7 +124,7 @@
                             Padding="14,8">
                         <DatePicker Date="{Binding DateOfBirth}"
                                     MinimumDate="01/01/1900"
-                                    MaximumDate="31/12/2020"
+                                    MaximumDate="12/31/2025"
                                     Format="dd MMMM yyyy"
                                     FontSize="15"
                                     TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
