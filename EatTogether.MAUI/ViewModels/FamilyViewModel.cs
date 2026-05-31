@@ -64,6 +64,9 @@ public partial class FamilyViewModel : ObservableObject
     private FamilyMember _currentUserMember;
 
     [ObservableProperty]
+    private bool _isOwner;
+
+    [ObservableProperty]
     private string _membersCount;
 
     [ObservableProperty]
@@ -230,6 +233,7 @@ public partial class FamilyViewModel : ObservableObject
                         if (member.IsCurrentUser)
                         {
                             CurrentUserMember = member;
+                            IsOwner = member.Role == FamilyRole.Owner;
                         }
 
                         _userNames[member.UserId] = member.DisplayName;
@@ -292,6 +296,7 @@ public partial class FamilyViewModel : ObservableObject
                 if (member.IsCurrentUser)
                 {
                     CurrentUserMember = member;
+                    IsOwner = member.Role == FamilyRole.Owner;
                 }
 
                 _userNames[member.UserId] = member.DisplayName;
@@ -464,6 +469,54 @@ public partial class FamilyViewModel : ObservableObject
         {
             await Shell.Current.DisplayAlert("Ошибка",
                 $"Ошибка при исключении участника: {ex.Message}", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private async Task LeaveFamily()
+    {
+        var currentFamily = _currentFamilyService?.GetCurrentFamily();
+        if (currentFamily == null) return;
+
+        var currentUser = _currentUserService.CurrentUser;
+        if (currentUser == null) return;
+
+        // Владелец не может покинуть семью
+        var currentMember = FamilyMembers.FirstOrDefault(m => m.UserId == currentUser.Uid);
+        if (currentMember?.Role == FamilyRole.Owner)
+        {
+            await Shell.Current.DisplayAlert("Невозможно",
+                "Глава семьи не может покинуть её. Сначала передайте права главы другому участнику.", "OK");
+            return;
+        }
+
+        bool confirm = await Shell.Current.DisplayAlert("Выход из семьи",
+            $"Вы уверены, что хотите покинуть семью \"{currentFamily.Name}\"?",
+            "Выйти", "Отмена");
+
+        if (!confirm) return;
+
+        try
+        {
+            bool result = await _familyService.LeaveFamily(currentFamily.Id, currentUser.Uid);
+            if (result)
+            {
+                HasFamily = false;
+                FamilyMembers.Clear();
+                PendingRequests.Clear();
+                PendingPlates.Clear();
+                ProcessedPlates.Clear();
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Ошибка",
+                    "Не удалось покинуть семью. Попробуйте ещё раз.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Ошибка",
+                $"Ошибка при выходе из семьи: {ex.Message}", "OK");
         }
     }
 
@@ -1309,11 +1362,14 @@ public partial class FamilyViewModel : ObservableObject
             await _familyService.AcceptMember(request);
             await _membershipService.UpdateRequestStatus(request, RequestStatus.Accepted);
 
+            // Обновляем статус в локальном объекте семьи, чтобы он не попал снова в список
             request.Status = RequestStatus.Accepted;
             request.RespondedAt = DateTime.UtcNow;
             request.RespondedBy = _currentUserService.CurrentUser?.Uid;
 
+            // Убираем из списка ожидающих
             PendingRequests.Remove(request);
+            HasPendingRequests = PendingRequests.Any();
 
             // Загружаем права для нового участника
             newMember.CanPromote = await _memberControlService.CanPromote(newMember);
@@ -1352,11 +1408,13 @@ public partial class FamilyViewModel : ObservableObject
         {
             await _membershipService.UpdateRequestStatus(request, RequestStatus.Rejected);
 
+            // Обновляем статус в локальном объекте семьи
             request.Status = RequestStatus.Rejected;
             request.RespondedAt = DateTime.UtcNow;
             request.RespondedBy = _currentUserService.CurrentUser?.Uid;
 
             PendingRequests.Remove(request);
+            HasPendingRequests = PendingRequests.Any();
 
             // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ЗАПРОСОВ
             if (CurrentTab?.Type == TabType.Requests)

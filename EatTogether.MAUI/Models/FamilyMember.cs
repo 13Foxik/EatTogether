@@ -1,10 +1,11 @@
 ﻿
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using Google.Cloud.Firestore;
 namespace EatTogether.MAUI.Models
 {
     [FirestoreData]
-    public class FamilyMember
+    public class FamilyMember : ObservableObject
     {
         [FirestoreProperty]
         public string UserId { get; set; }
@@ -18,19 +19,54 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string AvatarUrl { get; set; }
 
+        private FamilyRole _role = FamilyRole.Member;
         [FirestoreProperty]
-        public FamilyRole Role { get; set; } = FamilyRole.Member;
+        public FamilyRole Role
+        {
+            get => _role;
+            set => SetProperty(ref _role, value);
+        }
 
         [FirestoreProperty]
         public DateTime JoinedAt { get; set; }
 
         // Дополнительные свойства для UI
         public bool IsCurrentUser { get; set; }
-        public string RoleText { get; set; }
-        public Color RoleColor { get; set; }
-        public bool CanPromote { get; set; }
-        public bool CanDemote { get; set; }
-        public bool CanKick { get; set; }
+
+        private string _roleText;
+        public string RoleText
+        {
+            get => _roleText;
+            set => SetProperty(ref _roleText, value);
+        }
+
+        private Color _roleColor;
+        public Color RoleColor
+        {
+            get => _roleColor;
+            set => SetProperty(ref _roleColor, value);
+        }
+
+        private bool _canPromote;
+        public bool CanPromote
+        {
+            get => _canPromote;
+            set => SetProperty(ref _canPromote, value);
+        }
+
+        private bool _canDemote;
+        public bool CanDemote
+        {
+            get => _canDemote;
+            set => SetProperty(ref _canDemote, value);
+        }
+
+        private bool _canKick;
+        public bool CanKick
+        {
+            get => _canKick;
+            set => SetProperty(ref _canKick, value);
+        }
 
         public bool HasAvatar => !string.IsNullOrEmpty(AvatarUrl);
 

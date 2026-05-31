@@ -74,11 +74,35 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 Role = FamilyRole.Member
             };
             var family = _currentFamilyService.GetCurrentFamily();
-            if (family != null &&request.FamilyId == family.Id)
+            if (family != null && request.FamilyId == family.Id)
             {
                 family.AddMember(member);
             }
             await _cloudStoreService.AddMemberToFamily(request.FamilyId, member);
+        }
+
+        public async Task<bool> LeaveFamily(string familyId, string userId)
+        {
+            try
+            {
+                var result = await _cloudStoreService.KickMemberFromDB(userId, familyId);
+                if (result)
+                {
+                    var currentUser = _currentUserService.GetCurrentUser();
+                    if (currentUser != null)
+                    {
+                        currentUser.UserFamilies?.Remove(familyId);
+                        await _cloudStoreService.UpdateUserFamilies(currentUser);
+                    }
+                    _currentFamilyService.ClearFamily();
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при выходе из семьи: {ex}");
+                return false;
+            }
         }
     }
 }

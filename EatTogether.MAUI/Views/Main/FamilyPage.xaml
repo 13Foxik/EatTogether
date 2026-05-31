@@ -130,6 +130,20 @@
                                        MaxLines="3"/>
                             </VerticalStackLayout>
                         </Frame>
+
+                        <!-- Кнопка выхода из семьи (только для не-владельцев) -->
+                        <Button Text="Покинуть семью"
+                                IsVisible="{Binding IsOwner, Converter={StaticResource InvertedBoolConverter}}"
+                                Command="{Binding LeaveFamilyCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="#F44336"
+                                FontSize="13"
+                                BorderWidth="1"
+                                BorderColor="#F44336"
+                                CornerRadius="8"
+                                Padding="12,6"
+                                HeightRequest="36"
+                                HorizontalOptions="End"/>
                     </VerticalStackLayout>
                 </Frame>
 
