@@ -111,6 +111,33 @@
                                    Color="{StaticResource PrimaryColor}"
                                    HorizontalOptions="Center"/>
 
+                <!-- Разделитель -->
+                <BoxView HeightRequest="1"
+                         Margin="0,8"
+                         BackgroundColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"/>
+
+                <!-- Кнопка выхода из семьи (только для не-владельцев) -->
+                <VerticalStackLayout IsVisible="{Binding CanLeave}" Spacing="8">
+                    <Label Text="Опасная зона"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="#F44336"
+                           HorizontalOptions="Center"/>
+
+                    <Button Text="Покинуть семью"
+                            Command="{Binding LeaveFamilyCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBool}}"
+                            BackgroundColor="Transparent"
+                            TextColor="#F44336"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            BorderWidth="1.5"
+                            BorderColor="#F44336"
+                            CornerRadius="12"
+                            HeightRequest="50"
+                            HorizontalOptions="Fill"/>
+                </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

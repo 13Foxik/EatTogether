@@ -1361,11 +1361,14 @@ public partial class FamilyViewModel : ObservableObject
             await _familyService.AcceptMember(request);
             await _membershipService.UpdateRequestStatus(request, RequestStatus.Accepted);
 
+            // Обновляем статус в объекте (и в локальном Memberships кэше семьи)
             request.Status = RequestStatus.Accepted;
             request.RespondedAt = DateTime.UtcNow;
             request.RespondedBy = _currentUserService.CurrentUser?.Uid;
 
+            // Убираем из списка и явно обновляем флаг видимости
             PendingRequests.Remove(request);
+            HasPendingRequests = PendingRequests.Any();
 
             // Загружаем права для нового участника
             newMember.CanPromote = await _memberControlService.CanPromote(newMember);
@@ -1377,17 +1380,7 @@ public partial class FamilyViewModel : ObservableObject
 
             _userNames[request.UserId] = request.UserDisplayName;
 
-            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ПОСЛЕ ДОБАВЛЕНИЯ УЧАСТНИКА
-            if (CurrentTab?.Type == TabType.Members)
-            {
-                UpdateTabHeight();
-            }
-
-            // Обновляем высоту вкладки запросов
-            if (CurrentTab?.Type == TabType.Requests)
-            {
-                UpdateTabHeight();
-            }
+            UpdateTabHeight();
         }
         catch (Exception ex)
         {
@@ -1404,17 +1397,16 @@ public partial class FamilyViewModel : ObservableObject
         {
             await _membershipService.UpdateRequestStatus(request, RequestStatus.Rejected);
 
+            // Обновляем статус в объекте (и в локальном Memberships кэше семьи)
             request.Status = RequestStatus.Rejected;
             request.RespondedAt = DateTime.UtcNow;
             request.RespondedBy = _currentUserService.CurrentUser?.Uid;
 
+            // Убираем из списка и явно обновляем флаг видимости
             PendingRequests.Remove(request);
+            HasPendingRequests = PendingRequests.Any();
 
-            // ОБНОВЛЯЕМ ВЫСОТУ ВКЛАДКИ ЗАПРОСОВ
-            if (CurrentTab?.Type == TabType.Requests)
-            {
-                UpdateTabHeight();
-            }
+            UpdateTabHeight();
         }
         catch (Exception ex)
         {
@@ -1433,7 +1425,8 @@ public partial class FamilyViewModel : ObservableObject
             if (currentFamily?.Memberships != null)
             {
                 var pending = currentFamily.Memberships
-                    .Where(r => r.Status == RequestStatus.Pending && r.RespondedAt == default)
+                    .Where(r => r.Status == RequestStatus.Pending
+                             && (r.RespondedAt == null || r.RespondedAt == default))
                     .ToList();
 
                 foreach (var request in pending)
