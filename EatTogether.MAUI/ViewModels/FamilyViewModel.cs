@@ -1285,13 +1285,15 @@ public partial class FamilyViewModel : ObservableObject
         if (Application.Current?.MainPage is MainPage mainPage &&
             mainPage.CurrentPage is NavigationPage nav)
         {
-            var editVm = new EditFamilyViewModel(_familyService, _currentFamilyService)
+            // Получаем страницу через DI — EditFamilyViewModel тоже инжектируется автоматически
+            var editPage = App.Services.GetService<EditFamilyPage>();
+            if (editPage?.BindingContext is EditFamilyViewModel editVm)
             {
-                EditName = family.Name ?? "",
-                EditDescription = family.Description ?? "",
-                FamilyId = family.Id ?? ""
-            };
-                await nav.Navigation.PushAsync(App.Services.GetService<EditFamilyPage>());
+                editVm.EditName = family.Name ?? "";
+                editVm.EditDescription = family.Description ?? "";
+                editVm.FamilyId = family.Id ?? "";
+            }
+            await nav.Navigation.PushAsync(editPage);
         }
     }
 
