@@ -52,8 +52,8 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 if (!isNotSelf)
                     return false;
 
-                // 4. Проверяем, что есть куда повышать (не превышает Admin)
-                bool canBePromoted = targetMember.Role < FamilyRole.Admin;
+                // 4. Можно повысить только Member → Editor (не Editor → Admin)
+                bool canBePromoted = targetMember.Role == FamilyRole.Member;
                 if (!canBePromoted)
                     return false;
 

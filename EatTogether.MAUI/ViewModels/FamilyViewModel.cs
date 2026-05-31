@@ -99,6 +99,10 @@ public partial class FamilyViewModel : ObservableObject
 
     // Словарь для имен пользователей
     private Dictionary<string, string> _userNames = new();
+    // Словарь для аватарок пользователей (userId → avatarUrl)
+    private Dictionary<string, string> _userAvatarUrls = new();
+    // Словарь для цветов аватарок (userId → color)
+    private Dictionary<string, string> _userAvatarColors = new();
 
     // Коллекция вкладок с настройкой высоты
     private ObservableCollection<TabItem> _tabs = new();
@@ -274,6 +278,8 @@ public partial class FamilyViewModel : ObservableObject
                         }
 
                         _userNames[member.UserId] = member.DisplayName;
+                        _userAvatarUrls[member.UserId] = member.AvatarUrl ?? string.Empty;
+                        _userAvatarColors[member.UserId] = member.AvatarColor ?? "#1F744D";
                     }
 
                     MembersCount = $"{FamilyMembers.Count} участников";
@@ -336,6 +342,8 @@ public partial class FamilyViewModel : ObservableObject
                 }
 
                 _userNames[member.UserId] = member.DisplayName;
+                _userAvatarUrls[member.UserId] = member.AvatarUrl ?? string.Empty;
+                _userAvatarColors[member.UserId] = "#1F744D";
             }
 
             MembersCount = $"{FamilyMembers.Count} участников";
@@ -541,6 +549,8 @@ public partial class FamilyViewModel : ObservableObject
                     // Заполняем UI свойства
                     plate.UserName = GetUserName(plate.UserId);
                     plate.UserInitial = GetInitial(plate.UserName);
+                    plate.UserAvatarUrl = GetUserAvatarUrl(plate.UserId);
+                    plate.UserAvatarColor = GetUserAvatarColor(plate.UserId);
                     plate.StatusText = GetStatusText(plate.Status);
                     plate.StatusColor = GetStatusColor(plate.Status);
                     plate.IsExpanded = false;
@@ -1066,6 +1076,34 @@ public partial class FamilyViewModel : ObservableObject
     {
         if (string.IsNullOrEmpty(name)) return "?";
         return name.Substring(0, 1).ToUpper();
+    }
+
+    private string GetUserAvatarUrl(string userId)
+    {
+        if (string.IsNullOrEmpty(userId)) return string.Empty;
+        if (_userAvatarUrls.TryGetValue(userId, out var url)) return url;
+        var member = FamilyMembers.FirstOrDefault(m => m.UserId == userId);
+        if (member != null)
+        {
+            var avatarUrl = member.AvatarUrl ?? string.Empty;
+            _userAvatarUrls[userId] = avatarUrl;
+            return avatarUrl;
+        }
+        return string.Empty;
+    }
+
+    private string GetUserAvatarColor(string userId)
+    {
+        if (string.IsNullOrEmpty(userId)) return "#1F744D";
+        if (_userAvatarColors.TryGetValue(userId, out var color)) return color;
+        var member = FamilyMembers.FirstOrDefault(m => m.UserId == userId);
+        if (member != null)
+        {
+            var avatarColor = member.AvatarColor ?? "#1F744D";
+            _userAvatarColors[userId] = avatarColor;
+            return avatarColor;
+        }
+        return "#1F744D";
     }
 
     private string GetStatusText(RequestStatus status)

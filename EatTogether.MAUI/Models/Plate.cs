@@ -31,6 +31,12 @@ namespace EatTogether.MAUI.Models
         private string _userInitial;
 
         [ObservableProperty]
+        private string _userAvatarUrl;
+
+        [ObservableProperty]
+        private string _userAvatarColor = "#1F744D";
+
+        [ObservableProperty]
         private Color _statusColor;
 
         [ObservableProperty]

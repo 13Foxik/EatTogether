@@ -188,7 +188,7 @@ namespace EatTogether.MAUI.ViewModels
             await _plateService.WriteToDB();
             DishesInPlate.Clear();
             TotalDishesCount = 0;
-            WeakReferenceMessenger.Default.Send(new PlateUpdatedMessage());
+            WeakReferenceMessenger.Default.Send(new PlateUpdatedMessage(PlateUpdateAction.Added));
             await GoToMenu();
         }
 

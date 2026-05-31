@@ -21,6 +21,10 @@
             <converters:AvatarKeyToImageSourceConverter x:Key="AvatarImage"/>
             <converters:ExpandedIconConverter x:Key="ExpandedIconConverter"/>
             <converters:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter"/>
+            <converters:StringNotEmptyToBoolConverter x:Key="StringNotEmpty"/>
+            <converters:StringEmptyToBoolConverter x:Key="StringEmpty"/>
+            <converters:StringToColorConverter x:Key="StringToColor"/>
+            <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
             <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
             <converters:StringToColorConverter x:Key="StringToColor"/>
         </ResourceDictionary>
@@ -305,19 +309,30 @@
                                                                               ColumnSpacing="12">
 
                                                                             <!-- Аватар пользователя -->
-                                                                            <Frame WidthRequest="40"
-                                                                                   HeightRequest="40"
-                                                                                   CornerRadius="20"
-                                                                                   BackgroundColor="{StaticResource PrimaryColor}"
-                                                                                   Padding="0"
-                                                                                   VerticalOptions="Center">
-                                                                                <Label Text="{Binding UserInitial}"
-                                                                                       TextColor="White"
-                                                                                       FontSize="14"
-                                                                                       FontAttributes="Bold"
-                                                                                       HorizontalOptions="Center"
-                                                                                       VerticalOptions="Center"/>
-                                                                            </Frame>
+                                                                            <Border WidthRequest="40"
+                                                                                    HeightRequest="40"
+                                                                                    StrokeThickness="0"
+                                                                                    Stroke="Transparent"
+                                                                                    BackgroundColor="{Binding UserAvatarColor, Converter={StaticResource StringToColor}}"
+                                                                                    VerticalOptions="Center">
+                                                                                <Border.StrokeShape>
+                                                                                    <Ellipse/>
+                                                                                </Border.StrokeShape>
+                                                                                <Grid>
+                                                                                    <Label Text="{Binding UserInitial}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringEmpty}}"
+                                                                                           TextColor="White"
+                                                                                           FontSize="14"
+                                                                                           FontAttributes="Bold"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                    <Image Source="{Binding UserAvatarUrl, Converter={StaticResource AvatarImage}}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringNotEmpty}}"
+                                                                                           Aspect="AspectFit"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Grid>
+                                                                            </Border>
 
                                                                             <!-- Информация о пользователе -->
                                                                             <VerticalStackLayout Grid.Column="1" 
@@ -549,19 +564,30 @@
                                                                               ColumnSpacing="12">
 
                                                                             <!-- Аватар пользователя -->
-                                                                            <Frame WidthRequest="36"
-                                                                                   HeightRequest="36"
-                                                                                   CornerRadius="18"
-                                                                                   BackgroundColor="{StaticResource PrimaryColor}"
-                                                                                   Padding="0"
-                                                                                   VerticalOptions="Center">
-                                                                                <Label Text="{Binding UserInitial}"
-                                                                                       TextColor="White"
-                                                                                       FontSize="12"
-                                                                                       FontAttributes="Bold"
-                                                                                       HorizontalOptions="Center"
-                                                                                       VerticalOptions="Center"/>
-                                                                            </Frame>
+                                                                            <Border WidthRequest="36"
+                                                                                    HeightRequest="36"
+                                                                                    StrokeThickness="0"
+                                                                                    Stroke="Transparent"
+                                                                                    BackgroundColor="{Binding UserAvatarColor, Converter={StaticResource StringToColor}}"
+                                                                                    VerticalOptions="Center">
+                                                                                <Border.StrokeShape>
+                                                                                    <Ellipse/>
+                                                                                </Border.StrokeShape>
+                                                                                <Grid>
+                                                                                    <Label Text="{Binding UserInitial}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringEmpty}}"
+                                                                                           TextColor="White"
+                                                                                           FontSize="12"
+                                                                                           FontAttributes="Bold"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                    <Image Source="{Binding UserAvatarUrl, Converter={StaticResource AvatarImage}}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringNotEmpty}}"
+                                                                                           Aspect="AspectFit"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Grid>
+                                                                            </Border>
 
                                                                             <!-- Информация о пользователе -->
                                                                             <VerticalStackLayout Grid.Column="1" 
