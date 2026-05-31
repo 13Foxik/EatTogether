@@ -25,8 +25,6 @@
             <converters:StringEmptyToBoolConverter x:Key="StringEmpty"/>
             <converters:StringToColorConverter x:Key="StringToColor"/>
             <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
-            <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
-            <converters:StringToColorConverter x:Key="StringToColor"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
