@@ -1,8 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
-using EatTogether.MAUI.Models;
 
 namespace EatTogether.MAUI.ViewModels
 {
