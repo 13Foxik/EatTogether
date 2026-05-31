@@ -1407,12 +1407,11 @@ public partial class FamilyViewModel : ObservableObject
             await _familyService.AcceptMember(request);
             await _membershipService.UpdateRequestStatus(request, RequestStatus.Accepted);
 
-            // Обновляем статус в объекте (и в локальном Memberships кэше семьи)
-            request.Status = RequestStatus.Accepted;
-            request.RespondedAt = DateTime.UtcNow;
-            request.RespondedBy = _currentUserService.CurrentUser?.Uid;
+            // Удаляем из локального кэша семьи — чтобы при повторном LoadPendingRequests не всплыл
+            var currentFamily = _currentFamilyService?.GetCurrentFamily();
+            currentFamily?.Memberships?.Remove(request);
 
-            // Убираем из списка и явно обновляем флаг видимости
+            // Убираем из UI-списка и обновляем флаг
             PendingRequests.Remove(request);
             HasPendingRequests = PendingRequests.Any();
 
@@ -1443,12 +1442,11 @@ public partial class FamilyViewModel : ObservableObject
         {
             await _membershipService.UpdateRequestStatus(request, RequestStatus.Rejected);
 
-            // Обновляем статус в объекте (и в локальном Memberships кэше семьи)
-            request.Status = RequestStatus.Rejected;
-            request.RespondedAt = DateTime.UtcNow;
-            request.RespondedBy = _currentUserService.CurrentUser?.Uid;
+            // Удаляем из локального кэша семьи — чтобы при повторном LoadPendingRequests не всплыл
+            var currentFamilyReject = _currentFamilyService?.GetCurrentFamily();
+            currentFamilyReject?.Memberships?.Remove(request);
 
-            // Убираем из списка и явно обновляем флаг видимости
+            // Убираем из UI-списка и обновляем флаг
             PendingRequests.Remove(request);
             HasPendingRequests = PendingRequests.Any();
 
