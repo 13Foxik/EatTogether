@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Services;
+using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
+using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Views.Auth;
 using EatTogether.MAUI.Views.Main;
 using EatTogether.MAUI.Views.Main.ProfilePages;
@@ -14,6 +16,8 @@ namespace EatTogether.MAUI.ViewModels
     {
         private readonly CurrentUserService _currentUserService;
         private readonly IAuthService _authService;
+        private readonly IPlateService _plateService;
+        private readonly ICurrentFamilyService _currentFamilyService;
 
         [ObservableProperty]
         private string _displayName;
@@ -66,16 +70,27 @@ namespace EatTogether.MAUI.ViewModels
         [ObservableProperty]
         private string _avatarColor = "#1F744D";
 
+        [ObservableProperty]
+        private string _platesCount = "0";
+
         public bool HasAvatar => !string.IsNullOrEmpty(Avatar);
         public bool HasNoAvatar => string.IsNullOrEmpty(Avatar);
 
-        public ProfileViewModel(CurrentUserService currentUserService, IAuthService authService)
+        public ProfileViewModel(
+            CurrentUserService currentUserService,
+            IAuthService authService,
+            IPlateService plateService,
+            ICurrentFamilyService currentFamilyService)
         {
             _currentUserService = currentUserService;
             _authService = authService;
+            _plateService = plateService;
+            _currentFamilyService = currentFamilyService;
 
             _currentUserService.UserChanged += OnUserChanged;
+            _currentFamilyService.FamilyChanged += OnFamilyChanged;
             UpadateUserInfo();
+            _ = LoadPlatesCountAsync();
         }
 
         [RelayCommand]
@@ -99,6 +114,36 @@ namespace EatTogether.MAUI.ViewModels
         private void OnUserChanged(object sender, UserChangedEventArgs e)
         {
             UpadateUserInfo();
+            _ = LoadPlatesCountAsync();
+        }
+
+        private void OnFamilyChanged(object sender, FamilyChangedEventArgs e)
+        {
+            _ = LoadPlatesCountAsync();
+        }
+
+        private async Task LoadPlatesCountAsync()
+        {
+            try
+            {
+                var currentUser = _currentUserService.CurrentUser;
+                var currentFamily = _currentFamilyService.GetCurrentFamily();
+
+                if (currentUser == null || currentFamily == null)
+                {
+                    PlatesCount = "0";
+                    return;
+                }
+
+                var allPlates = await _plateService.GetFamilyPlates(currentFamily.Id);
+                var userPlatesCount = allPlates?.Count(p => p.UserId == currentUser.Uid) ?? 0;
+                PlatesCount = userPlatesCount.ToString();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки тарелок: {ex.Message}");
+                PlatesCount = "0";
+            }
         }
 
         private void UpadateUserInfo()

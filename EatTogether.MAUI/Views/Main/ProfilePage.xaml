@@ -142,21 +142,9 @@
 
                     <VerticalStackLayout Spacing="12">
                         <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
-                            <Label Text="Голосов в этом месяце:"
+                            <Label Text="Предложено тарелок:"
                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="47"
-                                   Grid.Column="1"
-                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                   HorizontalOptions="End"/>
-                        </Grid>
-
-                        <BoxView HeightRequest="1"
-                                 BackgroundColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"/>
-
-                        <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
-                            <Label Text="Любимое блюдо:"
-                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="Пока что нет информации"
+                            <Label Text="{Binding PlatesCount}"
                                    Grid.Column="1"
                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                    HorizontalOptions="End"/>

@@ -384,14 +384,19 @@ public partial class FamilyViewModel : ObservableObject
             var currentFamily = _currentFamilyService?.GetCurrentFamily();
             if (currentFamily == null) return;
 
+            // Сохраняем роль ДО вызова сервиса
+            var roleBeforePromote = member.Role;
+
             bool result = await _memberControlService.Promote(member.UserId, currentFamily.Id);
 
             if (result)
             {
+                // Сервис уже обновил роль в currentFamily.Members (кэш).
+                // FamilyMembers содержит те же объекты — роль уже поднята.
+                // Нам нужно только обновить RoleText/RoleColor по актуальной роли.
                 var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
-                if (updatedMember != null && updatedMember.Role < FamilyRole.Admin)
+                if (updatedMember != null)
                 {
-                    updatedMember.Role = updatedMember.Role + 1;
                     updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
                     updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
                     await LoadMemberPermissions();
@@ -418,10 +423,11 @@ public partial class FamilyViewModel : ObservableObject
 
             if (result)
             {
+                // Сервис уже обновил роль в currentFamily.Members (кэш).
+                // Нам нужно только обновить RoleText/RoleColor по актуальной роли.
                 var updatedMember = FamilyMembers.FirstOrDefault(m => m.UserId == member.UserId);
-                if (updatedMember != null && updatedMember.Role > FamilyRole.Member)
+                if (updatedMember != null)
                 {
-                    updatedMember.Role = updatedMember.Role - 1;
                     updatedMember.RoleText = _memberControlService.GetRoleText(updatedMember.Role);
                     updatedMember.RoleColor = _memberControlService.GetRoleColor(updatedMember.Role);
                     await LoadMemberPermissions();
