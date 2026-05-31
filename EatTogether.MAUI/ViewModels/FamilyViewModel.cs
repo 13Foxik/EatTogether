@@ -342,8 +342,8 @@ public partial class FamilyViewModel : ObservableObject
                 }
 
                 _userNames[member.UserId] = member.DisplayName;
-                _userAvatarUrls[member.UserId] = member.AvatarUrl ?? string.Empty;
-                _userAvatarColors[member.UserId] = "#1F744D";
+                        _userAvatarUrls[member.UserId] = member.AvatarUrl ?? string.Empty;
+                        _userAvatarColors[member.UserId] = member.AvatarColor ?? "#1F744D";
             }
 
             MembersCount = $"{FamilyMembers.Count} участников";

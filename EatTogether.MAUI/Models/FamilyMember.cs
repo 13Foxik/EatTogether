@@ -19,8 +19,17 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string AvatarUrl { get; set; }
 
+        private string _avatarColor;
         [FirestoreProperty]
-        public string AvatarColor { get; set; }
+        public string AvatarColor
+        {
+            get => _avatarColor;
+            set
+            {
+                if (SetProperty(ref _avatarColor, value))
+                    OnPropertyChanged(nameof(DisplayColor));
+            }
+        }
 
         private FamilyRole _role = FamilyRole.Member;
         [FirestoreProperty]

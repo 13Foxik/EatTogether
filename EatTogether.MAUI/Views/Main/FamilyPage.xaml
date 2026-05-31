@@ -1038,6 +1038,25 @@
                                                                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                            Margin="56,-15,0,10"/>
 
+                                                                    <!-- Описание запроса (если есть) -->
+                                                                    <Frame IsVisible="{Binding Message, Converter={StaticResource StringNotEmpty}}"
+                                                                           BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}"
+                                                                           CornerRadius="8"
+                                                                           Padding="12,8"
+                                                                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                                                           Margin="0,-4,0,0">
+                                                                        <VerticalStackLayout Spacing="2">
+                                                                            <Label Text="Сообщение:"
+                                                                                   FontSize="11"
+                                                                                   FontAttributes="Bold"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
+                                                                            <Label Text="{Binding Message}"
+                                                                                   FontSize="13"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                                   MaxLines="3"/>
+                                                                        </VerticalStackLayout>
+                                                                    </Frame>
+
                                                                     <!-- Кнопки только для Admin+ -->
                                                                     <HorizontalStackLayout Spacing="12" 
                                                                                            HorizontalOptions="Center"
