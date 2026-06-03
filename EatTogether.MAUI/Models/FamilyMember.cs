@@ -1,9 +1,11 @@
 
+using CommunityToolkit.Mvvm.ComponentModel;
 using Google.Cloud.Firestore;
+
 namespace EatTogether.MAUI.Models
 {
     [FirestoreData]
-    public class FamilyMember
+    public partial class FamilyMember : ObservableObject
     {
         [FirestoreProperty]
         public string UserId { get; set; }
@@ -17,31 +19,71 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string AvatarUrl { get; set; }
 
-        // Цвет аватарки (hex). Сохраняется в Firestore при добавлении участника.
+        private string _avatarColor;
         [FirestoreProperty]
-        public string AvatarColor { get; set; }
+        public string AvatarColor
+        {
+            get => _avatarColor;
+            set
+            {
+                if (SetProperty(ref _avatarColor, value))
+                    OnPropertyChanged(nameof(DisplayColor));
+            }
+        }
 
+        private FamilyRole _role = FamilyRole.Member;
         [FirestoreProperty]
-        public FamilyRole Role { get; set; } = FamilyRole.Member;
+        public FamilyRole Role
+        {
+            get => _role;
+            set => SetProperty(ref _role, value);
+        }
 
         [FirestoreProperty]
         public DateTime JoinedAt { get; set; }
 
-        // Дополнительные свойства для UI
+        // Дополнительные свойства для UI — все через SetProperty
         public bool IsCurrentUser { get; set; }
-        public string RoleText { get; set; }
-        public Color RoleColor { get; set; }
-        public bool CanPromote { get; set; }
-        public bool CanDemote { get; set; }
-        public bool CanKick { get; set; }
+
+        private string _roleText;
+        public string RoleText
+        {
+            get => _roleText;
+            set => SetProperty(ref _roleText, value);
+        }
+
+        private Color _roleColor;
+        public Color RoleColor
+        {
+            get => _roleColor;
+            set => SetProperty(ref _roleColor, value);
+        }
+
+        private bool _canPromote;
+        public bool CanPromote
+        {
+            get => _canPromote;
+            set => SetProperty(ref _canPromote, value);
+        }
+
+        private bool _canDemote;
+        public bool CanDemote
+        {
+            get => _canDemote;
+            set => SetProperty(ref _canDemote, value);
+        }
+
+        private bool _canKick;
+        public bool CanKick
+        {
+            get => _canKick;
+            set => SetProperty(ref _canKick, value);
+        }
 
         public bool HasAvatar => !string.IsNullOrEmpty(AvatarUrl);
 
-        // Строковый hex-цвет (fallback зелёный)
+        // Возвращает цвет или дефолтный зелёный если не задан
         public string DisplayColor => string.IsNullOrEmpty(AvatarColor) ? "#1F744D" : AvatarColor;
-
-        // Color-версия для XAML-биндинга BackgroundColor
-        public Color DisplayColorValue => Color.FromArgb(DisplayColor);
 
         public FamilyMember() { }
 
@@ -54,6 +96,7 @@ namespace EatTogether.MAUI.Models
             JoinedAt = DateTime.UtcNow;
         }
     }
+
     public enum FamilyRole
     {
         Member = 0,

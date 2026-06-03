@@ -1,5 +1,4 @@
 using Google.Cloud.Firestore;
-using Microsoft.Maui.Graphics;
 
 namespace EatTogether.MAUI.Models
 {
@@ -21,7 +20,7 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string UserAvatarUrl { get; set; }
 
-        // Цвет аватарки пользователя (hex), сохраняется при создании заявки
+        // Цвет аватарки пользователя (hex), чтобы отображать правильный цвет в карточке заявки
         [FirestoreProperty]
         public string UserAvatarColor { get; set; }
 
@@ -38,16 +37,10 @@ namespace EatTogether.MAUI.Models
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
 
         [FirestoreProperty]
-        public string RespondedBy { get; set; }
+        public string RespondedBy { get; set; } // ID пользователя, который ответил на заявку
 
-        // Есть ли аватарка-животное
-        public bool HasAvatar => !string.IsNullOrEmpty(UserAvatarUrl);
-
-        // Строковый hex-цвет
+        // Возвращает настоящий цвет аватарки или дефолтный зелёный
         public string DisplayColor => string.IsNullOrEmpty(UserAvatarColor) ? "#1F744D" : UserAvatarColor;
-
-        // Color-версия для XAML-биндинга BackgroundColor
-        public Color DisplayColorValue => Color.FromArgb(DisplayColor);
 
         public MembershipRequest() { }
 

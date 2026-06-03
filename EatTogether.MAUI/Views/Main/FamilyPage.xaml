@@ -9,7 +9,7 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColor}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.BindingContext>
-        <vm:FamilyViewModel />
+        <!-- BindingContext задаётся через code-behind -->
     </ContentPage.BindingContext>
 
     <ContentPage.Resources>
@@ -21,7 +21,12 @@
             <converters:AvatarKeyToImageSourceConverter x:Key="AvatarImage"/>
             <converters:ExpandedIconConverter x:Key="ExpandedIconConverter"/>
             <converters:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter"/>
+            <converters:StringNotEmptyToBoolConverter x:Key="StringNotEmpty"/>
+            <converters:StringEmptyToBoolConverter x:Key="StringEmpty"/>
+            <converters:StringToColorConverter x:Key="StringToColor"/>
             <converters:ButtonVisibilityConverter x:Key="ButtonVisibilityConverter"/>
+            <converters:BoolToExpandColorConverter x:Key="BoolToExpand"/>
+            <converters:ExpandedArrowConverter x:Key="ExpandedArrow"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -30,6 +35,7 @@
 
         <VerticalStackLayout Padding="20" Spacing="24">
 
+            <!-- Добавляем GestureRecognizers для свайпа -->
             <VerticalStackLayout.GestureRecognizers>
                 <SwipeGestureRecognizer Direction="Left" Command="{Binding SwipeLeftCommand}"/>
                 <SwipeGestureRecognizer Direction="Right" Command="{Binding SwipeRightCommand}"/>
@@ -46,6 +52,7 @@
                        HasShadow="True">
 
                     <VerticalStackLayout Spacing="16">
+                        <!-- Заголовок карточки -->
                         <HorizontalStackLayout HorizontalOptions="FillAndExpand">
                             <Label Text="Информация о семье"
                                    FontSize="18"
@@ -61,10 +68,27 @@
                                     BorderColor="{StaticResource PrimaryColor}"
                                     CornerRadius="8"
                                     Padding="12,6"
+                                    Margin="10,0,0,0"
+                                    HeightRequest="30"
+                                    IsVisible="{Binding CanManageFamily}"
+                                    Command="{Binding EditFamilyCommand}"/>
+
+                            <Button Text="Выйти"
+                                    Command="{Binding LeaveFamilyCommand}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#F44336"
+                                    FontSize="12"
+                                    BorderWidth="1"
+                                    BorderColor="#F44336"
+                                    CornerRadius="8"
+                                    Padding="12,6"
+                                    Margin="8,0,0,0"
                                     HeightRequest="30"/>
                         </HorizontalStackLayout>
 
+                        <!-- Основная информация -->
                         <HorizontalStackLayout Spacing="16">
+                            <!-- Аватар семьи: первая буква названия семьи -->
                             <Frame WidthRequest="80"
                                    HeightRequest="80"
                                    CornerRadius="40"
@@ -79,11 +103,23 @@
                                        VerticalOptions="Center"/>
                             </Frame>
 
+                            <!-- Информация -->
                             <VerticalStackLayout Spacing="6" VerticalOptions="Center">
                                 <Label Text="{Binding FamilyName}"
                                        FontSize="20"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
+
+                                <!-- Код семьи -->
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="Код:"
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
+                                    <Label Text="{Binding FamilyId}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource PrimaryColor}"/>
+                                </HorizontalStackLayout>
 
                                 <HorizontalStackLayout Spacing="8">
                                     <Frame BackgroundColor="{StaticResource PrimaryColor}" 
@@ -95,20 +131,11 @@
                                                TextColor="White"
                                                FontAttributes="Bold"/>
                                     </Frame>
-
-                                    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" 
-                                           CornerRadius="10" 
-                                           Padding="8,4"
-                                           HeightRequest="20">
-                                        <Label Text="Активна"
-                                               FontSize="10"
-                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                               FontAttributes="Bold"/>
-                                    </Frame>
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 
+                        <!-- Описание семьи -->
                         <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                CornerRadius="12"
                                Padding="16"
@@ -127,7 +154,7 @@
                     </VerticalStackLayout>
                 </Frame>
 
-                <!-- Панель вкладок -->
+                <!-- Панель вкладок - ДИНАМИЧЕСКАЯ ВЫСОТА -->
                 <Frame Padding="0"
                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
                        BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
@@ -135,6 +162,7 @@
                        HasShadow="True">
 
                     <VerticalStackLayout Spacing="0">
+                        <!-- Заголовок панели вкладок -->
                         <Border Stroke="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
                                 StrokeThickness="1">
                             <Grid Padding="20,16" ColumnDefinitions="*,Auto">
@@ -144,14 +172,6 @@
                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                        VerticalOptions="Center"/>
 
-                                <Button Text="Пригласить"
-                                        Grid.Column="1"
-                                        BackgroundColor="{StaticResource PrimaryColor}"
-                                        TextColor="White"
-                                        FontSize="12"
-                                        CornerRadius="8"
-                                        Padding="16,8"
-                                        HeightRequest="32"/>
                             </Grid>
                         </Border>
 
@@ -161,6 +181,7 @@
                               HeightRequest="48"
                               Padding="8,0">
 
+                            <!-- Activity Tab -->
                             <Button Text="Активность"
                                     Grid.Column="0"
                                     BackgroundColor="Transparent"
@@ -171,6 +192,7 @@
                                     Command="{Binding SelectTabCommand}"
                                     CommandParameter="0"/>
 
+                            <!-- Members Tab -->
                             <Button Text="Участники"
                                     Grid.Column="1"
                                     BackgroundColor="Transparent"
@@ -181,6 +203,7 @@
                                     Command="{Binding SelectTabCommand}"
                                     CommandParameter="1"/>
 
+                            <!-- Requests Tab -->
                             <Button Text="Запросы"
                                     Grid.Column="2"
                                     BackgroundColor="Transparent"
@@ -192,31 +215,24 @@
                                     CommandParameter="2"/>
                         </Grid>
 
+                        <!-- Индикатор активной вкладки -->
                         <BoxView HeightRequest="3"
                                  WidthRequest="80"
                                  BackgroundColor="{StaticResource PrimaryColor}"
+                                 Color="{StaticResource PrimaryColor}"
                                  HorizontalOptions="Start"
                                  Margin="{Binding SelectedTabIndex, Converter={StaticResource TabIndicatorMarginConverter}}"
                                  VerticalOptions="End"/>
 
                         <!-- Контент вкладок -->
-                        <CarouselView ItemsSource="{Binding Tabs}"
-                                      CurrentItem="{Binding CurrentTab}"
-                                      Loop="False"
-                                      PeekAreaInsets="0"
-                                      HorizontalScrollBarVisibility="Never"
-                                      HorizontalOptions="FillAndExpand"
-                                      HeightRequest="{Binding CurrentTabHeight}">
-
-                            <CarouselView.ItemTemplate>
-                                <DataTemplate x:DataType="vm:TabItem">
-                                    <Grid>
+                        <VerticalStackLayout>
 
                                         <!-- АКТИВНОСТЬ - ТАРЕЛКИ -->
-                                        <VerticalStackLayout IsVisible="{Binding IsActivity}" 
+                                        <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsActivityTab}" 
                                                              Spacing="16"
                                                              Padding="20,16,20,40">
 
+                                            <!-- Индикатор загрузки тарелок -->
                                             <ActivityIndicator IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                    Path=BindingContext.IsLoadingPlates}"
                                                                IsRunning="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
@@ -225,6 +241,7 @@
                                                                HorizontalOptions="Center"
                                                                VerticalOptions="Center"/>
 
+                                            <!-- Сообщение когда нет тарелок -->
                                             <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                        Path=BindingContext.HasPlates, 
                                                                        Converter={StaticResource InvertedBoolConverter}}"
@@ -252,6 +269,7 @@
                                                 </VerticalStackLayout>
                                             </Frame>
 
+                                            <!-- СПИСОК ТАРЕЛОК (если есть) -->
                                             <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                      Path=BindingContext.HasPlates}" 
                                                                  Spacing="20"
@@ -263,12 +281,14 @@
                                                                                          Converter={StaticResource CollectionCountToVisibilityConverter}}"
                                                                      Spacing="12">
 
+                                                    <!-- Заголовок для ожидающих тарелок -->
                                                     <Label Text="Ожидающие заявки"
                                                            FontSize="16"
                                                            FontAttributes="Bold"
                                                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                            Margin="0,0,0,4"/>
 
+                                                    <!-- Коллекция ожидающих тарелок -->
                                                     <CollectionView ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                           Path=BindingContext.PendingPlates}"
                                                                     SelectionMode="None"
@@ -283,24 +303,38 @@
                                                                        HasShadow="True">
 
                                                                     <VerticalStackLayout Spacing="0">
+                                                                        <!-- ШАПКА ТАРЕЛКИ -->
                                                                         <Grid Padding="16"
                                                                               ColumnDefinitions="Auto,*,Auto"
                                                                               ColumnSpacing="12">
 
-                                                                            <Frame WidthRequest="40"
-                                                                                   HeightRequest="40"
-                                                                                   CornerRadius="20"
-                                                                                   BackgroundColor="{StaticResource PrimaryColor}"
-                                                                                   Padding="0"
-                                                                                   VerticalOptions="Center">
-                                                                                <Label Text="{Binding UserInitial}"
-                                                                                       TextColor="White"
-                                                                                       FontSize="14"
-                                                                                       FontAttributes="Bold"
-                                                                                       HorizontalOptions="Center"
-                                                                                       VerticalOptions="Center"/>
-                                                                            </Frame>
+                                                                            <!-- Аватар пользователя -->
+                                                                            <Border WidthRequest="40"
+                                                                                    HeightRequest="40"
+                                                                                    StrokeThickness="0"
+                                                                                    Stroke="Transparent"
+                                                                                    BackgroundColor="{Binding UserAvatarColor, Converter={StaticResource StringToColor}}"
+                                                                                    VerticalOptions="Center">
+                                                                                <Border.StrokeShape>
+                                                                                    <Ellipse/>
+                                                                                </Border.StrokeShape>
+                                                                                <Grid>
+                                                                                    <Label Text="{Binding UserInitial}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringEmpty}}"
+                                                                                           TextColor="White"
+                                                                                           FontSize="14"
+                                                                                           FontAttributes="Bold"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                    <Image Source="{Binding UserAvatarUrl, Converter={StaticResource AvatarImage}}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringNotEmpty}}"
+                                                                                           Aspect="AspectFit"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Grid>
+                                                                            </Border>
 
+                                                                            <!-- Информация о пользователе -->
                                                                             <VerticalStackLayout Grid.Column="1" 
                                                                                                  Spacing="2" 
                                                                                                  VerticalOptions="Center">
@@ -313,15 +347,18 @@
                                                                                        FontSize="11"
                                                                                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
 
+                                                                                <!-- ДОБАВЛЕНА ДАТА -->
                                                                                 <Label Text="{Binding CreatedDateText}"
                                                                                        FontSize="10"
                                                                                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                                                                             </VerticalStackLayout>
 
+                                                                            <!-- Статус и кнопка раскрытия -->
                                                                             <HorizontalStackLayout Grid.Column="2" 
                                                                                                    Spacing="8" 
                                                                                                    VerticalOptions="Center">
 
+                                                                                <!-- Статус тарелки с прогрессом -->
                                                                                 <Frame BackgroundColor="{Binding StatusColor}"
                                                                                        CornerRadius="6"
                                                                                        Padding="6,2"
@@ -334,38 +371,49 @@
                                                                                            HorizontalOptions="Center"/>
                                                                                 </Frame>
 
-                                                                                <Button BackgroundColor="Transparent"
-                                                                                        Padding="0"
-                                                                                        WidthRequest="32"
-                                                                                        HeightRequest="32"
-                                                                                        CornerRadius="16"
-                                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                                          Path=BindingContext.TogglePlateCommand}"
-                                                                                        CommandParameter="{Binding Id}">
-                                                                                    <Button.ImageSource>
-                                                                                        <FontImageSource Glyph="{Binding IsExpanded, 
-                                                                                                                         Converter={StaticResource ExpandedIconConverter}}"
-                                                                                                         FontFamily="MaterialIconsOutlined"
-                                                                                                         Color="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource Gray300}}"
-                                                                                                         Size="20"/>
-                                                                                    </Button.ImageSource>
-                                                                                </Button>
+                                                                                <!-- Кнопка раскрытия/скрытия — ОЖИДАЮЩИЕ -->
+                                                                                <Border WidthRequest="34"
+                                                                                        HeightRequest="34"
+                                                                                        BackgroundColor="{Binding IsExpanded, 
+                                                                                            Converter={StaticResource BoolToExpand}}"
+                                                                                        StrokeThickness="0"
+                                                                                        VerticalOptions="Center">
+                                                                                    <Border.StrokeShape>
+                                                                                        <RoundRectangle CornerRadius="10"/>
+                                                                                    </Border.StrokeShape>
+                                                                                    <Border.GestureRecognizers>
+                                                                                        <TapGestureRecognizer
+                                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                              Path=BindingContext.TogglePlateCommand}"
+                                                                                            CommandParameter="{Binding Id}"/>
+                                                                                    </Border.GestureRecognizers>
+                                                                                    <Label Text="{Binding IsExpanded, Converter={StaticResource ExpandedArrow}}"
+                                                                                           FontSize="18"
+                                                                                           FontAttributes="Bold"
+                                                                                           TextColor="White"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Border>
                                                                             </HorizontalStackLayout>
                                                                         </Grid>
 
+                                                                        <!-- СОДЕРЖИМОЕ ТАРЕЛКИ (раскрывается) -->
                                                                         <VerticalStackLayout IsVisible="{Binding IsExpanded}" 
                                                                                              Spacing="0">
 
+                                                                            <!-- Разделитель -->
                                                                             <BoxView HeightRequest="1"
                                                                                      BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
                                                                                      Margin="16,8"/>
 
+                                                                            <!-- Заголовок списка блюд -->
                                                                             <Label Text="Блюда в заявке:"
                                                                                    FontSize="12"
                                                                                    FontAttributes="Bold"
                                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                                    Margin="16,8,16,4"/>
 
+                                                                            <!-- Список блюд -->
                                                                             <CollectionView ItemsSource="{Binding Dishes}"
                                                                                             SelectionMode="None"
                                                                                             Margin="16,0">
@@ -381,12 +429,14 @@
                                                                                                   ColumnSpacing="8"
                                                                                                   VerticalOptions="Center">
 
+                                                                                                <!-- Название блюда -->
                                                                                                 <Label Text="{Binding Name}"
                                                                                                        FontSize="14"
                                                                                                        FontAttributes="Bold"
                                                                                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                                                        VerticalOptions="Center"/>
 
+                                                                                                <!-- Статус блюда -->
                                                                                                 <Frame Grid.Column="1"
                                                                                                        BackgroundColor="{Binding StatusColor}"
                                                                                                        CornerRadius="4"
@@ -399,11 +449,13 @@
                                                                                                            FontAttributes="Bold"/>
                                                                                                 </Frame>
 
+                                                                                                <!-- Кнопки действий для блюда (только для ожидающих) -->
                                                                                                 <HorizontalStackLayout Grid.Column="2" 
                                                                                                                        Spacing="4"
                                                                                                                        VerticalOptions="Center"
                                                                                                                        IsVisible="{Binding CanShowActions}">
 
+                                                                                                    <!-- Кнопка принять -->
                                                                                                     <Button Text="✓"
                                                                                                             BackgroundColor="#4CAF50"
                                                                                                             TextColor="White"
@@ -413,10 +465,13 @@
                                                                                                             WidthRequest="28"
                                                                                                             HeightRequest="28"
                                                                                                             Padding="0"
+                                                                                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                                              Path=BindingContext.CanManageFamily}"
                                                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                                                               Path=BindingContext.AcceptDishCommand}"
                                                                                                             CommandParameter="{Binding}"/>
 
+                                                                                                    <!-- Кнопка отклонить -->
                                                                                                     <Button Text="✕"
                                                                                                             BackgroundColor="#F44336"
                                                                                                             TextColor="White"
@@ -426,6 +481,8 @@
                                                                                                             WidthRequest="28"
                                                                                                             HeightRequest="28"
                                                                                                             Padding="0"
+                                                                                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                                              Path=BindingContext.CanManageFamily}"
                                                                                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                                                               Path=BindingContext.RejectDishCommand}"
                                                                                                             CommandParameter="{Binding}"/>
@@ -436,11 +493,13 @@
                                                                                 </CollectionView.ItemTemplate>
                                                                             </CollectionView>
 
+                                                                            <!-- Кнопки для массовых действий (только для ожидающих) -->
                                                                             <Grid ColumnDefinitions="*,*"
                                                                                   ColumnSpacing="8"
                                                                                   Padding="16,12,16,16"
                                                                                   IsVisible="{Binding CanShowActions}">
 
+                                                                                <!-- Кнопка принять все -->
                                                                                 <Button Text="ПРИНЯТЬ ВСЕ"
                                                                                         BackgroundColor="{StaticResource PrimaryColor}"
                                                                                         TextColor="White"
@@ -448,10 +507,13 @@
                                                                                         FontAttributes="Bold"
                                                                                         CornerRadius="8"
                                                                                         HeightRequest="36"
+                                                                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                          Path=BindingContext.CanManageFamily}"
                                                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                                           Path=BindingContext.AcceptPlateCommand}"
                                                                                         CommandParameter="{Binding Id}"/>
 
+                                                                                <!-- Кнопка отклонить все -->
                                                                                 <Button Text="ОТКЛОНИТЬ ВСЕ"
                                                                                         Grid.Column="1"
                                                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
@@ -460,6 +522,8 @@
                                                                                         FontAttributes="Bold"
                                                                                         CornerRadius="8"
                                                                                         HeightRequest="36"
+                                                                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                          Path=BindingContext.CanManageFamily}"
                                                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                                           Path=BindingContext.RejectPlateCommand}"
                                                                                         CommandParameter="{Binding Id}"/>
@@ -478,12 +542,14 @@
                                                                                          Converter={StaticResource CollectionCountToVisibilityConverter}}"
                                                                      Spacing="12">
 
+                                                    <!-- Заголовок для обработанных тарелок -->
                                                     <Label Text="Обработанные заявки"
                                                            FontSize="16"
                                                            FontAttributes="Bold"
                                                            TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                            Margin="0,10,0,4"/>
 
+                                                    <!-- Коллекция обработанных тарелок -->
                                                     <CollectionView ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                           Path=BindingContext.ProcessedPlates}"
                                                                     SelectionMode="None"
@@ -498,24 +564,38 @@
                                                                        HasShadow="False">
 
                                                                     <VerticalStackLayout Spacing="0">
+                                                                        <!-- ШАПКА ТАРЕЛКИ -->
                                                                         <Grid Padding="16,12"
                                                                               ColumnDefinitions="Auto,*,Auto"
                                                                               ColumnSpacing="12">
 
-                                                                            <Frame WidthRequest="36"
-                                                                                   HeightRequest="36"
-                                                                                   CornerRadius="18"
-                                                                                   BackgroundColor="{StaticResource PrimaryColor}"
-                                                                                   Padding="0"
-                                                                                   VerticalOptions="Center">
-                                                                                <Label Text="{Binding UserInitial}"
-                                                                                       TextColor="White"
-                                                                                       FontSize="12"
-                                                                                       FontAttributes="Bold"
-                                                                                       HorizontalOptions="Center"
-                                                                                       VerticalOptions="Center"/>
-                                                                            </Frame>
+                                                                            <!-- Аватар пользователя -->
+                                                                            <Border WidthRequest="36"
+                                                                                    HeightRequest="36"
+                                                                                    StrokeThickness="0"
+                                                                                    Stroke="Transparent"
+                                                                                    BackgroundColor="{Binding UserAvatarColor, Converter={StaticResource StringToColor}}"
+                                                                                    VerticalOptions="Center">
+                                                                                <Border.StrokeShape>
+                                                                                    <Ellipse/>
+                                                                                </Border.StrokeShape>
+                                                                                <Grid>
+                                                                                    <Label Text="{Binding UserInitial}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringEmpty}}"
+                                                                                           TextColor="White"
+                                                                                           FontSize="12"
+                                                                                           FontAttributes="Bold"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                    <Image Source="{Binding UserAvatarUrl, Converter={StaticResource AvatarImage}}"
+                                                                                           IsVisible="{Binding UserAvatarUrl, Converter={StaticResource StringNotEmpty}}"
+                                                                                           Aspect="AspectFit"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Grid>
+                                                                            </Border>
 
+                                                                            <!-- Информация о пользователе -->
                                                                             <VerticalStackLayout Grid.Column="1" 
                                                                                                  Spacing="2" 
                                                                                                  VerticalOptions="Center">
@@ -528,15 +608,18 @@
                                                                                        FontSize="11"
                                                                                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
 
+                                                                                <!-- ДОБАВЛЕНА ДАТА -->
                                                                                 <Label Text="{Binding CreatedDateText}"
                                                                                        FontSize="10"
                                                                                        TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                                                                             </VerticalStackLayout>
 
+                                                                            <!-- Статус и кнопка раскрытия -->
                                                                             <HorizontalStackLayout Grid.Column="2" 
                                                                                                    Spacing="8" 
                                                                                                    VerticalOptions="Center">
 
+                                                                                <!-- Статус тарелки -->
                                                                                 <Frame BackgroundColor="{Binding StatusColor}"
                                                                                        CornerRadius="6"
                                                                                        Padding="6,2"
@@ -549,38 +632,49 @@
                                                                                            HorizontalOptions="Center"/>
                                                                                 </Frame>
 
-                                                                                <Button BackgroundColor="Transparent"
-                                                                                        Padding="0"
-                                                                                        WidthRequest="28"
-                                                                                        HeightRequest="28"
-                                                                                        CornerRadius="14"
-                                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                                          Path=BindingContext.TogglePlateCommand}"
-                                                                                        CommandParameter="{Binding Id}">
-                                                                                    <Button.ImageSource>
-                                                                                        <FontImageSource Glyph="{Binding IsExpanded, 
-                                                                                                                         Converter={StaticResource ExpandedIconConverter}}"
-                                                                                                         FontFamily="MaterialIconsOutlined"
-                                                                                                         Color="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource Gray300}}"
-                                                                                                         Size="18"/>
-                                                                                    </Button.ImageSource>
-                                                                                </Button>
+                                                                                <!-- Кнопка раскрытия/скрытия — ОБРАБОТАННЫЕ -->
+                                                                                <Border WidthRequest="30"
+                                                                                        HeightRequest="30"
+                                                                                        BackgroundColor="{Binding IsExpanded, 
+                                                                                            Converter={StaticResource BoolToExpand}}"
+                                                                                        StrokeThickness="0"
+                                                                                        VerticalOptions="Center">
+                                                                                    <Border.StrokeShape>
+                                                                                        <RoundRectangle CornerRadius="8"/>
+                                                                                    </Border.StrokeShape>
+                                                                                    <Border.GestureRecognizers>
+                                                                                        <TapGestureRecognizer
+                                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                              Path=BindingContext.TogglePlateCommand}"
+                                                                                            CommandParameter="{Binding Id}"/>
+                                                                                    </Border.GestureRecognizers>
+                                                                                    <Label Text="{Binding IsExpanded, Converter={StaticResource ExpandedArrow}}"
+                                                                                           FontSize="16"
+                                                                                           FontAttributes="Bold"
+                                                                                           TextColor="White"
+                                                                                           HorizontalOptions="Center"
+                                                                                           VerticalOptions="Center"/>
+                                                                                </Border>
                                                                             </HorizontalStackLayout>
                                                                         </Grid>
 
+                                                                        <!-- СОДЕРЖИМОЕ ТАРЕЛКИ (раскрывается) -->
                                                                         <VerticalStackLayout IsVisible="{Binding IsExpanded}" 
                                                                                              Spacing="0">
 
+                                                                            <!-- Разделитель -->
                                                                             <BoxView HeightRequest="1"
                                                                                      BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
                                                                                      Margin="16,8"/>
 
+                                                                            <!-- Заголовок списка блюд -->
                                                                             <Label Text="Блюда:"
                                                                                    FontSize="12"
                                                                                    FontAttributes="Bold"
                                                                                    TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                                    Margin="16,8,16,4"/>
 
+                                                                            <!-- Список блюд -->
                                                                             <CollectionView ItemsSource="{Binding Dishes}"
                                                                                             SelectionMode="None"
                                                                                             Margin="16,0,16,8">
@@ -596,12 +690,14 @@
                                                                                                   ColumnSpacing="8"
                                                                                                   VerticalOptions="Center">
 
+                                                                                                <!-- Название блюда -->
                                                                                                 <Label Text="{Binding Name}"
                                                                                                        FontSize="13"
                                                                                                        FontAttributes="Bold"
                                                                                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                                                        VerticalOptions="Center"/>
 
+                                                                                                <!-- Статус блюда -->
                                                                                                 <Frame Grid.Column="1"
                                                                                                        BackgroundColor="{Binding StatusColor}"
                                                                                                        CornerRadius="4"
@@ -628,8 +724,11 @@
                                                     </CollectionView>
                                                 </VerticalStackLayout>
 
-                                                <!-- Подсказка -->
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+                                                <!-- Подсказка по функционалу -->
+                                                <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
+                                                               Path=BindingContext.HasPlates, 
+                                                               Converter={StaticResource InvertedBoolConverter}}"
+                                                       BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
                                                        CornerRadius="12"
                                                        Padding="16"
                                                        Margin="0,20,0,0">
@@ -659,15 +758,15 @@
                                                     </VerticalStackLayout>
                                                 </Frame>
 
-                                                <BoxView HeightRequest="30" Color="Transparent"/>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
 
-                                        <!-- УЧАСТНИКИ -->
-                                        <VerticalStackLayout IsVisible="{Binding IsMembers}" 
+                                        <!-- УЧАСТНИКИ - ИСПРАВЛЕННЫЙ ВАРИАНТ -->
+                                        <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsMembersTab}" 
                                                              Spacing="12"
                                                              Padding="20,16,20,40">
 
+                                            <!-- Индикатор загрузки участников -->
                                             <ActivityIndicator IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                                    Path=BindingContext.IsLoadingMembers}"
                                                                IsRunning="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
@@ -676,35 +775,8 @@
                                                                HorizontalOptions="Center"
                                                                VerticalOptions="Center"/>
 
-                                            <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                       Path=BindingContext.FamilyMembers.Count, 
-                                                                       Converter={StaticResource InvertedBoolConverter}}"
-                                                   BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                   CornerRadius="12"
-                                                   Padding="20">
-                                                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
-                                                    <Label Text="👥" FontSize="32" HorizontalOptions="Center"/>
-
-                                                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                                                        <Label Text="Нет участников"
-                                                               FontSize="16"
-                                                               FontAttributes="Bold"    
-                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
-                                                               HorizontalOptions="Center"/>
-
-                                                        <Label Text="Участники семьи будут отображаться здесь"
-                                                               FontSize="14"
-                                                               TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                                                               HorizontalOptions="Center"
-                                                               HorizontalTextAlignment="Center"/>
-                                                    </VerticalStackLayout>
-                                                </VerticalStackLayout>
-                                            </Frame>
-
-                                            <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                     Path=BindingContext.FamilyMembers.Count, 
-                                                                                     Converter={StaticResource CollectionCountToVisibilityConverter}}"
-                                                                 Spacing="12"
+                                            <!-- Список участников -->
+                                            <VerticalStackLayout Spacing="12"
                                                                  VerticalOptions="FillAndExpand">
 
                                                 <CollectionView ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
@@ -724,16 +796,14 @@
 
                                                                 <Grid ColumnDefinitions="Auto,*,Auto" 
                                                                       ColumnSpacing="12"
-                                                                      RowDefinitions="Auto,Auto"
                                                                       VerticalOptions="FillAndExpand">
 
-                                                                    <!-- Аватар участника: цвет из профиля + животное если есть -->
-                                                                    <Border Grid.RowSpan="2"
-                                                                            WidthRequest="44"
+                                                                    <!-- Аватар участника: пресет или первая буква имени -->
+                                                                    <Border WidthRequest="44"
                                                                             HeightRequest="44"
                                                                             StrokeThickness="0"
                                                                             Stroke="Transparent"
-                                                                            BackgroundColor="{Binding DisplayColorValue}"
+                                                                            BackgroundColor="{Binding DisplayColor, Converter={StaticResource StringToColor}}"
                                                                             VerticalOptions="Start">
                                                                         <Border.StrokeShape>
                                                                             <Ellipse/>
@@ -749,6 +819,7 @@
                                                                             <Image Source="{Binding AvatarUrl, Converter={StaticResource AvatarImage}}"
                                                                                    IsVisible="{Binding HasAvatar}"
                                                                                    Aspect="AspectFit"
+                                                                                   Margin="6"
                                                                                    HorizontalOptions="Center"
                                                                                    VerticalOptions="Center"/>
                                                                         </Grid>
@@ -765,6 +836,7 @@
                                                                                    TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                                    VerticalOptions="Center"/>
 
+                                                                            <!-- Метка роли -->
                                                                             <Frame BackgroundColor="{Binding RoleColor}"
                                                                                    CornerRadius="4"
                                                                                    Padding="6,2"
@@ -782,15 +854,17 @@
                                                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
                                                                     </VerticalStackLayout>
 
+                                                                    <!-- Блок с действиями -->
                                                                     <VerticalStackLayout Grid.Column="2" 
-                                                                                         Grid.RowSpan="2"
                                                                                          Spacing="4"
                                                                                          HorizontalOptions="End"
                                                                                          VerticalOptions="Center">
 
+                                                                        <!-- Кнопки управления для не текущего пользователя -->
                                                                         <HorizontalStackLayout IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"
                                                                                                Spacing="4">
 
+                                                                            <!-- Кнопка Повысить -->
                                                                             <Button Text="↑"
                                                                                     BackgroundColor="#4CAF50"
                                                                                     TextColor="White"
@@ -805,6 +879,7 @@
                                                                                     CommandParameter="{Binding}"
                                                                                     IsVisible="{Binding CanPromote}"/>
 
+                                                                            <!-- Кнопка Понизить -->
                                                                             <Button Text="↓"
                                                                                     BackgroundColor="#2196F3"
                                                                                     TextColor="White"
@@ -819,6 +894,7 @@
                                                                                     CommandParameter="{Binding}"
                                                                                     IsVisible="{Binding CanDemote}"/>
 
+                                                                            <!-- Кнопка Исключить -->
                                                                             <Button Text="✕"
                                                                                     BackgroundColor="#F44336"
                                                                                     TextColor="White"
@@ -834,6 +910,7 @@
                                                                                     IsVisible="{Binding CanKick}"/>
                                                                         </HorizontalStackLayout>
 
+                                                                        <!-- Метка "Вы" для текущего пользователя -->
                                                                         <Frame IsVisible="{Binding IsCurrentUser}"
                                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
                                                                                CornerRadius="4"
@@ -846,96 +923,26 @@
                                                                         </Frame>
                                                                     </VerticalStackLayout>
 
-                                                                    <BoxView Grid.ColumnSpan="3"
-                                                                             Grid.Row="1"
-                                                                             HeightRequest="1"
-                                                                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
-                                                                             Margin="0,8,0,8"
-                                                                             IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
-
-                                                                    <Button Grid.Column="1"
-                                                                            Grid.Row="1"
-                                                                            Text="Профиль"
-                                                                            BackgroundColor="Transparent"
-                                                                            TextColor="{StaticResource PrimaryColor}"
-                                                                            FontSize="12"
-                                                                            BorderWidth="1"
-                                                                            BorderColor="{StaticResource PrimaryColor}"
-                                                                            CornerRadius="6"
-                                                                            Padding="12,4"
-                                                                            HeightRequest="28"
-                                                                            HorizontalOptions="Start"
-                                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
-                                                                                              Path=BindingContext.ViewMemberProfileCommand}"
-                                                                            CommandParameter="{Binding}"
-                                                                            IsVisible="{Binding IsCurrentUser, Converter={StaticResource InvertedBoolConverter}}"/>
                                                                 </Grid>
                                                             </Frame>
                                                         </DataTemplate>
                                                     </CollectionView.ItemTemplate>
 
+                                                    <!-- Пустое пространство после списка участников -->
                                                     <CollectionView.Footer>
                                                         <StackLayout HeightRequest="40"/>
                                                     </CollectionView.Footer>
                                                 </CollectionView>
 
-                                                <!-- Подсказка по управлению -->
-                                                <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                       CornerRadius="12"
-                                                       Padding="16"
-                                                       Margin="0,10,0,0">
-                                                    <VerticalStackLayout Spacing="8">
-                                                        <Label Text="👑 Управление участниками"
-                                                               FontSize="14"
-                                                               FontAttributes="Bold"
-                                                               TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-
-                                                        <VerticalStackLayout Spacing="4">
-                                                            <HorizontalStackLayout Spacing="8">
-                                                                <Frame BackgroundColor="#4CAF50" CornerRadius="4" Padding="4,2" HeightRequest="20" WidthRequest="20">
-                                                                    <Label Text="↑" FontSize="10" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center"/>
-                                                                </Frame>
-                                                                <Label Text="Повысить - повысить роль участника (Может: Админ или Глава)"
-                                                                       FontSize="11"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                            </HorizontalStackLayout>
-
-                                                            <HorizontalStackLayout Spacing="8">
-                                                                <Frame BackgroundColor="#2196F3" CornerRadius="4" Padding="4,2" HeightRequest="20" WidthRequest="20">
-                                                                    <Label Text="↓" FontSize="10" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center"/>
-                                                                </Frame>
-                                                                <Label Text="Понизить - понизить роль участника (Может: Админ или Глава)"
-                                                                       FontSize="11"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                            </HorizontalStackLayout>
-
-                                                            <HorizontalStackLayout Spacing="8">
-                                                                <Frame BackgroundColor="#F44336" CornerRadius="4" Padding="4,2" HeightRequest="20" WidthRequest="20">
-                                                                    <Label Text="✕" FontSize="10" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center"/>
-                                                                </Frame>
-                                                                <Label Text="Исключить - удалить участника из семьи (Может: Админ или Глава)"
-                                                                       FontSize="11"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                            </HorizontalStackLayout>
-
-                                                            <Label Text="* Глава может управлять всеми участниками, включая Админов"
-                                                                   FontSize="10"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
-                                                                   FontAttributes="Italic"/>
-                                                        </VerticalStackLayout>
-                                                    </VerticalStackLayout>
-                                                </Frame>
-
-                                                <BoxView HeightRequest="30" Color="Transparent"/>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
 
                                         <!-- ЗАПРОСЫ НА ВСТУПЛЕНИЕ -->
-                                        <VerticalStackLayout IsVisible="{Binding IsRequests}" 
+                                        <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.IsRequestsTab}" 
                                                              Spacing="16"
                                                              Padding="20,16,20,40">
 
-                                            <!-- Нет запросов -->
+                                            <!-- Состояние когда запросов нет -->
                                             <Frame IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, 
                                                                        Path=BindingContext.HasPendingRequests, 
                                                                        Converter={StaticResource InvertedBoolConverter}}"
@@ -943,7 +950,9 @@
                                                    CornerRadius="12"
                                                    Padding="20">
                                                 <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
-                                                    <Label Text="🎉" FontSize="32" HorizontalOptions="Center"/>
+                                                    <Label Text="📋"
+                                                           FontSize="32"
+                                                           HorizontalOptions="Center"/>
 
                                                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                                                         <Label Text="Новых запросов нет"
@@ -952,20 +961,30 @@
                                                                TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                                                HorizontalOptions="Center"/>
 
-                                                        <Label Text="Все запросы на вступление будут отображаться здесь"
+                                                        <Label Text="Чтобы кто-то вступил в семью — дайте ему код семьи. Участник должен ввести его на странице присоединения."
                                                                FontSize="14"
                                                                TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                HorizontalOptions="Center"
-                                                               VerticalTextAlignment="Center"/>
+                                                               HorizontalTextAlignment="Center"/>
                                                     </VerticalStackLayout>
 
-                                                    <Button Text="Поделиться приглашением"
-                                                            BackgroundColor="{StaticResource PrimaryColor}"
-                                                            TextColor="White"
-                                                            CornerRadius="8"
-                                                            Padding="24,12"
-                                                            FontSize="14"
-                                                            HorizontalOptions="Center"/>
+                                                    <!-- Показываем код семьи -->
+                                                    <Frame BackgroundColor="{StaticResource PrimaryColor}"
+                                                           CornerRadius="10"
+                                                           Padding="16,10"
+                                                           HorizontalOptions="Center">
+                                                        <HorizontalStackLayout Spacing="8">
+                                                            <Label Text="Код семьи:"
+                                                                   FontSize="14"
+                                                                   TextColor="White"
+                                                                   VerticalOptions="Center"/>
+                                                            <Label Text="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.FamilyId}"
+                                                                   FontSize="18"
+                                                                   FontAttributes="Bold"
+                                                                   TextColor="White"
+                                                                   VerticalOptions="Center"/>
+                                                        </HorizontalStackLayout>
+                                                    </Frame>
                                                 </VerticalStackLayout>
                                             </Frame>
 
@@ -992,34 +1011,20 @@
 
                                                                     <!-- Аватар и имя пользователя -->
                                                                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                                                                        <Frame WidthRequest="44"
+                                                                               HeightRequest="44"
+                                                                               CornerRadius="22"
+                                                                               BackgroundColor="{StaticResource PrimaryColor}"
+                                                                               Padding="0"
+                                                                               VerticalOptions="Center">
+                                                                            <Label Text="{Binding UserDisplayName, Converter={StaticResource FirstCharacterConverter}}"
+                                                                                   TextColor="White"
+                                                                                   FontSize="16"
+                                                                                   FontAttributes="Bold"
+                                                                                   HorizontalOptions="Center"
+                                                                                   VerticalOptions="Center"/>
+                                                                        </Frame>
 
-                                                                        <!-- АВАТАР: цвет из профиля + животное если выбрано -->
-                                                                        <Border WidthRequest="44"
-                                                                                HeightRequest="44"
-                                                                                StrokeThickness="0"
-                                                                                Stroke="Transparent"
-                                                                                BackgroundColor="{Binding DisplayColorValue}"
-                                                                                VerticalOptions="Center">
-                                                                            <Border.StrokeShape>
-                                                                                <Ellipse/>
-                                                                            </Border.StrokeShape>
-                                                                            <Grid>
-                                                                                <Label Text="{Binding UserDisplayName, Converter={StaticResource FirstCharacterConverter}}"
-                                                                                       IsVisible="{Binding HasAvatar, Converter={StaticResource InvertedBoolConverter}}"
-                                                                                       TextColor="White"
-                                                                                       FontSize="16"
-                                                                                       FontAttributes="Bold"
-                                                                                       HorizontalOptions="Center"
-                                                                                       VerticalOptions="Center"/>
-                                                                                <Image Source="{Binding UserAvatarUrl, Converter={StaticResource AvatarImage}}"
-                                                                                       IsVisible="{Binding HasAvatar}"
-                                                                                       Aspect="AspectFit"
-                                                                                       HorizontalOptions="Center"
-                                                                                       VerticalOptions="Center"/>
-                                                                            </Grid>
-                                                                        </Border>
-
-                                                                        <!-- Имя пользователя -->
                                                                         <Label Text="{Binding UserDisplayName}"
                                                                                FontSize="16"
                                                                                FontAttributes="Bold"
@@ -1033,9 +1038,30 @@
                                                                            TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"
                                                                            Margin="56,-15,0,10"/>
 
-                                                                    <!-- Кнопки -->
+                                                                    <!-- Описание запроса (если есть) -->
+                                                                    <Frame IsVisible="{Binding Message, Converter={StaticResource StringNotEmpty}}"
+                                                                           BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}"
+                                                                           CornerRadius="8"
+                                                                           Padding="12,8"
+                                                                           BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
+                                                                           Margin="0,-4,0,0">
+                                                                        <VerticalStackLayout Spacing="2">
+                                                                            <Label Text="Сообщение:"
+                                                                                   FontSize="11"
+                                                                                   FontAttributes="Bold"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
+                                                                            <Label Text="{Binding Message}"
+                                                                                   FontSize="13"
+                                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
+                                                                                   MaxLines="3"/>
+                                                                        </VerticalStackLayout>
+                                                                    </Frame>
+
+                                                                    <!-- Кнопки только для Admin+ -->
                                                                     <HorizontalStackLayout Spacing="12" 
-                                                                                           HorizontalOptions="Center">
+                                                                                           HorizontalOptions="Center"
+                                                                                           IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}},
+                                                                                                              Path=BindingContext.CanManageFamily}">
                                                                         <Button Text="Принять"
                                                                                 BackgroundColor="{StaticResource PrimaryColor}"
                                                                                 TextColor="White"
@@ -1073,41 +1099,8 @@
                                                 </CollectionView>
                                             </VerticalStackLayout>
 
-                                            <!-- История запросов -->
-                                            <Frame BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
-                                                   CornerRadius="12"
-                                                   Padding="16">
-                                                <VerticalStackLayout Spacing="12">
-                                                    <Label Text="Последние действия"
-                                                           FontSize="14"
-                                                           FontAttributes="Bold"
-                                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-
-                                                    <Grid ColumnDefinitions="Auto,1*" ColumnSpacing="12">
-                                                        <BoxView WidthRequest="4"
-                                                                 HeightRequest="40"
-                                                                 BackgroundColor="#4CAF50"
-                                                                 CornerRadius="2"
-                                                                 VerticalOptions="Center"/>
-
-                                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                                            <Label Text="Петр принят в семью"
-                                                                   FontSize="14"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                                            <Label Text="3 дня назад"
-                                                                   FontSize="12"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                                        </VerticalStackLayout>
-                                                    </Grid>
-                                                </VerticalStackLayout>
-                                            </Frame>
-
-                                            <BoxView HeightRequest="30" Color="Transparent"/>
-                                        </VerticalStackLayout>
-                                    </Grid>
-                                </DataTemplate>
-                            </CarouselView.ItemTemplate>
-                        </CarouselView>
+                                        </VerticalStackLayout><!-- /IsRequestsTab -->
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>
@@ -1119,10 +1112,12 @@
                                 VerticalOptions="Center"
                                 Padding="40,100">
 
+                <!-- Иконка -->
                 <Label Text="👨‍👩‍👧‍👦"
                        FontSize="80"
                        HorizontalOptions="Center"/>
 
+                <!-- Заголовок -->
                 <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
                     <Label Text="Еще не вступили в семью?"
                            FontSize="24"
@@ -1139,6 +1134,7 @@
                            MaxLines="4"/>
                 </VerticalStackLayout>
 
+                <!-- Кнопки действий -->
                 <VerticalStackLayout Spacing="16" HorizontalOptions="FillAndExpand">
                     <Button Text="Создать семью"
                             Command="{Binding CreateFamilyCommand}"
