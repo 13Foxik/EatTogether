@@ -18,7 +18,7 @@ namespace EatTogether.MAUI.Services
 
         private const string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private const int ID_LENGTH = 6;
-        private const int MAX_ATTEMPTS = 10; // на случай коллизий
+        private const int MAX_ATTEMPTS = 10;
         private const int MAX_PROCESSED_MEMBERSHIPS = 5; // максимум обработанных заявок в Firestore
 
         public FirestoreService(CurrentUserService currentUserService)
@@ -72,7 +72,6 @@ namespace EatTogether.MAUI.Services
 
             if (snapshot.Exists)
             {
-                // Обновляем только поле UserFamilies
                 await document.UpdateAsync("UserFamilies", user.UserFamilies);
                 Console.WriteLine($"User {user.Uid} updated - UserFamilies changed");
             }
@@ -146,7 +145,6 @@ namespace EatTogether.MAUI.Services
         {
             await SetupFirestore();
 
-            // 1. Получаем текущий массив заявок
             var document = _db.Collection("Families").Document(request.FamilyId);
             var snapshot = await document.GetSnapshotAsync();
 
@@ -155,15 +153,13 @@ namespace EatTogether.MAUI.Services
                 var memberships = snapshot.GetValue<List<MembershipRequest>>("Memberships")
                                  ?? new List<MembershipRequest>();
 
-                // 2. Находим и обновляем нужный запрос
                 var existingRequest = memberships.FirstOrDefault(m => m.Id == request.Id);
                 if (existingRequest != null)
                 {
                     existingRequest.Status = status;
                     existingRequest.RespondedAt = DateTime.UtcNow;
 
-                    // 3. Оставляем только ожидающие + последние MAX_PROCESSED_MEMBERSHIPS обработанных
-                    //    Это позволяет не превышать лимиты Firestore при большом количестве заявок
+                    // Оставляем все pending + только последние MAX_PROCESSED_MEMBERSHIPS обработанных
                     var pendingRequests = memberships
                         .Where(m => m.Status == RequestStatus.Pending)
                         .ToList();
@@ -176,10 +172,8 @@ namespace EatTogether.MAUI.Services
 
                     var trimmedMemberships = pendingRequests.Concat(processedRequests).ToList();
 
-                    // 4. Полностью заменяем массив
                     await document.UpdateAsync("Memberships", trimmedMemberships);
-                    Console.WriteLine($"Request {request.Id} status updated to {status}. " +
-                                      $"Pending: {pendingRequests.Count}, Processed kept: {processedRequests.Count}");
+                    Console.WriteLine($"Request {request.Id} → {status}. Pending: {pendingRequests.Count}, Processed kept: {processedRequests.Count}");
                 }
             }
         }
@@ -228,7 +222,6 @@ namespace EatTogether.MAUI.Services
 
             try
             {
-                // Получаем текущие данные семьи
                 var snapshot = await documentFamily.GetSnapshotAsync();
 
                 if (!snapshot.Exists)
@@ -239,7 +232,6 @@ namespace EatTogether.MAUI.Services
 
                 var family = snapshot.ConvertTo<Family>();
 
-                // Находим и обновляем роль пользователя
                 bool userFound = false;
                 foreach (var member in family.Members)
                 {
@@ -257,7 +249,6 @@ namespace EatTogether.MAUI.Services
                     return;
                 }
 
-                // Обновляем документ в Firestore
                 await documentFamily.SetAsync(family, SetOptions.MergeAll);
 
                 Console.WriteLine($"Роль пользователя {userId} успешно обновлена");
@@ -276,7 +267,6 @@ namespace EatTogether.MAUI.Services
 
             try
             {
-                // Получаем текущие данные семьи
                 var snapshot = await documentFamily.GetSnapshotAsync();
 
                 if (!snapshot.Exists)
@@ -287,7 +277,6 @@ namespace EatTogether.MAUI.Services
 
                 var family = snapshot.ConvertTo<Family>();
 
-                // Находим и обновляем роль пользователя
                 bool userFound = false;
                 foreach (var member in family.Members)
                 {
@@ -305,7 +294,6 @@ namespace EatTogether.MAUI.Services
                     return;
                 }
 
-                // Обновляем документ в Firestore
                 await documentFamily.SetAsync(family, SetOptions.MergeAll);
 
                 Console.WriteLine($"Роль пользователя {userId} успешно обновлена");
@@ -332,7 +320,6 @@ namespace EatTogether.MAUI.Services
             {
                 return await _db.RunTransactionAsync(async transaction =>
                 {
-                    // Получаем данные семьи в транзакции
                     var familySnapshot = await transaction.GetSnapshotAsync(documentFamily);
 
                     if (!familySnapshot.Exists)
@@ -341,47 +328,36 @@ namespace EatTogether.MAUI.Services
                     var family = familySnapshot.ConvertTo<Family>();
                     family.Members ??= new List<FamilyMember>();
 
-                    // Находим пользователя для удаления
                     var memberToRemove = family.Members.FirstOrDefault(m => m.UserId == userId);
                     if (memberToRemove == null)
                         throw new Exception("Пользователь не найден в семье");
 
-                    // Проверка: нельзя кикнуть владельца
                     if (memberToRemove.Role == FamilyRole.Owner)
                         throw new Exception("Нельзя удалить владельца семьи");
 
-                    // Проверка: текущий пользователь должен быть владельцем или админом
                     var currentMember = family.Members.FirstOrDefault(m => m.UserId == currentUserId);
                     if (currentMember == null || (currentMember.Role != FamilyRole.Owner && currentMember.Role != FamilyRole.Admin))
                         throw new Exception("Недостаточно прав для удаления пользователя");
 
-                    // Проверка: нельзя кикнуть самого себя (опционально, по желанию)
                     if (userId == currentUserId && currentMember.Role != FamilyRole.Owner)
                         throw new Exception("Вы не можете удалить сами себя");
 
-                    // Проверяем, существует ли пользователь в Users
                     var userSnapshot = await transaction.GetSnapshotAsync(documentUser);
                     if (!userSnapshot.Exists)
                         throw new Exception("Пользователь не найден");
 
-                    // Удаляем пользователя из семьи
                     family.Members.RemoveAll(m => m.UserId == userId);
                     family.CountUsers = family.Members.Count;
 
-                    // Подготавливаем обновления для семьи
                     Dictionary<string, object> familyUpdates = new()
                     {
                         { "Members", family.Members },
                         { "CountUsers", family.CountUsers }
                     };
 
-                    // Обновляем семью в транзакции
                     transaction.Update(documentFamily, familyUpdates);
-
-                    // Удаляем familyId из массива UserFamilies пользователя
                     transaction.Update(documentUser, "UserFamilies", FieldValue.ArrayRemove(familyId));
 
-                    // Optional: Можно также добавить поле с информацией о последней оставленной семье
                     Dictionary<string, object> userAdditionalUpdates = new()
                     {
                         { "LastFamilyLeftAt", DateTime.UtcNow },
@@ -409,7 +385,6 @@ namespace EatTogether.MAUI.Services
                 var documentFamily = _db.Collection("Families").Document(familyId);
                 var documentUser = _db.Collection("Users").Document(userId);
 
-                // Читаем семью
                 var familySnapshot = await documentFamily.GetSnapshotAsync();
                 if (!familySnapshot.Exists)
                 {
@@ -433,7 +408,6 @@ namespace EatTogether.MAUI.Services
                     return false;
                 }
 
-                // Убираем участника из семьи
                 family.Members.RemoveAll(m => m.UserId == userId);
                 family.CountUsers = family.Members.Count;
 
@@ -444,7 +418,6 @@ namespace EatTogether.MAUI.Services
                     { "CountUsers", family.CountUsers }
                 });
 
-                // Убираем familyId из UserFamilies пользователя
                 await documentUser.UpdateAsync("UserFamilies", FieldValue.ArrayRemove(familyId));
 
                 return true;
@@ -487,7 +460,6 @@ namespace EatTogether.MAUI.Services
         public async Task DeleteMembership(MembershipRequest request)
         {
             await SetupFirestore();
-            // Memberships — массив внутри документа Families, удаляем через ArrayRemove
             await _db.Collection("Families")
                 .Document(request.FamilyId)
                 .UpdateAsync("Memberships", FieldValue.ArrayRemove(request));
@@ -518,15 +490,48 @@ namespace EatTogether.MAUI.Services
             DocumentReference docRef = _db.Collection("Families").Document(documentId);
             DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
 
-            if (snapshot.Exists)
-            {
-                return snapshot.ConvertTo<Family>();
-            }
-            else
+            if (!snapshot.Exists)
             {
                 Console.WriteLine($"Family document with ID {documentId} not found in Firestore.");
                 return null;
             }
+
+            var family = snapshot.ConvertTo<Family>();
+
+            // Lazy-cleanup: если обработанных заявок больше MAX_PROCESSED_MEMBERSHIPS —
+            // обрезаем прямо здесь и сохраняем обратно, чтобы не превышать лимиты Firestore
+            if (family.Memberships != null)
+            {
+                var processedCount = family.Memberships.Count(m => m.Status != RequestStatus.Pending);
+                if (processedCount > MAX_PROCESSED_MEMBERSHIPS)
+                {
+                    var pending = family.Memberships
+                        .Where(m => m.Status == RequestStatus.Pending)
+                        .ToList();
+
+                    var processed = family.Memberships
+                        .Where(m => m.Status != RequestStatus.Pending)
+                        .OrderByDescending(m => m.RespondedAt ?? m.CreatedAt)
+                        .Take(MAX_PROCESSED_MEMBERSHIPS)
+                        .ToList();
+
+                    family.Memberships = pending.Concat(processed).ToList();
+
+                    // Сохраняем обрезанный массив обратно в Firestore
+                    try
+                    {
+                        await docRef.UpdateAsync("Memberships", family.Memberships);
+                        Console.WriteLine($"Family {documentId}: trimmed memberships to {family.Memberships.Count} (pending: {pending.Count}, processed: {processed.Count})");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Family {documentId}: failed to trim memberships: {ex.Message}");
+                        // Не пробрасываем — данные уже обрезаны в памяти, просто не сохранили
+                    }
+                }
+            }
+
+            return family;
         }
 
         public async Task<List<Category>> GetCategoriesAsync()
@@ -660,7 +665,6 @@ namespace EatTogether.MAUI.Services
 
             if (snapshot.Exists)
             {
-                // Обновляем только поле UserFamilies
                 await document.UpdateAsync("Name", subcategory.Name);
                 Console.WriteLine($"Subcategory {subcategory.Id} updated");
             }
@@ -693,7 +697,6 @@ namespace EatTogether.MAUI.Services
                     Dish Dish = document.ConvertTo<Dish>();
                     if(Dish.SubCategoryId == subcategoryId)
                     {
-
                         Dishes.Add(Dish);
                     }
                 }
@@ -758,7 +761,6 @@ namespace EatTogether.MAUI.Services
 
             if (snapshot.Exists)
             {
-                // Обновляем только поле UserFamilies
                 await document.UpdateAsync("Name", dish.Name);
                 await document.UpdateAsync("SubCategoryId", dish.SubCategoryId);
                 Console.WriteLine($"Dish {dish.Id} updated");
@@ -908,13 +910,12 @@ namespace EatTogether.MAUI.Services
             {
                 string candidateId = GenerateRandomId(20);
 
-                // Проверяем существует ли такой ID в коллекции
                 DocumentReference docRef = _db.Collection(collection).Document(candidateId);
                 DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
 
                 if (!snapshot.Exists)
                 {
-                    return candidateId; // Нашли уникальный ID
+                    return candidateId;
                 }
             }
 
@@ -929,13 +930,12 @@ namespace EatTogether.MAUI.Services
             {
                 string candidateId = GenerateRandomId(6);
             
-                // Проверяем существует ли такой ID в коллекции
                 DocumentReference docRef = _db.Collection(collection).Document(candidateId);
                 DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
             
                 if (!snapshot.Exists)
                 {
-                    return candidateId; // Нашли уникальный ID
+                    return candidateId;
                 }
             }
         
@@ -946,7 +946,6 @@ namespace EatTogether.MAUI.Services
         {
             await SetupFirestore();
 
-            // Проверяем — если уже есть категории, ничего не делаем
             var existing = await GetCategoriesAsync();
             if (existing.Count > 0)
             {
@@ -962,8 +961,8 @@ namespace EatTogether.MAUI.Services
                 ("Гарниры",    "🥦", 4),
                 ("Салаты",     "🥗", 5),
                 ("Выпечка",    "🥐", 6),
-                ("Десерты",    "🍰", 7),
-                ("Напитки",    "🥤", 8),
+                ("Десерты",    "🎂", 7),
+                ("Напитки",    "🧴", 8),
                 ("Закуски",    "🧀", 9),
                 ("Рыба",       "🐟", 10),
             };
