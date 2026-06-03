@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 using System.Data;
 
 namespace EatTogether.MAUI.Models
@@ -24,15 +24,8 @@ namespace EatTogether.MAUI.Models
         public List<string> UserFamilies { get; set; }
         [FirestoreProperty]
         public string Avatar { get; set; }
-
         [FirestoreProperty]
         public string AvatarColor { get; set; }
-
-        [FirestoreProperty]
-        public int TotalPlatesCount { get; set; } = 0;
-
-        // Возвращает цвет или дефолтный зелёный если не задан
-        public string DisplayColor => string.IsNullOrEmpty(AvatarColor) ? "#1F744D" : AvatarColor;
 
         public User() { }
 

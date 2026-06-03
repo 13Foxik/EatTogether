@@ -11,8 +11,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
         {
             _cloudStoreService = cloudStoreService;
         }
-
-        public async Task CreateRequest(string familyId, User user, string message = null)
+        public async Task CreateRequest(string familyId, User user)
         {
             var request = new MembershipRequest
             {
@@ -20,23 +19,17 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 UserId = user.Uid,
                 UserDisplayName = user.DisplayName,
                 UserAvatarUrl = user.Avatar ?? string.Empty,
-                UserAvatarColor = user.AvatarColor ?? "#1F744D",
-                Message = message,
+                UserAvatarColor = user.AvatarColor ?? string.Empty,
                 FamilyId = familyId,
                 Status = RequestStatus.Pending
             };
 
             await _cloudStoreService.InsertMembership(request);
         }
-
         public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
         {
             await _cloudStoreService.UpdateRequestStatus(request, status);
         }
 
-        public async Task DeleteRequest(MembershipRequest request)
-        {
-            await _cloudStoreService.DeleteMembership(request);
-        }
     }
 }
