@@ -1012,12 +1012,12 @@
                                                                     <!-- Аватар и имя пользователя -->
                                                                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
 
-                                                                        <!-- Аватарка: цвет профиля -->
+                                                                        <!-- Аватарка: DisplayColor как фолбэк (тот же принцип что в Участниках) -->
                                                                         <Border WidthRequest="44"
                                                                                 HeightRequest="44"
                                                                                 StrokeThickness="0"
                                                                                 Stroke="Transparent"
-                                                                                BackgroundColor="{Binding UserAvatarColor, Converter={StaticResource StringToColor}}"
+                                                                                BackgroundColor="{Binding DisplayColor, Converter={StaticResource StringToColor}}"
                                                                                 Padding="0"
                                                                                 VerticalOptions="Center">
                                                                             <Border.StrokeShape>
