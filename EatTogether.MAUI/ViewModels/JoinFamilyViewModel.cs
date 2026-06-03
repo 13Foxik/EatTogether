@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services;
@@ -61,7 +61,8 @@ namespace EatTogether.MAUI.ViewModels
 
             try
             {
-                await _membershipService.CreateRequest(FamilyId, _currentUserService.GetCurrentUser());
+                // Передаём сообщение пользователя вместе с заявкой
+                await _membershipService.CreateRequest(FamilyId, _currentUserService.GetCurrentUser(), JoinMessage);
                 IsRequestSent = true;
 
                 await Task.Delay(1500);

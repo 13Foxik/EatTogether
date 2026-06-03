@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 
 namespace EatTogether.MAUI.Models
 {
@@ -20,6 +20,10 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string UserAvatarUrl { get; set; }
 
+        // Цвет аватарки пользователя (hex), чтобы отображать правильный цвет в карточке заявки
+        [FirestoreProperty]
+        public string UserAvatarColor { get; set; }
+
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -35,16 +39,20 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string RespondedBy { get; set; } // ID пользователя, который ответил на заявку
 
+        // Возвращает настоящий цвет аватарки или дефолтный зелёный
+        public string DisplayColor => string.IsNullOrEmpty(UserAvatarColor) ? "#1F744D" : UserAvatarColor;
+
         public MembershipRequest() { }
 
         public MembershipRequest(string familyId, string userId, string userDisplayName,
-                               string userEmail, string userAvatarUrl, string message = null)
+                               string userEmail, string userAvatarUrl, string message = null, string userAvatarColor = null)
         {
             Id = Guid.NewGuid().ToString();
             FamilyId = familyId;
             UserId = userId;
             UserDisplayName = userDisplayName;
             UserAvatarUrl = userAvatarUrl;
+            UserAvatarColor = userAvatarColor;
             Message = message;
             CreatedAt = DateTime.UtcNow;
             Status = RequestStatus.Pending;

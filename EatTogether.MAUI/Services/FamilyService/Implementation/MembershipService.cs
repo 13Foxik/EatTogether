@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
 
@@ -11,7 +11,8 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
         {
             _cloudStoreService = cloudStoreService;
         }
-        public async Task CreateRequest(string familyId, User user)
+
+        public async Task CreateRequest(string familyId, User user, string message = null)
         {
             var request = new MembershipRequest
             {
@@ -19,12 +20,15 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 UserId = user.Uid,
                 UserDisplayName = user.DisplayName,
                 UserAvatarUrl = user.Avatar ?? string.Empty,
+                UserAvatarColor = user.AvatarColor ?? "#1F744D",
+                Message = message,
                 FamilyId = familyId,
                 Status = RequestStatus.Pending
             };
 
             await _cloudStoreService.InsertMembership(request);
         }
+
         public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
         {
             await _cloudStoreService.UpdateRequestStatus(request, status);
@@ -34,6 +38,5 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
         {
             await _cloudStoreService.DeleteMembership(request);
         }
-
     }
 }

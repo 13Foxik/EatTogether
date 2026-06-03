@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
 
@@ -27,7 +27,8 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 DisplayName = currentUser.DisplayName,
                 Email = currentUser.Email,
                 AvatarUrl = currentUser.Avatar ?? string.Empty,
-                Role = FamilyRole.Admin,
+                AvatarColor = currentUser.AvatarColor ?? "#1F744D",
+                Role = FamilyRole.Owner,
                 JoinedAt = DateTime.UtcNow
             };
             family.AddMember(member);
@@ -76,6 +77,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
 
         public async Task AcceptMember(MembershipRequest request)
         {
+            // Загружаем актуальный профиль пользователя, чтобы получить AvatarColor
             User user = await _cloudStoreService.GetUserModel(request.UserId);
 
             var member = new FamilyMember
@@ -84,11 +86,12 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 DisplayName = user.DisplayName,
                 Email = user.Email,
                 AvatarUrl = user.Avatar ?? string.Empty,
+                AvatarColor = user.AvatarColor ?? "#1F744D",
                 JoinedAt = DateTime.UtcNow,
                 Role = FamilyRole.Member
             };
             var family = _currentFamilyService.GetCurrentFamily();
-            if (family != null &&request.FamilyId == family.Id)
+            if (family != null && request.FamilyId == family.Id)
             {
                 family.AddMember(member);
             }

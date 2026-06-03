@@ -1,10 +1,11 @@
-﻿using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Models;
 
 namespace EatTogether.MAUI.Services.FamilyService.Interfaces
 {
     public interface IMembershipService
     {
-        Task CreateRequest(string familyId, User user);
+        // message — необязательное сообщение от пользователя при подаче заявки
+        Task CreateRequest(string familyId, User user, string message = null);
         Task UpdateRequestStatus(MembershipRequest request, RequestStatus status);
         Task DeleteRequest(MembershipRequest request);
     }

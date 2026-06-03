@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services;
 using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.ViewModels;
@@ -19,6 +19,7 @@ namespace EatTogether.MAUI.Services
         private const string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private const int ID_LENGTH = 6;
         private const int MAX_ATTEMPTS = 10; // на случай коллизий
+        private const int MAX_PROCESSED_MEMBERSHIPS = 5; // максимум обработанных заявок в Firestore
 
         public FirestoreService(CurrentUserService currentUserService)
         {
@@ -124,6 +125,7 @@ namespace EatTogether.MAUI.Services
                 }
             }
         }
+
         public async Task UpdateUserProfile(User user)
         {
             await SetupFirestore();
@@ -139,11 +141,12 @@ namespace EatTogether.MAUI.Services
             });
             Console.WriteLine($"User {user.Uid} profile updated");
         }
+
         public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
         {
             await SetupFirestore();
 
-            // 1. Сначала получим текущий массив
+            // 1. Получаем текущий массив заявок
             var document = _db.Collection("Families").Document(request.FamilyId);
             var snapshot = await document.GetSnapshotAsync();
 
@@ -152,15 +155,31 @@ namespace EatTogether.MAUI.Services
                 var memberships = snapshot.GetValue<List<MembershipRequest>>("Memberships")
                                  ?? new List<MembershipRequest>();
 
-                // 2. Найдем и обновим нужный запрос
+                // 2. Находим и обновляем нужный запрос
                 var existingRequest = memberships.FirstOrDefault(m => m.Id == request.Id);
                 if (existingRequest != null)
                 {
                     existingRequest.Status = status;
+                    existingRequest.RespondedAt = DateTime.UtcNow;
 
-                    // 3. Полностью заменяем массив
-                    await document.UpdateAsync("Memberships", memberships);
-                    Console.WriteLine($"Request {request.Id} status updated to {status}");
+                    // 3. Оставляем только ожидающие + последние MAX_PROCESSED_MEMBERSHIPS обработанных
+                    //    Это позволяет не превышать лимиты Firestore при большом количестве заявок
+                    var pendingRequests = memberships
+                        .Where(m => m.Status == RequestStatus.Pending)
+                        .ToList();
+
+                    var processedRequests = memberships
+                        .Where(m => m.Status != RequestStatus.Pending)
+                        .OrderByDescending(m => m.RespondedAt ?? m.CreatedAt)
+                        .Take(MAX_PROCESSED_MEMBERSHIPS)
+                        .ToList();
+
+                    var trimmedMemberships = pendingRequests.Concat(processedRequests).ToList();
+
+                    // 4. Полностью заменяем массив
+                    await document.UpdateAsync("Memberships", trimmedMemberships);
+                    Console.WriteLine($"Request {request.Id} status updated to {status}. " +
+                                      $"Pending: {pendingRequests.Count}, Processed kept: {processedRequests.Count}");
                 }
             }
         }
@@ -248,6 +267,7 @@ namespace EatTogether.MAUI.Services
                 Console.WriteLine($"Ошибка при обновлении роли: {ex.Message}");
             }
         }
+
         public async Task PermissionDownToDB(string userId, string familyId)
         {
             await SetupFirestore();
@@ -350,10 +370,10 @@ namespace EatTogether.MAUI.Services
 
                     // Подготавливаем обновления для семьи
                     Dictionary<string, object> familyUpdates = new()
-            {
-                { "Members", family.Members },
-                { "CountUsers", family.CountUsers }
-            };
+                    {
+                        { "Members", family.Members },
+                        { "CountUsers", family.CountUsers }
+                    };
 
                     // Обновляем семью в транзакции
                     transaction.Update(documentFamily, familyUpdates);
@@ -363,10 +383,10 @@ namespace EatTogether.MAUI.Services
 
                     // Optional: Можно также добавить поле с информацией о последней оставленной семье
                     Dictionary<string, object> userAdditionalUpdates = new()
-            {
-                { "LastFamilyLeftAt", DateTime.UtcNow },
-                { "LastFamilyId", familyId }
-            };
+                    {
+                        { "LastFamilyLeftAt", DateTime.UtcNow },
+                        { "LastFamilyId", familyId }
+                    };
 
                     transaction.Update(documentUser, userAdditionalUpdates);
 
@@ -796,6 +816,7 @@ namespace EatTogether.MAUI.Services
             Console.WriteLine($"Retrieved {Plates.Count} Dishes from Firestore.");
             return Plates;
         }
+
         public async Task EditPlateStatus(string plateId, RequestStatus status)
         {
             await SetupFirestore();
@@ -836,6 +857,7 @@ namespace EatTogether.MAUI.Services
             Console.WriteLine($"Retrieved {Dishes.Count} Dishes from Firestore.");
             return Dishes;
         }
+
         public async Task EditDishStatusFromDB(string dishOnPlateId, RequestStatus status)
         {
             await SetupFirestore();
@@ -920,61 +942,60 @@ namespace EatTogether.MAUI.Services
             throw new InvalidOperationException($"Could not generate unique ID after {MAX_ATTEMPTS} attempts");
         }
 
-    public async Task SeedDefaultCategoriesAsync()
-    {
-        await SetupFirestore();
-
-        // Проверяем — если уже есть категории, ничего не делаем
-        var existing = await GetCategoriesAsync();
-        if (existing.Count > 0)
+        public async Task SeedDefaultCategoriesAsync()
         {
-            Console.WriteLine($"Категории уже существуют ({existing.Count} шт.), сид пропущен.");
-            return;
-        }
+            await SetupFirestore();
 
-        var categories = new List<(string name, string icon, int order)>
-        {
-            ("Завтраки",   "🍳", 1),
-            ("Супы",       "🍲", 2),
-            ("Горячее",    "🍖", 3),
-            ("Гарниры",    "🥦", 4),
-            ("Салаты",     "🥗", 5),
-            ("Выпечка",    "🥐", 6),
-            ("Десерты",    "🍰", 7),
-            ("Напитки",    "🥤", 8),
-            ("Закуски",    "🧀", 9),
-            ("Рыба",       "🐟", 10),
-        };
-
-        foreach (var (name, icon, order) in categories)
-        {
-            var id = await GenerateUniqueFamilyIdAsync("Categories");
-            var category = new Category
+            // Проверяем — если уже есть категории, ничего не делаем
+            var existing = await GetCategoriesAsync();
+            if (existing.Count > 0)
             {
-                Id = id,
-                Name = name,
-                Icon = icon,
-                SortOrder = order,
+                Console.WriteLine($"Категории уже существуют ({existing.Count} шт.), сид пропущен.");
+                return;
+            }
+
+            var categories = new List<(string name, string icon, int order)>
+            {
+                ("Завтраки",   "🍳", 1),
+                ("Супы",       "🍲", 2),
+                ("Горячее",    "🍖", 3),
+                ("Гарниры",    "🥦", 4),
+                ("Салаты",     "🥗", 5),
+                ("Выпечка",    "🥐", 6),
+                ("Десерты",    "🍰", 7),
+                ("Напитки",    "🥤", 8),
+                ("Закуски",    "🧀", 9),
+                ("Рыба",       "🐟", 10),
             };
-            await _db.Collection("Categories").Document(id).SetAsync(category);
-            Console.WriteLine($"Добавлена категория: {name}");
+
+            foreach (var (name, icon, order) in categories)
+            {
+                var id = await GenerateUniqueFamilyIdAsync("Categories");
+                var category = new Category
+                {
+                    Id = id,
+                    Name = name,
+                    Icon = icon,
+                    SortOrder = order,
+                };
+                await _db.Collection("Categories").Document(id).SetAsync(category);
+                Console.WriteLine($"Добавлена категория: {name}");
+            }
+
+            Console.WriteLine("Сид категорий завершён успешно.");
         }
 
-        Console.WriteLine("Сид категорий завершён успешно.");
-    }
-
-    private string GenerateRandomId(int lenght)
-    {
-        var random = new Random();
-        var result = new char[lenght];
-        
-        for (int i = 0; i < lenght; i++)
+        private string GenerateRandomId(int lenght)
         {
-            result[i] = CHARACTERS[random.Next(CHARACTERS.Length)];
+            var random = new Random();
+            var result = new char[lenght];
+            
+            for (int i = 0; i < lenght; i++)
+            {
+                result[i] = CHARACTERS[random.Next(CHARACTERS.Length)];
+            }
+            
+            return new string(result);
         }
-        
-        return new string(result);
-    }
-
     }
 }
