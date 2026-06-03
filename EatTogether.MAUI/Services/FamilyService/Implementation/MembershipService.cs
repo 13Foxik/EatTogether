@@ -7,7 +7,6 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
     public class MembershipService : IMembershipService
     {
         private readonly ICloudStoreService _cloudStoreService;
-
         public MembershipService(ICloudStoreService cloudStoreService)
         {
             _cloudStoreService = cloudStoreService;
@@ -21,7 +20,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 UserId = user.Uid,
                 UserDisplayName = user.DisplayName,
                 UserAvatarUrl = user.Avatar ?? string.Empty,
-                UserAvatarColor = user.AvatarColor ?? string.Empty,
+                UserAvatarColor = user.AvatarColor ?? "#1F744D",
                 Message = message,
                 FamilyId = familyId,
                 Status = RequestStatus.Pending

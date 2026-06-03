@@ -1012,12 +1012,12 @@
                                                                     <!-- Аватар и имя пользователя -->
                                                                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
 
-                                                                        <!-- ИСПРАВЛЕННАЯ АВАТАРКА: цвет профиля + животное -->
+                                                                        <!-- Аватарка: цвет профиля -->
                                                                         <Border WidthRequest="44"
                                                                                 HeightRequest="44"
                                                                                 StrokeThickness="0"
                                                                                 Stroke="Transparent"
-                                                                                BackgroundColor="{Binding DisplayColor, Converter={StaticResource StringToColor}}"
+                                                                                BackgroundColor="{Binding UserAvatarColor, Converter={StaticResource StringToColor}}"
                                                                                 Padding="0"
                                                                                 VerticalOptions="Center">
                                                                             <Border.StrokeShape>
