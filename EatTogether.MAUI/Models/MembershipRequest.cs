@@ -20,7 +20,6 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string UserAvatarUrl { get; set; }
 
-        // Цвет аватарки пользователя (hex), чтобы отображать правильный цвет в карточке заявки
         [FirestoreProperty]
         public string UserAvatarColor { get; set; }
 
@@ -39,20 +38,21 @@ namespace EatTogether.MAUI.Models
         [FirestoreProperty]
         public string RespondedBy { get; set; } // ID пользователя, который ответил на заявку
 
-        // Возвращает настоящий цвет аватарки или дефолтный зелёный
-        public string DisplayColor => string.IsNullOrEmpty(UserAvatarColor) ? "#1F744D" : UserAvatarColor;
+        /// <summary>Цвет фона аватарки в виде hex-строки для StringToColorConverter.</summary>
+        public string DisplayColor => !string.IsNullOrEmpty(UserAvatarColor)
+            ? UserAvatarColor
+            : "#1F744D";
 
         public MembershipRequest() { }
 
         public MembershipRequest(string familyId, string userId, string userDisplayName,
-                               string userEmail, string userAvatarUrl, string message = null, string userAvatarColor = null)
+                               string userEmail, string userAvatarUrl, string message = null)
         {
             Id = Guid.NewGuid().ToString();
             FamilyId = familyId;
             UserId = userId;
             UserDisplayName = userDisplayName;
             UserAvatarUrl = userAvatarUrl;
-            UserAvatarColor = userAvatarColor;
             Message = message;
             CreatedAt = DateTime.UtcNow;
             Status = RequestStatus.Pending;
