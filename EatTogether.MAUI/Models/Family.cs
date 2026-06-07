@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 using System.Data;
 
 namespace EatTogether.MAUI.Models
@@ -124,11 +124,17 @@ namespace EatTogether.MAUI.Models
 
             return value.Select(request => new Dictionary<string, object>
             {
-                ["id"] = request.Id,
-                ["familyId"] = request.FamilyId,
-                ["userId"] = request.UserId,
-                ["createdAt"] = request.CreatedAt,
-                ["message"] = request.Message ?? ""
+                ["Id"] = request.Id ?? "",
+                ["FamilyId"] = request.FamilyId ?? "",
+                ["UserId"] = request.UserId ?? "",
+                ["UserDisplayName"] = request.UserDisplayName ?? "",
+                ["UserAvatarUrl"] = request.UserAvatarUrl ?? "",
+                ["UserAvatarColor"] = request.UserAvatarColor ?? "#1F744D",
+                ["CreatedAt"] = request.CreatedAt,
+                ["RespondedAt"] = request.RespondedAt,
+                ["Message"] = request.Message ?? "",
+                ["Status"] = request.Status.ToString(),
+                ["RespondedBy"] = request.RespondedBy ?? ""
             }).ToList();
         }
 
@@ -144,13 +150,17 @@ namespace EatTogether.MAUI.Models
                     {
                         var request = new MembershipRequest
                         {
-                            Id = dict.ContainsKey("Id") ? dict["Id"]?.ToString() : "",
-                            FamilyId = dict.ContainsKey("FamilyId") ? dict["FamilyId"]?.ToString() : "",
-                            UserId = dict.ContainsKey("UserId") ? dict["UserId"]?.ToString() : "",
-                            UserDisplayName = dict.ContainsKey("UserDisplayName") ? dict["UserDisplayName"]?.ToString() : "",
-                            Status = dict.ContainsKey("Status") ? new RequestStatusConverter().FromFirestore(dict["Status"]) : RequestStatus.Pending,
-                            CreatedAt = dict.ContainsKey("CreatedAt") ? ((Timestamp)dict["CreatedAt"]).ToDateTime() : DateTime.UtcNow,
-                            Message = dict.ContainsKey("Message") ? dict["Message"]?.ToString() : ""
+                            Id = GetString(dict, "Id", "id"),
+                            FamilyId = GetString(dict, "FamilyId", "familyId"),
+                            UserId = GetString(dict, "UserId", "userId"),
+                            UserDisplayName = GetString(dict, "UserDisplayName", "userDisplayName"),
+                            UserAvatarUrl = GetString(dict, "UserAvatarUrl", "userAvatarUrl"),
+                            UserAvatarColor = GetString(dict, "UserAvatarColor", "userAvatarColor"),
+                            CreatedAt = GetDateTime(dict, "CreatedAt", "createdAt") ?? DateTime.UtcNow,
+                            RespondedAt = GetDateTime(dict, "RespondedAt", "respondedAt"),
+                            Message = GetString(dict, "Message", "message"),
+                            Status = GetStatus(dict),
+                            RespondedBy = GetString(dict, "RespondedBy", "respondedBy")
                         };
                         requests.Add(request);
                     }
@@ -160,5 +170,45 @@ namespace EatTogether.MAUI.Models
             return requests;
         }
 
+        private static string GetString(Dictionary<string, object> dict, params string[] keys)
+        {
+            foreach (var key in keys)
+            {
+                if (dict.ContainsKey(key))
+                {
+                    return dict[key]?.ToString() ?? string.Empty;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static DateTime? GetDateTime(Dictionary<string, object> dict, params string[] keys)
+        {
+            foreach (var key in keys)
+            {
+                if (!dict.ContainsKey(key) || dict[key] == null)
+                    continue;
+
+                if (dict[key] is Timestamp timestamp)
+                    return timestamp.ToDateTime();
+
+                if (dict[key] is DateTime dateTime)
+                    return dateTime;
+            }
+
+            return null;
+        }
+
+        private static RequestStatus GetStatus(Dictionary<string, object> dict)
+        {
+            if (dict.ContainsKey("Status"))
+                return new RequestStatusConverter().FromFirestore(dict["Status"]);
+
+            if (dict.ContainsKey("status"))
+                return new RequestStatusConverter().FromFirestore(dict["status"]);
+
+            return RequestStatus.Pending;
+        }
     }
 }
