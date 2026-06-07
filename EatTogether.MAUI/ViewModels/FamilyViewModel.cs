@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services;
@@ -24,6 +24,8 @@ public partial class FamilyViewModel : ObservableObject
     private readonly IDishService _dishService;
     private readonly IFamilyMemberControlService _memberControlService;
     private readonly ICloudStoreService _cloudStoreService;
+
+    private const int MaxProcessedPlates = 5;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -589,11 +591,12 @@ public partial class FamilyViewModel : ObservableObject
                     }
                 }
 
-                // Сортируем обработанные тарелки: сначала по дате (старые сверху), потом по статусу
+                // Сортируем обработанные тарелки и берём только последние MaxProcessedPlates
                 var sortedProcessedPlates = ProcessedPlates
-                    .OrderBy(p => p.CreatedAt) // Сначала старые
-                    .ThenByDescending(p => p.HasAnyAcceptedDish) // Затем с принятыми блюдами
-                    .ThenByDescending(p => p.Status == RequestStatus.Accepted) // Затем принятые тарелки
+                    .OrderBy(p => p.CreatedAt)                          // Старые сначала
+                    .ThenByDescending(p => p.HasAnyAcceptedDish)        // С принятыми блюдами
+                    .ThenByDescending(p => p.Status == RequestStatus.Accepted)
+                    .TakeLast(MaxProcessedPlates)                       // Только 5 последних
                     .ToList();
 
                 ProcessedPlates.Clear();
@@ -887,9 +890,10 @@ public partial class FamilyViewModel : ObservableObject
     private void SortProcessedPlates()
     {
         var sortedProcessedPlates = ProcessedPlates
-            .OrderBy(p => p.CreatedAt) // Старые сверху
-            .ThenByDescending(p => p.HasAnyAcceptedDish) // С принятыми блюдами
-            .ThenByDescending(p => p.Status == RequestStatus.Accepted) // Принятые тарелки
+            .OrderBy(p => p.CreatedAt)                          // Старые сверху
+            .ThenByDescending(p => p.HasAnyAcceptedDish)        // С принятыми блюдами
+            .ThenByDescending(p => p.Status == RequestStatus.Accepted)
+            .TakeLast(MaxProcessedPlates)                       // Только 5 последних
             .ToList();
 
         ProcessedPlates.Clear();
