@@ -832,6 +832,51 @@ namespace EatTogether.MAUI.Services
             }
         }
 
+        public async Task<bool> DeletePlateFromDB(string plateId)
+        {
+            try
+            {
+                await SetupFirestore();
+
+                if (string.IsNullOrEmpty(plateId))
+                {
+                    Console.WriteLine("Plate ID cannot be null or empty.");
+                    return false;
+                }
+
+                var plateRef = _db.Collection("Plates").Document(plateId);
+                var plateSnapshot = await plateRef.GetSnapshotAsync();
+
+                if (!plateSnapshot.Exists)
+                {
+                    Console.WriteLine($"Plate with ID {plateId} does not exist.");
+                    return false;
+                }
+
+                var dishLinksSnapshot = await _db.Collection("DishOnPlate").GetSnapshotAsync();
+                foreach (var document in dishLinksSnapshot.Documents)
+                {
+                    if (!document.Exists)
+                        continue;
+
+                    var dishOnPlate = document.ConvertTo<DishOnPlate>();
+                    if (dishOnPlate.PlateId == plateId)
+                    {
+                        await document.Reference.DeleteAsync();
+                    }
+                }
+
+                await plateRef.DeleteAsync();
+                Console.WriteLine($"Plate with ID {plateId} successfully deleted.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting plate with ID {plateId}: {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<List<Dish>> GetDishesOnPlateFromDb(string PlateId)
         {
             await SetupFirestore();
