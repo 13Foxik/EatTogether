@@ -25,7 +25,7 @@ public partial class FamilyViewModel : ObservableObject
     private readonly IFamilyMemberControlService _memberControlService;
     private readonly ICloudStoreService _cloudStoreService;
 
-    private const int MaxProcessedPlates = 5;
+    private const int MaxProcessedPlates = 3;
 
     [ObservableProperty]
     private int _selectedTabIndex = 0;
@@ -591,19 +591,7 @@ public partial class FamilyViewModel : ObservableObject
                     }
                 }
 
-                // Сортируем обработанные тарелки и берём только последние MaxProcessedPlates
-                var sortedProcessedPlates = ProcessedPlates
-                    .OrderBy(p => p.CreatedAt)                          // Старые сначала
-                    .ThenByDescending(p => p.HasAnyAcceptedDish)        // С принятыми блюдами
-                    .ThenByDescending(p => p.Status == RequestStatus.Accepted)
-                    .TakeLast(MaxProcessedPlates)                       // Только 5 последних
-                    .ToList();
-
-                ProcessedPlates.Clear();
-                foreach (var plate in sortedProcessedPlates)
-                {
-                    ProcessedPlates.Add(plate);
-                }
+                SortProcessedPlates();
 
                 // Сортируем ожидающие тарелки по дате (старые сверху)
                 var sortedPendingPlates = PendingPlates
@@ -786,6 +774,8 @@ public partial class FamilyViewModel : ObservableObject
 
                     // Важно: нужно пересчитать статус после перемещения
                     UpdatePlateStatusBasedOnDishes(plate);
+                    plate.ProcessedAt = DateTime.UtcNow;
+                    await _plateService.EditPlateStatus(plate.Id, plate.Status);
 
                     ProcessedPlates.Insert(0, plate);
                     SortProcessedPlates();
@@ -843,8 +833,10 @@ public partial class FamilyViewModel : ObservableObject
 
                     // Важно: нужно пересчитать статус после перемещения
                     UpdatePlateStatusBasedOnDishes(plate);
+                    plate.ProcessedAt = DateTime.UtcNow;
+                    await _plateService.EditPlateStatus(plate.Id, plate.Status);
 
-                    ProcessedPlates.Add(plate);
+                    ProcessedPlates.Insert(0, plate);
                     SortProcessedPlates();
                 }
                 else
@@ -890,16 +882,29 @@ public partial class FamilyViewModel : ObservableObject
     private void SortProcessedPlates()
     {
         var sortedProcessedPlates = ProcessedPlates
-            .OrderBy(p => p.CreatedAt)                          // Старые сверху
-            .ThenByDescending(p => p.HasAnyAcceptedDish)        // С принятыми блюдами
-            .ThenByDescending(p => p.Status == RequestStatus.Accepted)
-            .TakeLast(MaxProcessedPlates)                       // Только 5 последних
+            .OrderByDescending(p => p.ProcessedAt ?? p.CreatedAt)
+            .ToList();
+
+        var platesToKeep = sortedProcessedPlates
+            .Take(MaxProcessedPlates)
+            .ToList();
+
+        var platesToDelete = sortedProcessedPlates
+            .Skip(MaxProcessedPlates)
             .ToList();
 
         ProcessedPlates.Clear();
-        foreach (var plate in sortedProcessedPlates)
+        foreach (var plate in platesToKeep)
         {
             ProcessedPlates.Add(plate);
+        }
+
+        foreach (var plate in platesToDelete)
+        {
+            if (!string.IsNullOrEmpty(plate.Id))
+            {
+                _ = _plateService.DeletePlate(plate.Id);
+            }
         }
     }
 
@@ -991,6 +996,8 @@ public partial class FamilyViewModel : ObservableObject
 
                     // Еще раз обновляем статус для правильного цвета и текста
                     UpdatePlateStatusBasedOnDishes(plate);
+                    plate.ProcessedAt = DateTime.UtcNow;
+                    await _plateService.EditPlateStatus(plate.Id, plate.Status);
 
                     ProcessedPlates.Insert(0, plate);
                     SortProcessedPlates();
@@ -1038,8 +1045,10 @@ public partial class FamilyViewModel : ObservableObject
 
                     // Еще раз обновляем статус для правильного цвета и текста
                     UpdatePlateStatusBasedOnDishes(plate);
+                    plate.ProcessedAt = DateTime.UtcNow;
+                    await _plateService.EditPlateStatus(plate.Id, plate.Status);
 
-                    ProcessedPlates.Add(plate);
+                    ProcessedPlates.Insert(0, plate);
                     SortProcessedPlates();
                 }
 
