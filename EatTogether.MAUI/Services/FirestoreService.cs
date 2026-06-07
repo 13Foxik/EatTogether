@@ -36,7 +36,7 @@ namespace EatTogether.MAUI.Services
                     using var reader = new StreamReader(stream);
                     var contents = await reader.ReadToEndAsync();
 
-                    _db = new FirestoreDbBuilder() 
+                    _db = new FirestoreDbBuilder()
                     {
                         ProjectId = "eattogether-79984",
                         ConverterRegistry = new ConverterRegistry
@@ -159,7 +159,6 @@ namespace EatTogether.MAUI.Services
                     existingRequest.Status = status;
                     existingRequest.RespondedAt = DateTime.UtcNow;
 
-                    // Оставляем все pending + только последние MAX_PROCESSED_MEMBERSHIPS обработанных
                     var pendingRequests = memberships
                         .Where(m => m.Status == RequestStatus.Pending)
                         .ToList();
@@ -498,8 +497,6 @@ namespace EatTogether.MAUI.Services
 
             var family = snapshot.ConvertTo<Family>();
 
-            // Lazy-cleanup: если обработанных заявок больше MAX_PROCESSED_MEMBERSHIPS —
-            // обрезаем прямо здесь и сохраняем обратно, чтобы не превышать лимиты Firestore
             if (family.Memberships != null)
             {
                 var processedCount = family.Memberships.Count(m => m.Status != RequestStatus.Pending);
@@ -517,7 +514,6 @@ namespace EatTogether.MAUI.Services
 
                     family.Memberships = pending.Concat(processed).ToList();
 
-                    // Сохраняем обрезанный массив обратно в Firestore
                     try
                     {
                         await docRef.UpdateAsync("Memberships", family.Memberships);
@@ -526,7 +522,6 @@ namespace EatTogether.MAUI.Services
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Family {documentId}: failed to trim memberships: {ex.Message}");
-                        // Не пробрасываем — данные уже обрезаны в памяти, просто не сохранили
                     }
                 }
             }
@@ -827,7 +822,17 @@ namespace EatTogether.MAUI.Services
 
             if (snapshot.Exists)
             {
-                await document.UpdateAsync("Status", status);
+                var updates = new Dictionary<string, object>
+                {
+                    { "Status", status }
+                };
+
+                if (status == RequestStatus.Accepted || status == RequestStatus.Rejected)
+                {
+                    updates["ProcessedAt"] = DateTime.UtcNow;
+                }
+
+                await document.UpdateAsync(updates);
                 Console.WriteLine($"plate {plateId} updated");
             }
         }
@@ -970,20 +975,20 @@ namespace EatTogether.MAUI.Services
         public async Task<string> GenerateUniqueFamilyIdAsync(string collection)
         {
             await SetupFirestore();
-        
+
             for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++)
             {
                 string candidateId = GenerateRandomId(6);
-            
+
                 DocumentReference docRef = _db.Collection(collection).Document(candidateId);
                 DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
-            
+
                 if (!snapshot.Exists)
                 {
                     return candidateId;
                 }
             }
-        
+
             throw new InvalidOperationException($"Could not generate unique ID after {MAX_ATTEMPTS} attempts");
         }
 
@@ -1033,12 +1038,12 @@ namespace EatTogether.MAUI.Services
         {
             var random = new Random();
             var result = new char[lenght];
-            
+
             for (int i = 0; i < lenght; i++)
             {
                 result[i] = CHARACTERS[random.Next(CHARACTERS.Length)];
             }
-            
+
             return new string(result);
         }
     }
