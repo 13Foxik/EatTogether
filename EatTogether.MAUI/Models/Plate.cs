@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Google.Cloud.Firestore;
 
 namespace EatTogether.MAUI.Models
@@ -20,6 +20,9 @@ namespace EatTogether.MAUI.Models
 
         [FirestoreProperty]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Изменяем на DateTime
+
+        [FirestoreProperty]
+        public DateTime? ProcessedAt { get; set; }
 
         public List<string> DishesId { get; set; }
 
