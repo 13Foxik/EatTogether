@@ -14,13 +14,15 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
 
         public async Task CreateRequest(string familyId, User user, string message = null)
         {
+            var actualUser = await _cloudStoreService.GetUserModel(user.Uid) ?? user;
+
             var request = new MembershipRequest
             {
                 Id = Guid.NewGuid().ToString(),
-                UserId = user.Uid,
-                UserDisplayName = user.DisplayName,
-                UserAvatarUrl = user.Avatar ?? string.Empty,
-                UserAvatarColor = user.AvatarColor ?? "#1F744D",
+                UserId = actualUser.Uid,
+                UserDisplayName = actualUser.DisplayName,
+                UserAvatarUrl = actualUser.Avatar ?? string.Empty,
+                UserAvatarColor = actualUser.AvatarColor ?? "#1F744D",
                 Message = message,
                 FamilyId = familyId,
                 Status = RequestStatus.Pending
@@ -31,6 +33,12 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
 
         public async Task UpdateRequestStatus(MembershipRequest request, RequestStatus status)
         {
+            if (status == RequestStatus.Rejected || status == RequestStatus.Cancelled)
+            {
+                await DeleteRequest(request);
+                return;
+            }
+
             await _cloudStoreService.UpdateRequestStatus(request, status);
         }
 
