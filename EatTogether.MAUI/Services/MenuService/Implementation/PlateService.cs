@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Services.MenuService.Interfaces;
+using EatTogether.MAUI.Services.MenuService.Interfaces;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.Interfaces;
 
@@ -23,6 +23,10 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
         public async Task EditPlateStatus(string plateId, RequestStatus status)
         {
             await _cloudStoreService.EditPlateStatus(plateId, status);
+        }
+        public async Task<bool> DeletePlate(string plateId)
+        {
+            return await _cloudStoreService.DeletePlateFromDB(plateId);
         }
     }
 }

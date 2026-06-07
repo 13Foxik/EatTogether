@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Models;
 
 namespace EatTogether.MAUI.Services.Interfaces
 {
@@ -35,6 +35,7 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task AddPlateToDB(Plate plate);
         Task AddDishOnPlateToDB(DishOnPlate dish);
         Task EditPlateStatus(string plateId, RequestStatus status);
+        Task<bool> DeletePlateFromDB(string plateId);
         Task<List<Plate>> GetFamilyPlatesFromDB(string familyId);
         Task<List<Dish>> GetDishesOnPlateFromDb(string plateId);
         Task SetFamilyCategoriesModels(List<FamilyCategory> familyCategories);
