@@ -35,6 +35,7 @@ namespace EatTogether.MAUI.Services.Interfaces
         Task AddPlateToDB(Plate plate);
         Task AddDishOnPlateToDB(DishOnPlate dish);
         Task EditPlateStatus(string plateId, RequestStatus status);
+        Task SetPlateProcessedAt(string plateId, DateTime processedAt);
         Task<bool> DeletePlateFromDB(string plateId);
         Task<List<Plate>> GetFamilyPlatesFromDB(string familyId);
         Task<List<Dish>> GetDishesOnPlateFromDb(string plateId);
