@@ -459,9 +459,24 @@ namespace EatTogether.MAUI.Services
         public async Task DeleteMembership(MembershipRequest request)
         {
             await SetupFirestore();
-            await _db.Collection("Families")
-                .Document(request.FamilyId)
-                .UpdateAsync("Memberships", FieldValue.ArrayRemove(request));
+
+            var document = _db.Collection("Families").Document(request.FamilyId);
+            var snapshot = await document.GetSnapshotAsync();
+
+            if (!snapshot.Exists)
+            {
+                return;
+            }
+
+            var memberships = snapshot.GetValue<List<MembershipRequest>>("Memberships")
+                              ?? new List<MembershipRequest>();
+
+            var updatedMemberships = memberships
+                .Where(m => m.Id != request.Id)
+                .ToList();
+
+            await document.UpdateAsync("Memberships", updatedMemberships);
+            Console.WriteLine($"Membership request {request.Id} deleted from family {request.FamilyId}");
         }
 
         public async Task<User?> GetUserModel(string documentId)
