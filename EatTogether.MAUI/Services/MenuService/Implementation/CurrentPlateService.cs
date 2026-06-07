@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Models;
+using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
@@ -20,6 +20,9 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
             _cloudStoreService = cloudStoreService;
             _currentFamilyService = currentFamilyService;
 
+            _currentUserService.UserChanged += OnUserChanged;
+            _currentFamilyService.FamilyChanged += OnFamilyChanged;
+
             // Проверяем, не создана ли уже тарелка
             if (CurrentPlate == null)
             {
@@ -27,11 +30,21 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
             }
         }
 
+        private void OnUserChanged(object sender, UserChangedEventArgs e)
+        {
+            CreatePlate();
+        }
+
+        private void OnFamilyChanged(object sender, FamilyChangedEventArgs e)
+        {
+            CreatePlate();
+        }
+
         public void CreatePlate()
         {
             CurrentPlate = new Plate
             {
-                UserId = _currentUserService.GetCurrentUser()?.Uid ?? "default_user",
+                UserId = _currentUserService.GetCurrentUser()?.Uid ?? string.Empty,
                 DishesId = new List<string>(),
                 FamilyId = _currentFamilyService.GetCurrentFamily()?.Id ?? string.Empty
             };
@@ -39,12 +52,26 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
 
         public void ClearPlate()
         {
+            if (CurrentPlate == null)
+            {
+                CreatePlate();
+                return;
+            }
+
             CurrentPlate.DishesId.Clear();
         }
 
         public void AddDish(string dishId)
         {
             if (CurrentPlate == null)
+            {
+                CreatePlate();
+            }
+
+            var currentUserId = _currentUserService.GetCurrentUser()?.Uid ?? string.Empty;
+            var currentFamilyId = _currentFamilyService.GetCurrentFamily()?.Id ?? string.Empty;
+
+            if (CurrentPlate.UserId != currentUserId || CurrentPlate.FamilyId != currentFamilyId)
             {
                 CreatePlate();
             }
@@ -77,22 +104,34 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
 
         public async Task WriteToDB()
         {
-            if(CurrentPlate == null)
+            if (CurrentPlate == null)
             {
                 return;
             }
 
+            var currentUserId = _currentUserService.GetCurrentUser()?.Uid ?? string.Empty;
+            var currentFamilyId = _currentFamilyService.GetCurrentFamily()?.Id ?? string.Empty;
+
+            if (string.IsNullOrEmpty(currentUserId) || string.IsNullOrEmpty(currentFamilyId))
+            {
+                return;
+            }
+
+            CurrentPlate.UserId = currentUserId;
+            CurrentPlate.FamilyId = currentFamilyId;
+            CurrentPlate.CreatedAt = DateTime.UtcNow;
+            CurrentPlate.Status = RequestStatus.Pending;
+            CurrentPlate.ProcessedAt = null;
+
             await _cloudStoreService.AddPlateToDB(CurrentPlate);
 
-            foreach(string dishId in CurrentPlate.DishesId)
+            foreach (string dishId in CurrentPlate.DishesId)
             {
                 DishOnPlate dish = new DishOnPlate(CurrentPlate.Id, dishId);
                 await _cloudStoreService.AddDishOnPlateToDB(dish);
             }
 
-            ClearPlate();
+            CreatePlate();
         }
-
     }
-
 }
