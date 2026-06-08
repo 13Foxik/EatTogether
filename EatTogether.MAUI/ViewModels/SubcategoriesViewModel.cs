@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using EatTogether.MAUI.Messages;
@@ -120,6 +120,15 @@ namespace EatTogether.MAUI.ViewModels
 
             // Загружаем данные
             MainThread.BeginInvokeOnMainThread(async () => await LoadSubcategoriesAsync());
+        }
+
+        private void NotifyMenuCountsChanged(int dishCountDelta = 0, int subcategoryCountDelta = 0, string subcategoryId = null)
+        {
+            WeakReferenceMessenger.Default.Send(new MenuCountsUpdatedMessage(
+                categoryId: _categoryId,
+                subcategoryId: subcategoryId,
+                dishCountDelta: dishCountDelta,
+                subcategoryCountDelta: subcategoryCountDelta));
         }
 
         private async Task RefreshDishesStateAsync()
@@ -294,12 +303,15 @@ namespace EatTogether.MAUI.ViewModels
             try
             {
                 var dishName = NewDishName.Trim();
+                var targetSubcategory = SelectedSubcategoryForDish;
 
                 // Создаем блюдо через сервис
                 await _dishService.CreateDishAsync(
                     dishName,
                     Preferences.Get("family_id", string.Empty),
-                    SelectedSubcategoryForDish.Id);
+                    targetSubcategory.Id);
+
+                NotifyMenuCountsChanged(dishCountDelta: 1, subcategoryId: targetSubcategory.Id);
 
                 IsAddDishDialogVisible = false;
                 NewDishName = string.Empty;
@@ -352,6 +364,8 @@ namespace EatTogether.MAUI.ViewModels
                     dishName,
                     Preferences.Get("family_id", string.Empty),
                     subcategory.Id);
+
+                NotifyMenuCountsChanged(dishCountDelta: 1, subcategoryId: subcategory.Id);
 
                 // Сбрасываем форму сразу
                 subcategory.IsAddingDish = false;
@@ -535,6 +549,8 @@ namespace EatTogether.MAUI.ViewModels
 
             try
             {
+                var parentSubcategory = Subcategories.FirstOrDefault(s => s.Dishes?.Any(d => d.Id == dish.Id) == true);
+
                 await _dishService.DeleteDishAsync(dish.Id);
 
                 // Если блюдо было в тарелке, удаляем его
@@ -542,6 +558,8 @@ namespace EatTogether.MAUI.ViewModels
                 {
                     _plateService.RemoveDish(dish.Id);
                 }
+
+                NotifyMenuCountsChanged(dishCountDelta: -1, subcategoryId: parentSubcategory?.Id);
 
                 await LoadSubcategoriesAsync();
                 await Application.Current.MainPage.DisplayAlert("Успех", "Блюдо удалено", "OK");
@@ -700,6 +718,8 @@ namespace EatTogether.MAUI.ViewModels
 
             try
             {
+                var deletedDishCount = subcategory.Dishes?.Count ?? 0;
+
                 await _subcategoryService.DeleteSubcategoryAsync(subcategory.Id);
 
                 // Удаляем все блюда из тарелки, которые относятся к этой подкатегории
@@ -719,6 +739,11 @@ namespace EatTogether.MAUI.ViewModels
                     tempList.Remove(subcategoryToRemove);
                     Subcategories = new ObservableCollection<Subcategory>(tempList);
                 }
+
+                NotifyMenuCountsChanged(
+                    dishCountDelta: -deletedDishCount,
+                    subcategoryCountDelta: -1,
+                    subcategoryId: subcategory.Id);
 
                 await Application.Current.MainPage.DisplayAlert("Успех", "Подкатегория удалена", "OK");
                 UpdateComputedProperties();
