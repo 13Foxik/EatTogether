@@ -13,11 +13,11 @@ public partial class SignUpPage : ContentPage
     }
     protected override bool OnBackButtonPressed()
     {
-        // Вызываем команду возврата из ViewModel
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ ViewModel
         if (BindingContext is SignUpViewModel viewModel)
         {
             viewModel.GoToSignInCommand.Execute(null);
-            return true; // Отменяем стандартное поведение
+            return true; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         }
 
         return base.OnBackButtonPressed();

@@ -23,7 +23,7 @@
                   BackgroundColor="{StaticResource PrimaryColor}"
                   HorizontalOptions="FillAndExpand">
 
-                
+
             </Grid>
 
             <!-- Основной контент -->
@@ -96,16 +96,6 @@
                                        VerticalOptions="Center"/>
                             </Frame>
 
-                            <Button Text="Выбрать аватар"
-                                    Command="{Binding ChangeAvatarCommand}"
-                                    BackgroundColor="Transparent"
-                                    TextColor="{StaticResource PrimaryColor}"
-                                    FontSize="12"
-                                    BorderWidth="1"
-                                    BorderColor="{StaticResource PrimaryColor}"
-                                    CornerRadius="8"
-                                    Padding="16,6"
-                                    HeightRequest="32"/>
                         </VerticalStackLayout>
 
                         <!-- Поля ввода -->
@@ -143,26 +133,7 @@
                                         PlaceholderColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"/>
                             </VerticalStackLayout>
 
-                            <!-- Приватность -->
-                            <Grid ColumnDefinitions="*,Auto" 
-                                  ColumnSpacing="12"
-                                  VerticalOptions="Center">
 
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label Text="Закрытая семья"
-                                           FontSize="14"
-                                           FontAttributes="Bold"
-                                           TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"/>
-                                    <Label Text="Только по приглашениям"
-                                           FontSize="12"
-                                           TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray300}}"/>
-                                </VerticalStackLayout>
-
-                                <Switch Grid.Column="1"
-                                        IsToggled="{Binding IsPrivateFamily}"
-                                        HorizontalOptions="End"
-                                        VerticalOptions="Center"/>
-                            </Grid>
                         </VerticalStackLayout>
 
                         <!-- Преимущества -->
@@ -227,14 +198,7 @@
                                     HeightRequest="50"
                                     HorizontalOptions="FillAndExpand"/>
 
-                            <Button Text="У меня есть приглашение"
-                                    Command="{Binding NavigateToJoinCommand}"
-                                    BackgroundColor="Transparent"
-                                    TextColor="{StaticResource PrimaryColor}"
-                                    FontSize="14"
-                                    BorderWidth="0"
-                                    HeightRequest="40"
-                                    HorizontalOptions="Center"/>
+
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
