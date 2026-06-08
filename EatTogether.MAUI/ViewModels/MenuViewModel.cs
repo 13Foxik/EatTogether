@@ -1,5 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using EatTogether.MAUI.Messages;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.MenuService.Interfaces;
@@ -15,6 +17,7 @@ namespace EatTogether.MAUI.ViewModels
         private readonly ISubcategoryService _subcategoryService;
         private readonly IDishService _dishService;
         private readonly ICurrentFamilyService _currentFamilyService;
+        private readonly Dictionary<string, string> _subcategoryCategoryMap = new();
 
         [ObservableProperty]
         private ObservableCollection<Category> categories = new();
@@ -44,6 +47,16 @@ namespace EatTogether.MAUI.ViewModels
 
             // Подписываемся на событие — когда семья загрузится асинхронно после логина, обновим состояние
             _currentFamilyService.FamilyChanged += OnFamilyChanged;
+
+            WeakReferenceMessenger.Default.Register<MenuCountsUpdatedMessage>(
+                this,
+                (recipient, message) =>
+                {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        ApplyMenuCountUpdate(message);
+                    });
+                });
 
             CheckFamilyStatus();
 
@@ -77,6 +90,49 @@ namespace EatTogether.MAUI.ViewModels
             OnPropertyChanged(nameof(ShowNoFamilyMessage));
             OnPropertyChanged(nameof(ShowCategoriesContent));
             OnPropertyChanged(nameof(ShowNoCategoriesMessage));
+        }
+
+        private void ApplyMenuCountUpdate(MenuCountsUpdatedMessage message)
+        {
+            if (message == null || Categories == null || Categories.Count == 0)
+                return;
+
+            var categoryId = message.CategoryId;
+
+            if (string.IsNullOrEmpty(categoryId)
+                && !string.IsNullOrEmpty(message.SubcategoryId)
+                && _subcategoryCategoryMap.TryGetValue(message.SubcategoryId, out var mappedCategoryId))
+            {
+                categoryId = mappedCategoryId;
+            }
+
+            if (string.IsNullOrEmpty(categoryId))
+                return;
+
+            var category = Categories.FirstOrDefault(c => c.Id == categoryId);
+            if (category == null)
+                return;
+
+            category.DishCount = Math.Max(0, category.DishCount + message.DishCountDelta);
+            category.SubcategoryCount = Math.Max(0, category.SubcategoryCount + message.SubcategoryCountDelta);
+            TotalDishCount = Math.Max(0, TotalDishCount + message.DishCountDelta);
+
+            var categoryIndex = Categories.IndexOf(category);
+            if (categoryIndex >= 0)
+            {
+                Categories[categoryIndex] = new Category
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Icon = category.Icon,
+                    ImageFile = category.ImageFile,
+                    SortOrder = category.SortOrder,
+                    DishCount = category.DishCount,
+                    SubcategoryCount = category.SubcategoryCount
+                };
+            }
+
+            UpdateComputedProperties();
         }
 
         partial void OnTotalDishCountChanged(int value) => OnPropertyChanged(nameof(TotalDishCountText));
@@ -114,6 +170,7 @@ namespace EatTogether.MAUI.ViewModels
 
                 var familyId = Preferences.Get("family_id", string.Empty);
                 var loaded = await _categoryService.GetAllCategoriesAsync();
+                _subcategoryCategoryMap.Clear();
 
                 // Параллельно загружаем счётчики для каждой категории
                 var tasks = loaded.Select(async category =>
@@ -124,6 +181,14 @@ namespace EatTogether.MAUI.ViewModels
                             .GetSubcategoriesByCategoryAsync(category.Id, familyId);
 
                         category.SubcategoryCount = subcategories.Count;
+
+                        foreach (var subcategory in subcategories)
+                        {
+                            if (!string.IsNullOrEmpty(subcategory.Id))
+                            {
+                                _subcategoryCategoryMap[subcategory.Id] = category.Id;
+                            }
+                        }
 
                         // Считаем блюда параллельно по всем подкатегориям
                         if (subcategories.Count > 0)

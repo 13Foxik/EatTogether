@@ -1,6 +1,8 @@
-﻿using EatTogether.MAUI.Services.MenuService.Interfaces;
+using CommunityToolkit.Mvvm.Messaging;
+using EatTogether.MAUI.Messages;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.Interfaces;
+using EatTogether.MAUI.Services.MenuService.Interfaces;
 
 namespace EatTogether.MAUI.Services.MenuService.Implementation
 {
@@ -15,6 +17,10 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
         public async Task CreateSubcategoryAsync(string categoryId, string familyId, string name)
         {
             await _cloudStoreService.CreateSubcategoriesAsync(categoryId, familyId, name);
+
+            WeakReferenceMessenger.Default.Send(new MenuCountsUpdatedMessage(
+                categoryId: categoryId,
+                subcategoryCountDelta: 1));
         }
 
         public async Task<List<Subcategory>> GetSubcategoriesByCategoryAsync(string categoryId, string familyId)

@@ -1,6 +1,8 @@
-﻿using EatTogether.MAUI.Services.MenuService.Interfaces;
+using CommunityToolkit.Mvvm.Messaging;
+using EatTogether.MAUI.Messages;
 using EatTogether.MAUI.Models;
 using EatTogether.MAUI.Services.Interfaces;
+using EatTogether.MAUI.Services.MenuService.Interfaces;
 
 namespace EatTogether.MAUI.Services.MenuService.Implementation
 {
@@ -16,6 +18,10 @@ namespace EatTogether.MAUI.Services.MenuService.Implementation
         {
             Dish dish = new Dish(name, familyId, subcategoryId);
             await _cloudStoreService.AddDishToDbAsync(dish);
+
+            WeakReferenceMessenger.Default.Send(new MenuCountsUpdatedMessage(
+                subcategoryId: subcategoryId,
+                dishCountDelta: 1));
         }
         public async Task<List<Dish>> GetDishListAsync(string subcategoryId)
         {
