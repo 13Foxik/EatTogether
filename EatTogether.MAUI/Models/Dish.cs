@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Google.Cloud.Firestore;
-using System.Reflection.Metadata;
 
 namespace EatTogether.MAUI.Models
 {
@@ -23,15 +22,56 @@ namespace EatTogether.MAUI.Models
         [ObservableProperty]
         private bool _isInPlate;
 
-        public RequestStatus Status { get; set; }
+        private RequestStatus _status;
+        public RequestStatus Status
+        {
+            get => _status;
+            set => SetProperty(ref _status, value);
+        }
+
         public string dishOnPlateId { get; set; }
 
-        public string StatusText { get; set; }
-        public Color StatusColor { get; set; }
-        public Color ButtonBackgroundColor { get; set; }
-        public Color ButtonTextColor { get; set; }
-        public bool IsStatusVisible { get; set; }
-        public bool CanShowActions { get; set; } = true;
+        private string _statusText;
+        public string StatusText
+        {
+            get => _statusText;
+            set => SetProperty(ref _statusText, value);
+        }
+
+        private Color _statusColor;
+        public Color StatusColor
+        {
+            get => _statusColor;
+            set => SetProperty(ref _statusColor, value);
+        }
+
+        private Color _buttonBackgroundColor;
+        public Color ButtonBackgroundColor
+        {
+            get => _buttonBackgroundColor;
+            set => SetProperty(ref _buttonBackgroundColor, value);
+        }
+
+        private Color _buttonTextColor;
+        public Color ButtonTextColor
+        {
+            get => _buttonTextColor;
+            set => SetProperty(ref _buttonTextColor, value);
+        }
+
+        private bool _isStatusVisible;
+        public bool IsStatusVisible
+        {
+            get => _isStatusVisible;
+            set => SetProperty(ref _isStatusVisible, value);
+        }
+
+        private bool _canShowActions = true;
+        public bool CanShowActions
+        {
+            get => _canShowActions;
+            set => SetProperty(ref _canShowActions, value);
+        }
 
         public Dish() { }
         public Dish(string name, string familyId, string subcategoryId)

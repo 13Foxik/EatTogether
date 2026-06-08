@@ -1,4 +1,4 @@
-﻿using EatTogether.MAUI.Services.FamilyService.Interfaces;
+using EatTogether.MAUI.Services.FamilyService.Interfaces;
 using EatTogether.MAUI.Services.Interfaces;
 using EatTogether.MAUI.Models;
 
@@ -27,7 +27,7 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 var currentUser = _currentUserService.GetCurrentUser();
                 var currentFamily = _currentFamilyService.GetCurrentFamily();
 
-                if (currentUser == null || currentFamily == null)
+                if (currentUser == null || currentFamily == null || targetMember == null)
                     return false;
 
                 // Находим текущего пользователя в списке участников
@@ -41,19 +41,17 @@ namespace EatTogether.MAUI.Services.FamilyService.Implementation
                 if (!isAdminOrOwner)
                     return false;
 
-                // 2. Целевой участник не должен быть админом или главой
-                bool targetIsNotAdminOrOwner = targetMember.Role != FamilyRole.Admin &&
-                                                targetMember.Role != FamilyRole.Owner;
-                if (!targetIsNotAdminOrOwner)
-                    return false;
-
-                // 3. Целевой участник не должен быть самим пользователем
+                // 2. Целевой участник не должен быть самим пользователем
                 bool isNotSelf = targetMember.UserId != currentUser.Uid;
                 if (!isNotSelf)
                     return false;
 
-                // 4. Можно повысить только Member → Editor (не Editor → Admin)
-                bool canBePromoted = targetMember.Role == FamilyRole.Member;
+                // 3. Владельца нельзя повышать
+                if (targetMember.Role == FamilyRole.Owner)
+                    return false;
+
+                // 4. Можно повышать до админа: Member -> Editor, Editor -> Admin
+                bool canBePromoted = targetMember.Role < FamilyRole.Admin;
                 if (!canBePromoted)
                     return false;
 
