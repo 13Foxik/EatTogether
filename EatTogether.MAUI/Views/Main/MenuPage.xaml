@@ -72,7 +72,7 @@
 
         <!-- КОНТЕНТ (Row 1) — только этот блок скроллится -->
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="20" Spacing="32">
+            <VerticalStackLayout Padding="16,20" Spacing="28">
 
                 <!-- Нет семьи -->
                 <VerticalStackLayout IsVisible="{Binding ShowNoFamilyMessage}" Spacing="8">
@@ -137,19 +137,19 @@
                           JustifyContent="SpaceBetween" AlignItems="Start">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="{x:Type models:Category}">
-                            <Frame WidthRequest="175" HeightRequest="220" Padding="0"
+                            <Frame WidthRequest="155" HeightRequest="190" Padding="0"
                                  BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
                                  BorderColor="{AppThemeBinding Light={StaticResource BorderColor}, Dark={StaticResource Gray600}}"
-                                 CornerRadius="16" HasShadow="True" Margin="0,0,0,24">
+                                 CornerRadius="14" HasShadow="True" Margin="0,0,0,18">
                                 <Frame.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MenuViewModel}}, Path=CategoryTappedCommand}"
                                         CommandParameter="{Binding}"/>
                                 </Frame.GestureRecognizers>
-                                <Grid RowDefinitions="140,80" RowSpacing="0">
+                                <Grid RowDefinitions="118,72" RowSpacing="0">
                                     <Frame Grid.Row="0"
                                          BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray800}}"
-                                         CornerRadius="16" Padding="0"
+                                         CornerRadius="14" Padding="0"
                                          HorizontalOptions="Fill" VerticalOptions="Fill"
                                          InputTransparent="True">
                                         <Grid>
@@ -158,28 +158,28 @@
                                                    InputTransparent="True"/>
                                             <Grid HorizontalOptions="Center" VerticalOptions="Center" InputTransparent="True">
                                                 <Image Source="{Binding ImageFile}" IsVisible="{Binding HasImage}"
-                                                       Aspect="AspectFit" WidthRequest="90" HeightRequest="90"
-                                                       HorizontalOptions="Center" VerticalOptions="Center" Margin="10"/>
+                                                       Aspect="AspectFit" WidthRequest="76" HeightRequest="76"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" Margin="8"/>
                                                 <Label Text="{Binding Icon}" IsVisible="{Binding HasNoImage}"
-                                                       FontSize="48" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                       FontSize="42" HorizontalOptions="Center" VerticalOptions="Center"/>
                                             </Grid>
                                             <Frame BackgroundColor="{StaticResource PrimaryColor}"
-                                                 CornerRadius="10" Padding="8,4"
+                                                 CornerRadius="9" Padding="7,3"
                                                  HorizontalOptions="End" VerticalOptions="Start"
-                                                 Margin="8" HeightRequest="24">
+                                                 Margin="7" HeightRequest="22">
                                                 <Label Text="{Binding DishCountText}"
-                                                     FontSize="11" TextColor="White" FontAttributes="Bold"/>
+                                                     FontSize="10" TextColor="White" FontAttributes="Bold"/>
                                             </Frame>
                                         </Grid>
                                     </Frame>
-                                    <VerticalStackLayout Grid.Row="1" Padding="12,10" Spacing="4" VerticalOptions="Center">
+                                    <VerticalStackLayout Grid.Row="1" Padding="10,8" Spacing="3" VerticalOptions="Center">
                                         <Label Text="{Binding Name}"
-                                             FontSize="15" FontAttributes="Bold"
+                                             FontSize="14" FontAttributes="Bold"
                                              TextColor="{AppThemeBinding Light={StaticResource PrimaryTextColor}, Dark={StaticResource White}}"
                                              HorizontalOptions="Center" HorizontalTextAlignment="Center"
                                              MaxLines="2" LineBreakMode="TailTruncation"/>
                                         <Label Text="{Binding SubcategoryCountText, StringFormat='{0} подкатегорий'}"
-                                             FontSize="11" HorizontalOptions="Center"
+                                             FontSize="10" HorizontalOptions="Center"
                                              TextColor="{AppThemeBinding Light={StaticResource SecondaryTextColor}, Dark={StaticResource Gray400}}"/>
                                     </VerticalStackLayout>
                                 </Grid>
